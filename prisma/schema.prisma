@@ -1,0 +1,211 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_PRISMA_URL")
+  // directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Tokens {
+  id                   Int     @id @default(autoincrement())
+  address              String? @unique
+  createdAt            Int?
+  name                 String?
+  symbol               String?
+  quoteToken           String?
+  buyCount1            Int?
+  buyCount12           Int?
+  buyCount24           Int?
+  buyCount4            Int?
+  uniqueBuys1          Int?
+  uniqueBuys12         Int?
+  uniqueBuys24         Int?
+  uniqueBuys4          Int?
+  change1              String?
+  change12             String?
+  change24             String?
+  change4              String?
+  high1                String?
+  high12               String?
+  high24               String?
+  high4                String?
+  lastTransaction      Int?
+  liquidity            String?
+  low1                 String?
+  low12                String?
+  low24                String?
+  low4                 String?
+  marketCap            String?
+  priceUSD             String?
+  sellCount1           Int?
+  sellCount12          Int?
+  sellCount24          Int?
+  sellCount4           Int?
+  uniqueSells1         Int?
+  uniqueSells12        Int?
+  uniqueSells24        Int?
+  uniqueSells4         Int?
+  txnCount1            Int?
+  txnCount12           Int?
+  txnCount24           Int?
+  txnCount4            Int?
+  uniqueTransactions1  Int?
+  uniqueTransactions12 Int?
+  uniqueTransactions24 Int?
+  uniqueTransactions4  Int?
+  volume1              String?
+  volume12             String?
+  volume24             String?
+  volume4              String?
+  token                Json?
+  pair                 Json?
+  exchanges            Json?
+  cronCount            Int?
+}
+
+model Votes {
+  id              Int      @id @default(autoincrement())
+  date            DateTime @default(now())
+  tokenAddress    String
+  walletAddress   String
+}
+
+model Score {
+  tokenAddress String @id @unique
+  tokenScore   Float
+}
+
+model Gainers {
+  id                   Int     @id @default(autoincrement())
+  address              String? @unique
+  createdAt            Int?
+  name                 String?
+  symbol               String?
+  quoteToken           String?
+  buyCount1            Int?
+  buyCount12           Int?
+  buyCount24           Int?
+  buyCount4            Int?
+  uniqueBuys1          Int?
+  uniqueBuys12         Int?
+  uniqueBuys24         Int?
+  uniqueBuys4          Int?
+  change1              String?
+  change12             String?
+  change24             String?
+  change4              String?
+  high1                String?
+  high12               String?
+  high24               String?
+  high4                String?
+  lastTransaction      Int?
+  liquidity            String?
+  low1                 String?
+  low12                String?
+  low24                String?
+  low4                 String?
+  marketCap            String?
+  priceUSD             String?
+  sellCount1           Int?
+  sellCount12          Int?
+  sellCount24          Int?
+  sellCount4           Int?
+  uniqueSells1         Int?
+  uniqueSells12        Int?
+  uniqueSells24        Int?
+  uniqueSells4         Int?
+  txnCount1            Int?
+  txnCount12           Int?
+  txnCount24           Int?
+  txnCount4            Int?
+  uniqueTransactions1  Int?
+  uniqueTransactions12 Int?
+  uniqueTransactions24 Int?
+  uniqueTransactions4  Int?
+  volume1              String?
+  volume12             String?
+  volume24             String?
+  volume4              String?
+  token                Json?
+  pair                 Json?
+  exchanges            Json?
+  cronCount            Int?
+
+}
+
+model Losers {
+  id                   Int     @id @default(autoincrement())
+  address              String? @unique
+  createdAt            Int?
+  name                 String?
+  symbol               String?
+  quoteToken           String?
+  buyCount1            Int?
+  buyCount12           Int?
+  buyCount24           Int?
+  buyCount4            Int?
+  uniqueBuys1          Int?
+  uniqueBuys12         Int?
+  uniqueBuys24         Int?
+  uniqueBuys4          Int?
+  change1              String?
+  change12             String?
+  change24             String?
+  change4              String?
+  high1                String?
+  high12               String?
+  high24               String?
+  high4                String?
+  lastTransaction      Int?
+  liquidity            String?
+  low1                 String?
+  low12                String?
+  low24                String?
+  low4                 String?
+  marketCap            String?
+  priceUSD             String?
+  sellCount1           Int?
+  sellCount12          Int?
+  sellCount24          Int?
+  sellCount4           Int?
+  uniqueSells1         Int?
+  uniqueSells12        Int?
+  uniqueSells24        Int?
+  uniqueSells4         Int?
+  txnCount1            Int?
+  txnCount12           Int?
+  txnCount24           Int?
+  txnCount4            Int?
+  uniqueTransactions1  Int?
+  uniqueTransactions12 Int?
+  uniqueTransactions24 Int?
+  uniqueTransactions4  Int?
+  volume1              String?
+  volume12             String?
+  volume24             String?
+  volume4              String?
+  token                Json?
+  pair                 Json?
+  exchanges            Json?
+  cronCount            Int?
+}
+
+model Users {
+  walletAddress           String @id @unique
+  votes                   Int    @default(5)
+  updatedAt               DateTime @default(now())
+  refreshToken            String?
+  refreshTokenCreatedAt   DateTime @default(now())
+}
+
+model Volume {
+  id                   Int     @id @default(autoincrement())
+  address              String?
+  volumeCreatedAt      DateTime @default(now())
+  volume24             String?
+}
