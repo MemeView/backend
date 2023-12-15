@@ -1,0 +1,51 @@
+query GetTokens($ids: [TokenInput!]!) {
+  tokens(ids: $ids) {
+    address
+    decimals
+    id
+    name
+    networkId
+    symbol
+    explorerData {
+      id
+      blueCheckmark
+      description
+      divisor
+      tokenPriceUSD
+      tokenType
+      __typename
+    }
+    info {
+      address
+      id
+      networkId
+      symbol
+      circulatingSupply
+      totalSupply
+      imageLargeUrl
+      imageSmallUrl
+      __typename
+    }
+    socialLinks {
+      bitcointalk
+      blog
+      coingecko
+      coinmarketcap
+      discord
+      email
+      facebook
+      github
+      instagram
+      linkedin
+      reddit
+      slack
+      telegram
+      twitch
+      twitter
+      website
+      wechat
+      whitepaper
+      youtube
+    }
+  }
+}

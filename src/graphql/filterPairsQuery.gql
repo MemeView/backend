@@ -1,0 +1,39 @@
+query FilterPairsQuery($pairs: [String!]!) {
+  filterPairs(pairs: $pairs) {
+    results {
+      txnCount24
+      marketCap
+      buyCount24
+      sellCount24
+      volumeUSD24
+      quoteToken
+      liquidityToken
+      pair {
+        token0Data {
+          name
+          symbol
+          address
+          info {
+            imageLargeUrl
+            imageSmallUrl
+          }
+        }
+        token1Data {
+          name
+          symbol
+          address
+          info {
+            imageLargeUrl
+            imageSmallUrl
+          }
+        }
+      }
+      exchange {
+        name
+        exchangeVersion
+        address
+        tradeUrl
+        iconUrl
+      }
+    }
+  }}

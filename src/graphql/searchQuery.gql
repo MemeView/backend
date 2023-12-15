@@ -1,0 +1,57 @@
+query Search($limit: Int, $lowVolumeFilter: Boolean, $networkFilter: [Int!], $resolution: String, $search: String!) {
+  searchTokens(
+    limit: $limit
+    lowVolumeFilter: $lowVolumeFilter
+    networkFilter: $networkFilter
+    resolution: $resolution
+    search: $search
+  ) {
+    hasMore
+    hasMoreLowVolume
+    tokens {
+      ...BaseTokenWithMetadata
+      __typename
+    }
+    __typename
+  }
+}
+
+fragment BaseTokenWithMetadata on TokenWithMetadata {
+  address
+  decimals
+  exchanges {
+    ...ExchangeModel
+    __typename
+  }
+  id
+  imageLargeUrl
+  imageSmallUrl
+  imageThumbUrl
+  liquidity
+  name
+  networkId
+  price
+  priceChange
+  priceChange1
+  priceChange12
+  priceChange24
+  priceChange4
+  quoteToken
+  resolution
+  symbol
+  topPairId
+  volume
+  __typename
+}
+
+fragment ExchangeModel on Exchange {
+  address
+  color
+  exchangeVersion
+  id
+  name
+  networkId
+  tradeUrl
+  iconUrl
+  __typename
+}

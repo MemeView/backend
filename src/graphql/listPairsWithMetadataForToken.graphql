@@ -1,0 +1,20 @@
+query ListPairsWithMetadataForToken($limit: Int, $networkId: Int!, $tokenAddress: String!) {
+  listPairsWithMetadataForToken(
+    networkId: $networkId
+    tokenAddress: $tokenAddress
+    limit: $limit
+  ) {
+    results {
+      exchange {
+        name
+        exchangeVersion
+        address
+        iconUrl
+        tradeUrl
+      }
+      pair {
+        address
+      }
+    }
+  }
+}

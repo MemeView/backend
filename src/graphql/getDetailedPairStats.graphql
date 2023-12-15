@@ -1,0 +1,67 @@
+query GetDetailedPairStats($pairAddress: String!, $networkId: Int!, $tokenOfInterest: TokenOfInterest!) {
+  getDetailedPairStats(pairAddress: $pairAddress, networkId:$networkId, tokenOfInterest: $tokenOfInterest) {
+    pair {
+      token0Data {
+        name
+      }
+
+      token1Data {
+        name
+      }
+    }
+    stats_day1 {
+      start
+      end
+      timestamps {
+        start
+        end
+      }
+      statsNonCurrency {
+        traders {
+          currentValue
+          previousValue
+          change
+          buckets
+        }
+        buys {
+          currentValue
+          previousValue
+          change
+          buckets
+        }
+        sells {
+          currentValue
+          previousValue
+          change
+          buckets
+        }
+        transactions {
+          currentValue
+          previousValue
+          change
+          buckets
+        }
+      }
+      statsUsd {
+        sellVolume {
+          currentValue
+          previousValue
+          change
+          buckets
+        }
+        buyVolume {
+          currentValue
+          previousValue
+          change
+          buckets
+        }
+        volume {
+          currentValue
+          previousValue
+          change
+          buckets
+        }
+      }
+    }
+  }
+}
