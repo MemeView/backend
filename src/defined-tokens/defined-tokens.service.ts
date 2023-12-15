@@ -8,11 +8,9 @@ import {
   FilterTokensQueryVariables,
 } from '@definedfi/sdk/dist/sdk/generated/graphql';
 
-import filterTokensQuery from '../graphql/filterTokensQuery.gql';
 import { definedSDK } from 'src/defined-api/definedSDK';
 
-import { readFileSync } from 'fs';
-import { join } from 'path';
+import { GET_FILTER_TOKENS } from '../graphql/getFilterTokens';
 
 @Injectable()
 export class DefinedTokensService {
@@ -37,10 +35,10 @@ export class DefinedTokensService {
       while (!currentIterationResult || currentIterationResult.length > 0) {
         offset = limit * iterationCount;
 
-        const { filterTokens } = await definedSDK.query<
+        const { filterTokens } = await definedSDK.send<
           FilterTokensQuery,
           FilterTokensQueryVariables
-        >(filterTokensQuery, {
+        >(GET_FILTER_TOKENS, {
           limit,
           offset,
           rankings: {
