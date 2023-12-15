@@ -11,6 +11,7 @@ import {
 import { definedSDK } from 'src/defined-api/definedSDK';
 
 import { GET_FILTER_TOKENS } from '../graphql/getFilterTokens';
+import { Cron, Interval, Timeout } from '@nestjs/schedule';
 
 @Injectable()
 export class DefinedTokensService {
@@ -31,6 +32,8 @@ export class DefinedTokensService {
 
     let createTimestamp: number | null = null;
 
+    let oldTokens: Array<any> = [];
+
     try {
       while (!currentIterationResult || currentIterationResult.length > 0) {
         offset = limit * iterationCount;
@@ -45,13 +48,18 @@ export class DefinedTokensService {
             attribute: TokenRankingAttribute.CreatedAt,
             direction: RankingDirection.Asc,
           },
-          filters: { network: [1], liquidity: { gt: 1000 } },
+          filters: {
+            network: [1],
+            liquidity: { gt: 1000 },
+            createdAt: { gt: createTimestamp },
+          },
         });
 
         currentIterationResult =
           (filterTokens?.results as TokenFilterResult[]) || [];
 
         allTokens = [...allTokens, ...currentIterationResult];
+        // console.log(currentIterationResult[199].token);
 
         console.log(
           '============================================================',
@@ -67,7 +75,8 @@ export class DefinedTokensService {
         iterationCount += 1;
 
         if (offset === 9800) {
-          const lastToken = currentIterationResult.pop();
+          const lastToken =
+            currentIterationResult[currentIterationResult.length - 1];
 
           createTimestamp = lastToken?.createdAt ?? null;
 
@@ -77,30 +86,41 @@ export class DefinedTokensService {
         }
       }
 
+      const resultAfterFilter = allTokens
+        .filter(
+          (token) =>
+            !!token.token?.address &&
+            token.token.symbol &&
+            token.token.symbol.length <= 10 &&
+            /^[a-zA-Zа-яА-Я0-9]+$/.test(token.token.symbol),
+        )
+        .map((token) => ({
+          ...token,
+          address: token.token?.address,
+          name: token.token?.name,
+          symbol: token.token?.symbol,
+        }));
+
+      oldTokens = await this.prisma.tokens.findMany();
+
       // Сначала удаляем
-      const deletedCount = await this.prisma.tokens.deleteMany();
+      const { count: deletedCount } = await this.prisma.tokens.deleteMany();
 
       // Потом вставляем
-      const addedCount = await this.prisma.tokens.createMany({
+      const { count: addedCount } = await this.prisma.tokens.createMany({
         skipDuplicates: true,
-        data: allTokens
-          .filter(
-            (token) =>
-              token?.token?.address !==
-                '0x0e84296da31b6c475afc1a991db05e79633e67b0' &&
-              !!token.token?.address,
-          )
-          .map((token) => ({
-            ...token,
-            address: token.token?.address,
-            name: token.token?.name,
-            symbol: token.token?.symbol,
-          })),
+        data: resultAfterFilter,
       });
 
       return { deletedCount, addedCount };
     } catch (error) {
       console.error('Error occurred:', error);
+      if (oldTokens.length > 0) {
+        await this.prisma.tokens.deleteMany();
+        await this.prisma.tokens.createMany({
+          data: oldTokens,
+        });
+      }
       throw error;
     }
   }
