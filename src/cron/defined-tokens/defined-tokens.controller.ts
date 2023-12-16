@@ -2,7 +2,7 @@ import { Controller, Get, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { DefinedTokensService } from './defined-tokens.service';
 
-@Controller('defined-tokens-sync')
+@Controller('api/defined-tokens-sync')
 export class DefinedTokensController {
   constructor(private readonly definedTokensService: DefinedTokensService) {}
 

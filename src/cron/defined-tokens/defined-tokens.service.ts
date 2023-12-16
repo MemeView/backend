@@ -10,7 +10,7 @@ import {
 
 import { definedSDK } from 'src/defined-api/definedSDK';
 
-import { GET_FILTER_TOKENS } from '../graphql/getFilterTokens';
+import { GET_FILTER_TOKENS } from '../../graphql/getFilterTokens';
 import { Cron, Interval, Timeout } from '@nestjs/schedule';
 
 @Injectable()

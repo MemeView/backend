@@ -1,10 +1,18 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
-import { DefinedTokensService } from '../defined-tokens/defined-tokens.service';
+import { DefinedTokensService } from './defined-tokens/defined-tokens.service';
 import { CronService } from './cron.service';
+import { VolumeService } from './volume-sync/volume.service';
+import { PrismaModule } from 'prisma/prisma.module';
+import { SolveScoreService } from './solve-score-sync/solve-score.service';
 
 @Module({
-  imports: [ScheduleModule.forRoot()],
-  providers: [DefinedTokensService, CronService],
+  imports: [ScheduleModule.forRoot(), PrismaModule],
+  providers: [
+    DefinedTokensService,
+    VolumeService,
+    SolveScoreService,
+    CronService,
+  ],
 })
 export class CronModule {}

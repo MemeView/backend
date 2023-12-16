@@ -1,0 +1,503 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+import { subDays, subHours, startOfDay } from 'date-fns';
+
+type QueryResult = {
+  tokenAddress: string;
+  _count: number;
+};
+
+interface Result {
+  tokenAddress: string;
+  scoreFromVotes?: number;
+  scoreFromChange24?: number;
+  scoreFromVolume?: number;
+}
+
+interface Token {
+  address: string;
+  change24: string;
+}
+
+interface Volume {
+  tokenAddress: string;
+  scoreFromVolume: number | null;
+  scoreFromVotes?: number;
+  scoreFromChange24?: number;
+}
+
+// Функция для вычисления балла на основе изменения цены за 24 часа
+function calculateScore(change24: string) {
+  const factor = parseFloat(change24) * 100;
+
+  return factor >= 100 ? 10 : (10 * factor) / 100;
+}
+
+@Injectable()
+export class SolveScoreService {
+  constructor(private prisma: PrismaClient) {}
+
+  async solveScores() {
+    const totalCount = await this.prisma.votes.count();
+
+    // переменные для дат и времени
+    const now = new Date();
+    const today = startOfDay(now);
+    const yesterday = subDays(startOfDay(now), 1);
+    const twoDaysAgo = subDays(startOfDay(now), 2);
+    const sevenDaysAgo = subDays(now, 7);
+    const twentyFourHoursAgo = subHours(now, 24);
+
+    // возвращает голоса за 24 часа
+    const resultToday = await this.prisma.votes.groupBy({
+      by: ['tokenAddress'],
+      where: { date: { gte: twentyFourHoursAgo } },
+      _count: true,
+    });
+
+    // возвращает голоса от уникальных пользователей по каждому токену
+    const resultTodayByVotersRaw = await this.prisma.votes.findMany({
+      where: { date: { gte: twentyFourHoursAgo } },
+      distinct: ['tokenAddress', 'walletAddress'],
+      select: { tokenAddress: true, walletAddress: true },
+    });
+
+    // Группировка голосов за последние 24 часа по токенам и подсчет количества голосов от уникальных адресов
+    const tokenCountsMap = resultTodayByVotersRaw.reduce((map, vote) => {
+      const currentTokenAddress = vote.tokenAddress;
+      const _count = map.get(currentTokenAddress) || 0;
+      map.set(currentTokenAddress, _count + 1);
+      return map;
+    }, new Map());
+
+    const resultTodayByVoters = Array.from(tokenCountsMap.entries()).map(
+      ([currentTokenAddress, _count]) => ({
+        tokenAddress: currentTokenAddress,
+        _count,
+      }),
+    );
+
+    // возвращает количество голосов за каждый токен за 7 дней.
+    const resultSevenDays = await this.prisma.votes.groupBy({
+      by: ['tokenAddress'],
+      where: { date: { gte: sevenDaysAgo } },
+      _count: true,
+    });
+
+    // возвращает volume за позавчера
+    const resultTwoDaysAgo = await this.prisma.volume.findMany({
+      where: {
+        AND: [
+          { volumeCreatedAt: { gte: twoDaysAgo } },
+          { volumeCreatedAt: { lt: yesterday } },
+        ],
+      },
+    });
+
+    // возвращает volume за вчера
+    const resultYesterday = await this.prisma.volume.findMany({
+      where: {
+        AND: [
+          { volumeCreatedAt: { gte: yesterday } },
+          { volumeCreatedAt: { lt: today } },
+        ],
+      },
+    });
+
+    const resultFromVolume: Array<Volume> = [];
+
+    // Проходим по каждому токену, рассчитываем его объемы и добавляем в массив результатов
+    resultTwoDaysAgo.forEach((tokenTwoDaysAgo) => {
+      // Находим соответствующий токен за вчерашний день
+      const tokenYesterday = resultYesterday.find(
+        (token) => token.address === tokenTwoDaysAgo.address,
+      );
+
+      if (tokenYesterday) {
+        if (
+          tokenYesterday &&
+          tokenYesterday.volume24 !== null &&
+          tokenTwoDaysAgo.volume24 !== null &&
+          parseFloat(tokenYesterday.volume24) !== 0 &&
+          parseFloat(tokenTwoDaysAgo.volume24) !== 0
+        ) {
+          let volumeRatio: number;
+          // Рассчитываем отношение объема за два дня назад к объему за вчера
+          if (
+            parseFloat(tokenTwoDaysAgo.volume24) >
+            parseFloat(tokenYesterday.volume24)
+          ) {
+            volumeRatio =
+              parseFloat(tokenTwoDaysAgo.volume24) /
+              parseFloat(tokenYesterday.volume24);
+            const volumeScore =
+              volumeRatio >= 4 ? 0 : (1 - volumeRatio / 4) * 10;
+            if (tokenTwoDaysAgo.address != null && volumeScore !== 0) {
+              // Добавляем результаты в массив
+              resultFromVolume.push({
+                tokenAddress: tokenTwoDaysAgo.address,
+                scoreFromVolume: volumeScore,
+              });
+            }
+          } else {
+            // Рассчитываем отношение объема за вчера к объему за два дня назад
+            volumeRatio =
+              parseFloat(tokenYesterday.volume24) /
+              parseFloat(tokenTwoDaysAgo.volume24);
+            let volumeScore = volumeRatio >= 4 ? 10 : (volumeRatio / 4) * 10;
+            volumeScore += 10;
+            if (tokenTwoDaysAgo.address != null) {
+              // Добавляем результаты в массив
+              resultFromVolume.push({
+                tokenAddress: tokenTwoDaysAgo.address,
+                scoreFromVolume: volumeScore,
+              });
+            }
+          }
+        }
+        // случай, когда токен имел нулевой объем, а потом вырос
+        if (
+          tokenYesterday &&
+          tokenYesterday.volume24 !== null &&
+          tokenTwoDaysAgo.volume24 !== null &&
+          parseFloat(tokenYesterday.volume24) !== 0 &&
+          parseFloat(tokenTwoDaysAgo.volume24) === 0
+        ) {
+          if (tokenTwoDaysAgo.address != null) {
+            resultFromVolume.push({
+              tokenAddress: tokenTwoDaysAgo.address,
+              scoreFromVolume: 20,
+            });
+          }
+        }
+      }
+    });
+
+    // Определяем количество воутеров за сегодня
+    const uniqueVotersCountToday = new Set(
+      resultTodayByVotersRaw.map((result) => result.walletAddress),
+    ).size;
+
+    // Вычисляем общее количество голосов за текущий день
+    const totalCountToday = resultToday.reduce(
+      (acc, row) => acc + row._count,
+      0,
+    );
+
+    // Создаем объект для хранения количества голосов по каждому токену за текущий день
+    const resultTodayObj: { [key: string]: number } = {};
+    resultToday.forEach((r) => {
+      resultTodayObj[r.tokenAddress] = r._count;
+    });
+
+    // Массивы для хранения результатов голосования за сегодня и за последние 7 дней
+    const resultsFromVotesToday: Result[] = [];
+    const resultsFromVotesSevenDays: Result[] = [];
+
+    // Первый цикл - используется для вычисления сегодняшнего значения
+    // Мы проходимся по массиву за 7 дней, потому что он самый полный
+    resultSevenDays.forEach((row: QueryResult) => {
+      let scoreForCurrentToken = 0;
+      let uniqueVotersRatio = 0;
+      const rowAddress = row.tokenAddress;
+      // Находим информацию о голосовавших за текущий токен сегодня.
+      const foundElement = resultTodayByVoters.find(
+        (e) => e.tokenAddress === rowAddress,
+      );
+
+      if (uniqueVotersCountToday > 0 && foundElement) {
+        // Вычисляем отношение уникальных воутеров к общему числу уникальных воутеров
+        const uniqueVotersForCurrentToken = foundElement._count || 0;
+        uniqueVotersRatio =
+          (uniqueVotersForCurrentToken / uniqueVotersCountToday) * 100;
+      }
+
+      // Вычисляем баллы за воутеров за 1 день
+      const votersScore =
+        uniqueVotersRatio >= 8 ? 6 : (6 * uniqueVotersRatio) / 100;
+      scoreForCurrentToken += votersScore;
+
+      // Получаем количество голосов в целом за текущий токен за сегодня
+      const countToday = resultTodayObj[row.tokenAddress] || 0;
+
+      if (countToday >= 100) {
+        // Вычисляем баллы от количества голосов за 1 день
+        scoreForCurrentToken += 3;
+      } else {
+        scoreForCurrentToken += 3 * (countToday / 100);
+      }
+
+      const todayPercentage = totalCountToday
+        ? (countToday / totalCountToday) * 100
+        : 0;
+      // Вычисляем баллы от общего количества голосов за 1 день
+      if (todayPercentage >= 10) {
+        scoreForCurrentToken += 6;
+      } else {
+        scoreForCurrentToken += (6 * todayPercentage) / 10;
+      }
+
+      // Добавляем результаты в массив для результатов сегодняшнего дня
+      resultsFromVotesToday.push({
+        tokenAddress: row.tokenAddress,
+        scoreFromVotes: scoreForCurrentToken,
+      });
+    });
+
+    // Второй цикл - используется для вычисления недельного значения
+    resultSevenDays.forEach((row: QueryResult) => {
+      let scoreForCurrentToken = 0;
+
+      const countSevenDays = row._count;
+
+      const sevenDaysPercentage = totalCount
+        ? (countSevenDays / totalCount) * 100
+        : 0;
+      // Вычисляем баллы от общего количества голосов за последние 7 дней
+      if (sevenDaysPercentage >= 5) {
+        scoreForCurrentToken += 3;
+      } else {
+        scoreForCurrentToken += (3 * sevenDaysPercentage) / 5;
+      }
+
+      // Добавляем результаты в массив для последних 7 дней
+      resultsFromVotesSevenDays.push({
+        tokenAddress: row.tokenAddress,
+        scoreFromVotes: scoreForCurrentToken,
+      });
+    });
+
+    // Объединяем результаты голосования за сегодня и за последние 7 дней
+    const combinedResultsFromVotes: Result[] = [
+      ...resultsFromVotesToday,
+      ...resultsFromVotesSevenDays,
+    ];
+
+    // Группируем результаты по адресам токенов
+    const groupedResults: { [address: string]: Result } =
+      combinedResultsFromVotes.reduce(
+        (previous: { [address: string]: Result }, current) => {
+          const found = previous[current.tokenAddress];
+
+          if (found) {
+            found.scoreFromVotes =
+              (found.scoreFromVotes ?? 0) + (current.scoreFromVotes ?? 0);
+          } else {
+            previous[current.tokenAddress] = current;
+            current.scoreFromVotes = current.scoreFromVotes ?? 0;
+          }
+
+          return previous;
+        },
+        {},
+      );
+
+    // Получаем окончательные результаты голосования
+    const resultsFromVotes: Result[] = Object.values(groupedResults);
+
+    // Получаем информацию о токенах с изменением цены за последние 24 часа
+    const resultsFromChange24Raw = await this.prisma.tokens.findMany({
+      where: {
+        change24: {
+          gt: '0',
+        },
+      },
+      select: {
+        address: true,
+        change24: true,
+        symbol: true,
+      },
+      orderBy: {
+        change24: 'desc',
+      },
+    });
+
+    // Рассчитываем баллы для изменения цены за последние 24 часа
+    const resultsFromChange24 = (resultsFromChange24Raw as Token[]).map(
+      (item) => {
+        const score = calculateScore(item.change24);
+        const result: Result = {
+          tokenAddress: item.address,
+          scoreFromChange24: score || 0,
+        };
+
+        return result;
+      },
+    );
+
+    const uniqueResultFromVolume = resultFromVolume.reduce<Result[]>(
+      (unique, item) => {
+        // Проверяем, есть ли уже такой tokenAddress в уникальном массиве
+        const score =
+          item.scoreFromVolume === null ? undefined : item.scoreFromVolume;
+
+        const resultItem: Result = { ...item, scoreFromVolume: score };
+
+        const exists = unique.some(
+          (elem) => elem.tokenAddress === item.tokenAddress,
+        );
+
+        // Если tokenAddress на данный момент не существует в уникальном массиве,
+        // добавляем и текущий элемент к уникальному массиву
+        if (!exists) {
+          unique.push(resultItem);
+        }
+
+        return unique;
+      },
+      [],
+    );
+
+    const uniqueResultFromChange24 = resultsFromChange24.reduce<Result[]>(
+      (unique, item) => {
+        // Проверяем, есть ли уже такой tokenAddress в уникальном массиве
+        const score =
+          item.scoreFromVolume === null ? undefined : item.scoreFromVolume;
+
+        const resultItem: Result = { ...item, scoreFromVolume: score };
+
+        const exists = unique.some(
+          (elem) => elem.tokenAddress === item.tokenAddress,
+        );
+
+        // Если tokenAddress на данный момент не существует в уникальном массиве,
+        // добавляем и текущий элемент к уникальному массиву
+        if (!exists) {
+          unique.push(resultItem);
+        }
+
+        return unique;
+      },
+      [],
+    );
+
+    const uniqueResultFromVotes = resultsFromVotes.reduce<Result[]>(
+      (unique, item) => {
+        // Проверяем, есть ли уже такой tokenAddress в уникальном массиве
+        const score =
+          item.scoreFromVolume === null ? undefined : item.scoreFromVolume;
+
+        const resultItem: Result = { ...item, scoreFromVolume: score };
+
+        const exists = unique.some(
+          (elem) => elem.tokenAddress === item.tokenAddress,
+        );
+
+        // Если tokenAddress на данный момент не существует в уникальном массиве,
+        // добавляем и текущий элемент к уникальному массиву
+        if (!exists) {
+          unique.push(resultItem);
+        }
+
+        return unique;
+      },
+      [],
+    );
+
+    // Объединяем результаты голосования, изменения цены и объема токенов
+    const combinedResults = [
+      ...uniqueResultFromVotes,
+      ...uniqueResultFromChange24,
+      ...uniqueResultFromVolume,
+    ].reduce<{
+      [key: string]: { score: number };
+    }>((acc, val) => {
+      if (!acc[val.tokenAddress]) {
+        acc[val.tokenAddress] = { score: 0 };
+      }
+
+      acc[val.tokenAddress].score += val.scoreFromVotes
+        ? val.scoreFromVotes
+        : 0;
+      acc[val.tokenAddress].score += val.scoreFromChange24
+        ? val.scoreFromChange24
+        : 0;
+      acc[val.tokenAddress].score += val.scoreFromVolume
+        ? val.scoreFromVolume
+        : 0;
+
+      return acc;
+    }, {});
+
+    // Преобразуем объединенные результаты в окончательные результаты
+    let finalResults = Object.entries(combinedResults).map(
+      ([tokenAddress, { score }]) => ({
+        tokenAddress,
+        tokenScore: score + 31, // +16 за холдеров и +15 за 2theMoon
+      }),
+    );
+    // Получаем адреса токенов из окончательных результатов
+    const finalResultsAddresses = finalResults.map((item) => item.tokenAddress);
+    // Получаем информацию о токенах из базы данных, используя адреса из finalResultsAddresses
+    const rawTokens = await this.prisma.tokens.findMany({
+      where: { address: { in: finalResultsAddresses } },
+      select: { address: true, liquidity: true },
+    });
+
+    // Обновляем баллы для токенов в зависимости от их ликвидности
+    finalResults.forEach(async (result) => {
+      // Находим информацию о текущем токене в rawTokens
+      const token = rawTokens.find(
+        (item) => item.address === result.tokenAddress,
+      );
+
+      if (token && parseFloat(token.liquidity!) < 3000) {
+        // Уменьшаем баллы для токенов с низкой ликвидностью
+        result.tokenScore -= 99;
+      }
+
+      if (
+        token &&
+        parseFloat(token.liquidity!) >= 3000 &&
+        parseFloat(token.liquidity!) < 30000
+      ) {
+        // Увеличиваем баллы для токенов с ликвидностью от 3000 до 30000
+        result.tokenScore += 10;
+      }
+
+      if (
+        token &&
+        parseFloat(token.liquidity!) >= 30000 &&
+        parseFloat(token.liquidity!) < 300000
+      ) {
+        // Увеличиваем баллы для токенов с ликвидностью от 30000 до 300000, учитывая изменение по формуле
+        result.tokenScore +=
+          10 - ((parseFloat(token.liquidity!) - 30000) * 9) / 270000;
+      }
+
+      if (token && parseFloat(token.liquidity!) >= 300000) {
+        // Увеличиваем баллы для токенов с высокой ликвидностью (больше или равно 300000)
+        result.tokenScore += 1;
+      }
+    });
+
+    // Фильтруем токены, оставляя только те, у которых баллы больше 0
+    finalResults = finalResults.filter((item) => item.tokenScore > 0);
+
+    // Объяснение, как я вывел формулу:
+
+    // x1 = минимальное значение (30 000)
+    // x2 = максимальное значение (300 000)
+    // y1 = баллы, при минимальном значении (10)
+    // y2 = баллы, при максимальном значении (1)
+    // x3 = входное значение (к примеру, 150 000)
+
+    // можем найти коэффицент наклона = (y2 - y1) / (x2 - x1)
+    // и получим:
+
+    // y3 = ((y2 - y1) / (x2 - x1)) * (x3 - x1) + y1
+    // то есть, получаем:
+    // y3 = ((1 - 10) / (300 000 - 30 000)) * (150 000 - 30 000) + 10
+    // ответ: y3 = 6
+
+    // чтобы код не ругался, что я делю на ноль, я чуть изменил формулу:
+    // y = 10 - ((x - 30 000) * 9) / 270 000
+    // при x = 150 000 получим 6 баллов
+
+    // Очищаем таблицу с предыдущими результатами
+    await this.prisma.score.deleteMany();
+    // Записываем новые результаты в таблицу
+    await this.prisma.score.createMany({ data: finalResults });
+    return finalResults;
+  }
+}
