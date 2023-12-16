@@ -48,7 +48,6 @@ export class CronService {
       console.log(
         `Cron job completed: ${deletedCount} tokens deleted, ${addedCount} tokens added.`,
       );
-      await this.solveScoresCron();
     });
   }
 
