@@ -25,6 +25,7 @@
     "@graphql-tools/graphql-file-loader": "^8.0.0",
     "@nestjs/apollo": "^12.0.11",
     "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.1.1",
     "@nestjs/core": "^10.0.0",
     "@nestjs/graphql": "^12.0.11",
     "@nestjs/platform-express": "^10.0.0",
