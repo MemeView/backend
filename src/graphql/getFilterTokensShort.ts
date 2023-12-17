@@ -8,19 +8,10 @@ export const GET_FILTER_TOKENS_SHORT = `query ($tokens: [String], $limit: Int, $
         liquidity
         volume24
         token {
-          networkId
-          address
-          decimals
           name
-          info {
-            circulatingSupply
-            totalSupply
-            imageLargeUrl
-            imageSmallUrl
-          }
-          networkId
-          isScam
           symbol
+          address
+          networkId
         }
       }
     }
