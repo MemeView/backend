@@ -51,7 +51,6 @@ export class CronService {
     });
   }
 
-  @Cron('2 0 * * *')
   async volumeCron() {
     await this.handleRetry(async () => {
       await this.volumeService.handleVolumeData();
