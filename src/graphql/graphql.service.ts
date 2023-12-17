@@ -30,8 +30,6 @@ export class GraphqlService {
       variables,
     });
 
-    console.log('response', response);
-
     return response.data;
   }
 }
