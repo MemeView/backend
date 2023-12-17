@@ -1,10 +1,13 @@
 import { Controller, Get, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { DefinedTokensService } from './defined-tokens.service';
+import { GraphqlService } from '../../graphql/graphql.service';
 
 @Controller('api/defined-tokens-sync')
 export class DefinedTokensController {
-  constructor(private readonly definedTokensService: DefinedTokensService) {}
+  constructor(
+    private readonly definedTokensService: DefinedTokensService,
+  ) {}
 
   @Get()
   async getDefinedTokens(@Res() response: Response) {

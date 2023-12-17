@@ -11,14 +11,18 @@ import {
 import { definedSDK } from 'src/defined-api/definedSDK';
 
 import { GET_FILTER_TOKENS } from '../../graphql/getFilterTokens';
-import { Cron, Interval, Timeout } from '@nestjs/schedule';
+import { GraphqlService } from '../../graphql/graphql.service';
 
 @Injectable()
 export class DefinedTokensService {
   private readonly prisma: PrismaClient;
+  private readonly graphqlService: GraphqlService;
+
   constructor() {
     this.prisma = new PrismaClient();
+    this.graphqlService = new GraphqlService();
   }
+
   public async handleTokens() {
     const limit = 200;
 
@@ -38,10 +42,7 @@ export class DefinedTokensService {
       while (!currentIterationResult || currentIterationResult.length > 0) {
         offset = limit * iterationCount;
 
-        const { filterTokens } = await definedSDK.send<
-          FilterTokensQuery,
-          FilterTokensQueryVariables
-        >(GET_FILTER_TOKENS, {
+        const result = await this.graphqlService.makeQuery<FilterTokensQuery, FilterTokensQueryVariables>(GET_FILTER_TOKENS, {
           limit,
           offset,
           rankings: {
@@ -51,15 +52,16 @@ export class DefinedTokensService {
           filters: {
             network: [1],
             liquidity: { gt: 1000 },
-            createdAt: { gt: createTimestamp },
+            ...(createTimestamp && {createdAt: { gt: createTimestamp }})
           },
         });
+
+        const { filterTokens} = result;
 
         currentIterationResult =
           (filterTokens?.results as TokenFilterResult[]) || [];
 
         allTokens = [...allTokens, ...currentIterationResult];
-        // console.log(currentIterationResult[199].token);
 
         console.log(
           '============================================================',

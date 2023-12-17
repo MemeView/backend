@@ -1,8 +1,10 @@
-export const GET_FILTER_TOKENS = `query FilterTokens($tokens: [String], $limit: Int, $offset: Int, $rankings: [TokenRanking], $filters: TokenFilters) {
+export const GET_FILTER_TOKENS = `query ($tokens: [String], $limit: Int, $offset: Int, $rankings: [TokenRanking], $filters: TokenFilters) {
   filterTokens(tokens: $tokens, limit: $limit, offset: $offset, filters: $filters, rankings: $rankings) {
+    __typename
     page
     count
     results {
+      __typename
       quoteToken
       createdAt
       buyCount1
@@ -51,14 +53,13 @@ export const GET_FILTER_TOKENS = `query FilterTokens($tokens: [String], $limit: 
       volume24
       volume4
       token {
-        totalSupply
         networkId
         address
         decimals
-        id
         name
         info {
           circulatingSupply
+          totalSupply
           imageLargeUrl
           imageSmallUrl
         }
