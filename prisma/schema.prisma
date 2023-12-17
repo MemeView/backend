@@ -17,54 +17,10 @@ model Tokens {
   createdAt            Int?
   name                 String?
   symbol               String?
-  quoteToken           String?
-  buyCount1            Int?
-  buyCount12           Int?
-  buyCount24           Int?
-  buyCount4            Int?
-  uniqueBuys1          Int?
-  uniqueBuys12         Int?
-  uniqueBuys24         Int?
-  uniqueBuys4          Int?
-  change1              String?
-  change12             String?
   change24             String?
-  change4              String?
-  high1                String?
-  high12               String?
-  high24               String?
-  high4                String?
-  lastTransaction      Int?
   liquidity            String?
-  low1                 String?
-  low12                String?
-  low24                String?
-  low4                 String?
-  marketCap            String?
-  priceUSD             String?
-  sellCount1           Int?
-  sellCount12          Int?
-  sellCount24          Int?
-  sellCount4           Int?
-  uniqueSells1         Int?
-  uniqueSells12        Int?
-  uniqueSells24        Int?
-  uniqueSells4         Int?
-  txnCount1            Int?
-  txnCount12           Int?
-  txnCount24           Int?
-  txnCount4            Int?
-  uniqueTransactions1  Int?
-  uniqueTransactions12 Int?
-  uniqueTransactions24 Int?
-  uniqueTransactions4  Int?
-  volume1              String?
-  volume12             String?
   volume24             String?
-  volume4              String?
   token                Json?
-  pair                 Json?
-  exchanges            Json?
   cronCount            Int?
 }
 
@@ -86,56 +42,11 @@ model Gainers {
   createdAt            Int?
   name                 String?
   symbol               String?
-  quoteToken           String?
-  buyCount1            Int?
-  buyCount12           Int?
-  buyCount24           Int?
-  buyCount4            Int?
-  uniqueBuys1          Int?
-  uniqueBuys12         Int?
-  uniqueBuys24         Int?
-  uniqueBuys4          Int?
-  change1              String?
-  change12             String?
   change24             String?
-  change4              String?
-  high1                String?
-  high12               String?
-  high24               String?
-  high4                String?
-  lastTransaction      Int?
   liquidity            String?
-  low1                 String?
-  low12                String?
-  low24                String?
-  low4                 String?
-  marketCap            String?
-  priceUSD             String?
-  sellCount1           Int?
-  sellCount12          Int?
-  sellCount24          Int?
-  sellCount4           Int?
-  uniqueSells1         Int?
-  uniqueSells12        Int?
-  uniqueSells24        Int?
-  uniqueSells4         Int?
-  txnCount1            Int?
-  txnCount12           Int?
-  txnCount24           Int?
-  txnCount4            Int?
-  uniqueTransactions1  Int?
-  uniqueTransactions12 Int?
-  uniqueTransactions24 Int?
-  uniqueTransactions4  Int?
-  volume1              String?
-  volume12             String?
   volume24             String?
-  volume4              String?
   token                Json?
-  pair                 Json?
-  exchanges            Json?
   cronCount            Int?
-
 }
 
 model Losers {
@@ -144,54 +55,10 @@ model Losers {
   createdAt            Int?
   name                 String?
   symbol               String?
-  quoteToken           String?
-  buyCount1            Int?
-  buyCount12           Int?
-  buyCount24           Int?
-  buyCount4            Int?
-  uniqueBuys1          Int?
-  uniqueBuys12         Int?
-  uniqueBuys24         Int?
-  uniqueBuys4          Int?
-  change1              String?
-  change12             String?
   change24             String?
-  change4              String?
-  high1                String?
-  high12               String?
-  high24               String?
-  high4                String?
-  lastTransaction      Int?
   liquidity            String?
-  low1                 String?
-  low12                String?
-  low24                String?
-  low4                 String?
-  marketCap            String?
-  priceUSD             String?
-  sellCount1           Int?
-  sellCount12          Int?
-  sellCount24          Int?
-  sellCount4           Int?
-  uniqueSells1         Int?
-  uniqueSells12        Int?
-  uniqueSells24        Int?
-  uniqueSells4         Int?
-  txnCount1            Int?
-  txnCount12           Int?
-  txnCount24           Int?
-  txnCount4            Int?
-  uniqueTransactions1  Int?
-  uniqueTransactions12 Int?
-  uniqueTransactions24 Int?
-  uniqueTransactions4  Int?
-  volume1              String?
-  volume12             String?
   volume24             String?
-  volume4              String?
   token                Json?
-  pair                 Json?
-  exchanges            Json?
   cronCount            Int?
 }
 

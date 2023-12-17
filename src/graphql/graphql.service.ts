@@ -25,7 +25,7 @@ export class GraphqlService {
   async makeQuery<R, V>(query: string, variables?: V) {
     const response = await this.client.query<R, V>({
       query: gql`
-          ${query}
+        ${query}
       `,
       variables,
     });

@@ -3,7 +3,6 @@ export const GET_FILTER_TOKENS = `query ($tokens: [String], $limit: Int, $offset
     page
     count
     results {
-      __typename
       quoteToken
       createdAt
       buyCount1

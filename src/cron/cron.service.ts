@@ -43,11 +43,28 @@ export class CronService {
   @Cron('0 * * * *') // начало каждого часа
   async tokensCron() {
     await this.handleRetry(async () => {
-      const { deletedCount, addedCount } =
-        await this.definedTokensService.handleTokens();
+      let totalDeletedCount = 0;
+      let totalAddedCount = 0;
+
+      for (let i = 1; i <= 6; i++) {
+        const { deletedCount, addedCount } =
+          await this.definedTokensService.handleTokens(i);
+        totalDeletedCount += deletedCount;
+        totalAddedCount += addedCount;
+      }
+
       console.log(
-        `Cron job completed: ${deletedCount} tokens deleted, ${addedCount} tokens added.`,
+        `Cron job completed: ${totalDeletedCount} tokens deleted, ${totalAddedCount} tokens added.`,
       );
+    });
+
+    await this.handleRetry(async () => {
+      const currentHour = new Date().getHours();
+
+      if (currentHour === 0) {
+        await this.volumeService.handleVolumeData();
+        console.log(`Cron 'volume-sync' job completed`);
+      }
     });
   }
 

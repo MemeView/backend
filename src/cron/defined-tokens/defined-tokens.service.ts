@@ -11,6 +11,7 @@ import {
 import { definedSDK } from 'src/defined-api/definedSDK';
 
 import { GET_FILTER_TOKENS } from '../../graphql/getFilterTokens';
+import { GET_FILTER_TOKENS_SHORT } from 'src/graphql/getFilterTokensShort';
 import { GraphqlService } from '../../graphql/graphql.service';
 
 @Injectable()
@@ -23,7 +24,7 @@ export class DefinedTokensService {
     this.graphqlService = new GraphqlService();
   }
 
-  public async handleTokens() {
+  public async handleTokens(iteration: number) {
     const limit = 200;
 
     let iterationCount = 0;
@@ -36,13 +37,29 @@ export class DefinedTokensService {
 
     let createTimestamp: number | null = null;
 
+    if (iteration > 1) {
+      const lastCronToken = await this.prisma.tokens.findFirst({
+        where: {
+          cronCount: iteration - 1,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      createTimestamp = lastCronToken?.createdAt ?? null;
+    }
+
     let oldTokens: Array<any> = [];
 
     try {
       while (!currentIterationResult || currentIterationResult.length > 0) {
         offset = limit * iterationCount;
 
-        const result = await this.graphqlService.makeQuery<FilterTokensQuery, FilterTokensQueryVariables>(GET_FILTER_TOKENS, {
+        const result = await this.graphqlService.makeQuery<
+          FilterTokensQuery,
+          FilterTokensQueryVariables
+        >(GET_FILTER_TOKENS_SHORT, {
           limit,
           offset,
           rankings: {
@@ -52,11 +69,11 @@ export class DefinedTokensService {
           filters: {
             network: [1],
             liquidity: { gt: 1000 },
-            ...(createTimestamp && {createdAt: { gt: createTimestamp }})
+            ...(createTimestamp && { createdAt: { gt: createTimestamp } }),
           },
         });
 
-        const { filterTokens} = result;
+        const { filterTokens } = result;
 
         currentIterationResult =
           (filterTokens?.results as TokenFilterResult[]) || [];
@@ -76,15 +93,17 @@ export class DefinedTokensService {
 
         iterationCount += 1;
 
-        if (offset === 9800) {
-          const lastToken =
-            currentIterationResult[currentIterationResult.length - 1];
+        if (offset === 4800) {
+          // const lastToken =
+          //   currentIterationResult[currentIterationResult.length - 1];
 
-          createTimestamp = lastToken?.createdAt ?? null;
+          // createTimestamp = lastToken?.createdAt ?? null;
 
-          offset = 0;
+          // offset = 0;
 
-          iterationCount = 0;
+          // iterationCount = 0;
+
+          break;
         }
       }
 
@@ -101,18 +120,35 @@ export class DefinedTokensService {
           address: token.token?.address,
           name: token.token?.name,
           symbol: token.token?.symbol,
+          cronCount: iteration,
         }));
+
+      const cleanResultAfterFilter = resultAfterFilter.map((item) => {
+        const { __typename, ...cleanedItem } = item;
+        return cleanedItem;
+      });
 
       oldTokens = await this.prisma.tokens.findMany();
 
       // Сначала удаляем
-      const { count: deletedCount } = await this.prisma.tokens.deleteMany();
+      let deletedCount;
+      if (iteration != 1) {
+        const { count } = await this.prisma.tokens.deleteMany({
+          where: { cronCount: iteration },
+        });
+        deletedCount = count;
+      } else {
+        const { count } = await this.prisma.tokens.deleteMany();
+        deletedCount = count;
+      }
 
       // Потом вставляем
       const { count: addedCount } = await this.prisma.tokens.createMany({
         skipDuplicates: true,
-        data: resultAfterFilter,
+        data: cleanResultAfterFilter,
       });
+
+      console.log(iteration, 'итерация завершилась');
 
       return { deletedCount, addedCount };
     } catch (error) {
