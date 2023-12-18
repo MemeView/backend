@@ -13,7 +13,6 @@ query GetTokens($ids: [TokenInput!]!) {
       divisor
       tokenPriceUSD
       tokenType
-      __typename
     }
     info {
       address
@@ -24,7 +23,6 @@ query GetTokens($ids: [TokenInput!]!) {
       totalSupply
       imageLargeUrl
       imageSmallUrl
-      __typename
     }
     socialLinks {
       bitcointalk

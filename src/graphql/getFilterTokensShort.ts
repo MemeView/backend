@@ -3,10 +3,14 @@ export const GET_FILTER_TOKENS_SHORT = `query ($tokens: [String], $limit: Int, $
       page
       count
       results {
-        createdAt
         change24
         liquidity
         volume24
+        createdAt
+        quoteToken
+        pair {
+          address
+        }
         token {
           name
           symbol
@@ -15,5 +19,4 @@ export const GET_FILTER_TOKENS_SHORT = `query ($tokens: [String], $limit: Int, $
         }
       }
     }
-  }
-  `;
+  }`;

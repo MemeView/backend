@@ -12,23 +12,25 @@ datasource db {
 }
 
 model Tokens {
-  id                   Int     @id @default(autoincrement())
-  address              String? @unique
-  createdAt            Int?
-  name                 String?
-  symbol               String?
-  change24             String?
-  liquidity            String?
-  volume24             String?
-  token                Json?
-  cronCount            Int?
+  id          Int     @id @default(autoincrement())
+  address     String? @unique
+  pairAddress String?
+  quoteToken  String?
+  createdAt   Int?
+  name        String?
+  symbol      String?
+  change24    String?
+  liquidity   String?
+  volume24    String?
+  token       Json?
+  cronCount   Int?
 }
 
 model Votes {
-  id              Int      @id @default(autoincrement())
-  date            DateTime @default(now())
-  tokenAddress    String
-  walletAddress   String
+  id            Int      @id @default(autoincrement())
+  date          DateTime @default(now())
+  tokenAddress  String
+  walletAddress String
 }
 
 model Score {
@@ -37,42 +39,42 @@ model Score {
 }
 
 model Gainers {
-  id                   Int     @id @default(autoincrement())
-  address              String? @unique
-  createdAt            Int?
-  name                 String?
-  symbol               String?
-  change24             String?
-  liquidity            String?
-  volume24             String?
-  token                Json?
-  cronCount            Int?
+  id        Int     @id @default(autoincrement())
+  address   String? @unique
+  createdAt Int?
+  name      String?
+  symbol    String?
+  change24  String?
+  liquidity String?
+  volume24  String?
+  token     Json?
+  cronCount Int?
 }
 
 model Losers {
-  id                   Int     @id @default(autoincrement())
-  address              String? @unique
-  createdAt            Int?
-  name                 String?
-  symbol               String?
-  change24             String?
-  liquidity            String?
-  volume24             String?
-  token                Json?
-  cronCount            Int?
+  id        Int     @id @default(autoincrement())
+  address   String? @unique
+  createdAt Int?
+  name      String?
+  symbol    String?
+  change24  String?
+  liquidity String?
+  volume24  String?
+  token     Json?
+  cronCount Int?
 }
 
 model Users {
-  walletAddress           String @id @unique
-  votes                   Int    @default(5)
-  updatedAt               DateTime @default(now())
-  refreshToken            String?
-  refreshTokenCreatedAt   DateTime @default(now())
+  walletAddress         String   @id @unique
+  votes                 Int      @default(5)
+  updatedAt             DateTime @default(now())
+  refreshToken          String?
+  refreshTokenCreatedAt DateTime @default(now())
 }
 
 model Volume {
-  id                   Int     @id @default(autoincrement())
-  address              String?
-  volumeCreatedAt      DateTime @default(now())
-  volume24             String?
+  id              Int      @id @default(autoincrement())
+  address         String?
+  volumeCreatedAt DateTime @default(now())
+  volume24        String?
 }

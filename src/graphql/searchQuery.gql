@@ -10,9 +10,7 @@ query Search($limit: Int, $lowVolumeFilter: Boolean, $networkFilter: [Int!], $re
     hasMoreLowVolume
     tokens {
       ...BaseTokenWithMetadata
-      __typename
     }
-    __typename
   }
 }
 
@@ -21,7 +19,6 @@ fragment BaseTokenWithMetadata on TokenWithMetadata {
   decimals
   exchanges {
     ...ExchangeModel
-    __typename
   }
   id
   imageLargeUrl
@@ -41,7 +38,6 @@ fragment BaseTokenWithMetadata on TokenWithMetadata {
   symbol
   topPairId
   volume
-  __typename
 }
 
 fragment ExchangeModel on Exchange {
@@ -53,5 +49,4 @@ fragment ExchangeModel on Exchange {
   networkId
   tradeUrl
   iconUrl
-  __typename
 }

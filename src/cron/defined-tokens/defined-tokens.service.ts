@@ -94,15 +94,6 @@ export class DefinedTokensService {
         iterationCount += 1;
 
         if (offset === 4800) {
-          // const lastToken =
-          //   currentIterationResult[currentIterationResult.length - 1];
-
-          // createTimestamp = lastToken?.createdAt ?? null;
-
-          // offset = 0;
-
-          // iterationCount = 0;
-
           break;
         }
       }
@@ -115,18 +106,15 @@ export class DefinedTokensService {
             token.token.symbol.length <= 10 &&
             /^[a-zA-Zа-яА-Я0-9]+$/.test(token.token.symbol),
         )
-        .map((token) => ({
-          ...token,
-          address: token.token?.address,
-          name: token.token?.name,
-          symbol: token.token?.symbol,
+        .map(({token, pair, __typename, ...rest}) => ({
+          ...rest,
+          name: token.name,
+          symbol: token.symbol,
+          address: token.address,
+          token: token,
+          pairAddress: pair?.address,
           cronCount: iteration,
         }));
-
-      const cleanResultAfterFilter = resultAfterFilter.map((item) => {
-        const { __typename, ...cleanedItem } = item;
-        return cleanedItem;
-      });
 
       oldTokens = await this.prisma.tokens.findMany();
 
@@ -145,10 +133,10 @@ export class DefinedTokensService {
       // Потом вставляем
       const { count: addedCount } = await this.prisma.tokens.createMany({
         skipDuplicates: true,
-        data: cleanResultAfterFilter,
+        data: resultAfterFilter,
       });
 
-      console.log(iteration, 'итерация завершилась');
+      console.log(iteration, 'итерация завершилась', JSON.stringify({addedCount, deletedCount}));
 
       return { deletedCount, addedCount };
     } catch (error) {
