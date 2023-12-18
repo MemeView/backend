@@ -59,6 +59,12 @@ export class CronService {
     });
 
     await this.handleRetry(async () => {
+      await this.solveScoreService.solveScores();
+
+      console.log(`solveScoreService job completed'`);
+    });
+
+    await this.handleRetry(async () => {
       const currentHour = new Date().getHours();
 
       if (currentHour === 0) {
