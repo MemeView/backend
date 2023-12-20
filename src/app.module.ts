@@ -8,6 +8,7 @@ import { CronModule } from './cron/cron.module';
 import { VolumeModule } from './cron/volume-sync/volume.module';
 import { SolveScoreModule } from './cron/solve-score-sync/solve-score.module';
 import { GraphqlModule } from './graphql/graphql.module';
+import { BlackListModule } from './black-list/black-list.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { GraphqlModule } from './graphql/graphql.module';
     DefinedTokensModule,
     SolveScoreModule,
     VolumeModule,
+    BlackListModule,
   ],
   controllers: [AppController],
   providers: [AppService],

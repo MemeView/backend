@@ -26,6 +26,11 @@ model Tokens {
   cronCount   Int?
 }
 
+model Blacklist {
+  id            Int @id @default(autoincrement())
+  tokenAddress  String @unique
+}
+
 model Votes {
   id            Int      @id @default(autoincrement())
   date          DateTime @default(now())
@@ -36,32 +41,6 @@ model Votes {
 model Score {
   tokenAddress String @id @unique
   tokenScore   Float
-}
-
-model Gainers {
-  id        Int     @id @default(autoincrement())
-  address   String? @unique
-  createdAt Int?
-  name      String?
-  symbol    String?
-  change24  String?
-  liquidity String?
-  volume24  String?
-  token     Json?
-  cronCount Int?
-}
-
-model Losers {
-  id        Int     @id @default(autoincrement())
-  address   String? @unique
-  createdAt Int?
-  name      String?
-  symbol    String?
-  change24  String?
-  liquidity String?
-  volume24  String?
-  token     Json?
-  cronCount Int?
 }
 
 model Users {

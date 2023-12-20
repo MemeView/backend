@@ -98,15 +98,21 @@ export class DefinedTokensService {
         }
       }
 
+      const blacklistTokens = await this.prisma.blacklist.findMany();
+
       const resultAfterFilter = allTokens
         .filter(
           (token) =>
             !!token.token?.address &&
             token.token.symbol &&
             token.token.symbol.length <= 10 &&
-            /^[a-zA-Zа-яА-Я0-9]+$/.test(token.token.symbol),
+            /^[a-zA-Zа-яА-Я0-9]+$/.test(token.token.symbol) &&
+            !blacklistTokens.some(
+              (blacklistedToken) =>
+                blacklistedToken.tokenAddress === token.token.address,
+            ),
         )
-        .map(({token, pair, __typename, ...rest}) => ({
+        .map(({ token, pair, __typename, ...rest }) => ({
           ...rest,
           name: token.name,
           symbol: token.symbol,
@@ -136,7 +142,11 @@ export class DefinedTokensService {
         data: resultAfterFilter,
       });
 
-      console.log(iteration, 'итерация завершилась', JSON.stringify({addedCount, deletedCount}));
+      console.log(
+        iteration,
+        'итерация завершилась',
+        JSON.stringify({ addedCount, deletedCount }),
+      );
 
       return { deletedCount, addedCount };
     } catch (error) {
