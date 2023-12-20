@@ -41,4 +41,14 @@ export class BlackListService {
       throw new InternalServerErrorException(error);
     }
   }
+
+  public async blacklist() {
+    try {
+      const blacklist = await this.prisma.blacklist.findMany();
+
+      return blacklist;
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { BlackListService } from './black-list.service';
 
 @Controller('api')
@@ -19,5 +19,11 @@ export class BlackListController {
   ): Promise<string> {
     await this.blackListService.deleteTokenFromBlacklist(tokenAddress);
     return 'TokenAddress was removed from black list';
+  }
+
+  @Get('/blacklist')
+  public async blacklist() {
+    const blacklist = await this.blackListService.blacklist();
+    return blacklist;
   }
 }
