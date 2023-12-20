@@ -81,6 +81,7 @@ export class CronService {
     });
   }
 
+  @Cron('35 * * * *') // начало каждого часа
   async solveScoresCron() {
     await this.handleRetry(async () => {
       await this.solveScoreService.solveScores();

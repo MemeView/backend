@@ -112,8 +112,11 @@ export class DefinedTokensService {
                 blacklistedToken.tokenAddress === token.token.address,
             ),
         )
-        .map(({ token, pair, __typename, ...rest }) => ({
-          ...rest,
+        .map(({token, pair, __typename, change24, liquidity, volume24, createdAt}) => ({
+          change24,
+          volume24,
+          liquidity,
+          createdAt,
           name: token.name,
           symbol: token.symbol,
           address: token.address,
