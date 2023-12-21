@@ -9,6 +9,7 @@ import { VolumeModule } from './cron/volume-sync/volume.module';
 import { SolveScoreModule } from './cron/solve-score-sync/solve-score.module';
 import { GraphqlModule } from './graphql/graphql.module';
 import { BlackListModule } from './black-list/black-list.module';
+import { ExcelModule } from './excel/excel.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { BlackListModule } from './black-list/black-list.module';
     SolveScoreModule,
     VolumeModule,
     BlackListModule,
+    ExcelModule,
   ],
   controllers: [AppController],
   providers: [AppService],
