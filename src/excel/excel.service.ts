@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  StreamableFile,
+} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import * as ExcelJS from 'exceljs';
 import * as moment from 'moment';
@@ -11,7 +15,7 @@ export class ExcelService {
     this.prisma = new PrismaClient();
   }
 
-  public async getAllTokens(dateStr?: string) {
+  public async getExcelTokens(dateStr?: string): Promise<Buffer> {
     try {
       let lastTokenId = 0;
       let hasMore = true;
@@ -59,9 +63,7 @@ export class ExcelService {
         hasMore = batch.length === 200;
       }
 
-      await this.writeToExcel(tokensData);
-
-      return tokensData;
+      return this.writeToExcel(tokensData);
     } catch (error) {
       throw new InternalServerErrorException(
         'error: data need to be in 21.12.2023 format',
@@ -69,7 +71,7 @@ export class ExcelService {
     }
   }
 
-  private async writeToExcel(tokensData: any[]) {
+  private async writeToExcel(tokensData: any[]): Promise<Buffer> {
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Tokens');
 
@@ -80,8 +82,8 @@ export class ExcelService {
     });
 
     const filePath = './src/excel/';
-    await workbook.xlsx.writeFile(`${filePath}tokens.xlsx`);
+    console.log(`Данные успешно записаны`);
 
-    console.log(`Данные успешно записаны в ${filePath}`);
+    return (await workbook.xlsx.writeBuffer()) as Buffer;
   }
 }
