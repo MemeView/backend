@@ -59,18 +59,14 @@ export class CronService {
     });
 
     await this.handleRetry(async () => {
-      await this.solveScoreService.solveScores();
-
-      console.log(`solveScoreService job completed'`);
+      await this.volumeService.handleVolumeData();
+      console.log(`Cron 'volume-sync' job completed`);
     });
 
     await this.handleRetry(async () => {
-      const currentHour = new Date().getHours();
+      await this.solveScoreService.solveScores();
 
-      if (currentHour === 0) {
-        await this.volumeService.handleVolumeData();
-        console.log(`Cron 'volume-sync' job completed`);
-      }
+      console.log(`solveScoreService job completed'`);
     });
   }
 
