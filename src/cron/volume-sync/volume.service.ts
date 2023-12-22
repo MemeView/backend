@@ -39,10 +39,5 @@ export class VolumeService {
       data: tokens,
     });
     console.log('addedCount', addedCount);
-    console.log(
-      await this.prisma.volume.findFirst({
-        where: { volumeCreatedAt: { gte: today } },
-      }),
-    );
   }
 }

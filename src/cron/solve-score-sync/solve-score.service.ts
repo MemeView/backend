@@ -423,7 +423,8 @@ export class SolveScoreService {
     let finalResults = Object.entries(combinedResults).map(
       ([tokenAddress, { score }]) => ({
         tokenAddress,
-        tokenScore: score + 31, // +16 за холдеров и +15 за 2theMoon
+        tokenScore: score + 31,
+        liquidity: '', // +16 за холдеров и +15 за 2theMoon
       }),
     );
     // Получаем адреса токенов из окончательных результатов
@@ -435,11 +436,13 @@ export class SolveScoreService {
     });
 
     // Обновляем баллы для токенов в зависимости от их ликвидности
-    finalResults.forEach(async (result) => {
+    finalResults.forEach((result) => {
       // Находим информацию о текущем токене в rawTokens
       const token = rawTokens.find(
         (item) => item.address === result.tokenAddress,
       );
+
+      result.liquidity = token.liquidity;
 
       if (token && parseFloat(token.liquidity!) < 3000) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
@@ -498,6 +501,131 @@ export class SolveScoreService {
     await this.prisma.score.deleteMany();
     // Записываем новые результаты в таблицу
     await this.prisma.score.createMany({ data: finalResults });
+
+    const currentHour = now.getHours();
+    const key = `tokenScore${currentHour}h`;
+
+    const existingTokenAddresses = await this.prisma.scoreByHours.findMany({
+      select: {
+        tokenAddress: true,
+      },
+    });
+
+    const existingTokenAddressesSet = new Set(
+      existingTokenAddresses.map(({ tokenAddress }) => tokenAddress),
+    );
+
+    const createData = [];
+    const updateChunks = [];
+    const chunkSize = 5;
+
+    for (const result of finalResults) {
+      if (existingTokenAddressesSet.has(result.tokenAddress)) {
+        updateChunks.push({
+          where: { tokenAddress: result.tokenAddress },
+          data: { [key]: result.tokenScore },
+        });
+      } else {
+        createData.push({
+          tokenAddress: result.tokenAddress,
+          [key]: result.tokenScore,
+        });
+      }
+    }
+
+    const processChunk = async (chunk) => {
+      await Promise.all(
+        chunk.map((update) => this.prisma.scoreByHours.update(update)),
+      );
+    };
+
+    for (let i = 0; i < updateChunks.length; i += chunkSize) {
+      const chunk = updateChunks.slice(i, i + chunkSize);
+      await processChunk(chunk);
+    }
+
+    if (createData.length > 0) {
+      await this.prisma.scoreByHours.createMany({
+        data: createData,
+      });
+    }
+
     return finalResults;
+  }
+
+  async updateDailyScores() {
+    const allScores = await this.prisma.scoreByHours.findMany();
+
+    const averages = allScores
+      .map((tokenData) => {
+        const scores = [];
+        for (let i = 0; i < 24; i++) {
+          const score = tokenData[`tokenScore${i}h`];
+          if (typeof score === 'number') {
+            scores.push(score);
+          }
+        }
+
+        if (scores.length >= 10) {
+          const sum = scores.reduce((acc, curr) => acc + curr, 0);
+          const averageScore = sum / scores.length;
+
+          return {
+            tokenAddress: tokenData.tokenAddress,
+            averageScore: averageScore,
+          };
+        }
+
+        return null;
+      })
+      .filter(Boolean);
+
+    const chunkSize = 5;
+    const chunks = [];
+    for (let i = 0; i < averages.length; i += chunkSize) {
+      const chunk = averages.slice(i, i + chunkSize);
+      chunks.push(chunk);
+    }
+
+    const updateChunk = async (chunk) => {
+      const updates = chunk.map(async (avgData) => {
+        const { tokenAddress, averageScore } = avgData;
+
+        const currentScores = await this.prisma.dailyScore.findUnique({
+          where: { tokenAddress },
+          select: {
+            averageScore24Ago: true,
+            averageScoreToday: true,
+          },
+        });
+
+        return this.prisma.dailyScore.upsert({
+          where: { tokenAddress },
+          update: {
+            averageScore48Ago: currentScores.averageScore24Ago, // предыдущее значение для 24Ago стало 48Ago
+            averageScore24Ago: currentScores.averageScoreToday, // предыдущее значение для Today стало 24Ago
+            averageScoreToday: averageScore, // новое значение
+          },
+          create: {
+            tokenAddress,
+            averageScoreToday: averageScore,
+            averageScore24Ago: null,
+            averageScore48Ago: null,
+          },
+        });
+      });
+
+      const results = await Promise.all(updates);
+
+      return results;
+    };
+
+    const chunkResults = [];
+    for (const chunk of chunks) {
+      const results = await updateChunk(chunk);
+      chunkResults.push(results);
+    }
+
+    return 'ok';
   }
 }

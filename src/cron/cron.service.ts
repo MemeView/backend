@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { DefinedTokensService } from './defined-tokens/defined-tokens.service';
 import { VolumeService } from './volume-sync/volume.service';
 import { SolveScoreService } from './solve-score-sync/solve-score.service';
+import { PrismaClient } from '@prisma/client';
 
 @Injectable()
 export class CronService {
@@ -13,6 +14,7 @@ export class CronService {
     private readonly definedTokensService: DefinedTokensService,
     private readonly volumeService: VolumeService,
     private readonly solveScoreService: SolveScoreService,
+    private prisma: PrismaClient,
   ) {}
 
   private async handleRetry(
@@ -42,6 +44,9 @@ export class CronService {
 
   @Cron('0 * * * *') // начало каждого часа
   async tokensCron() {
+    const now = new Date();
+    const currentHour = now.getHours();
+
     await this.handleRetry(async () => {
       let totalDeletedCount = 0;
       let totalAddedCount = 0;
@@ -63,11 +68,22 @@ export class CronService {
       console.log(`Cron 'volume-sync' job completed`);
     });
 
+    if (currentHour === 0) {
+      await this.prisma.scoreByHours.deleteMany();
+    }
+
     await this.handleRetry(async () => {
       await this.solveScoreService.solveScores();
 
       console.log(`solveScoreService job completed'`);
     });
+
+    if (currentHour === 23) {
+      await this.handleRetry(async () => {
+        await this.solveScoreService.updateDailyScores();
+        console.log(`Cron 'average-score' job completed`);
+      });
+    }
   }
 
   async volumeCron() {
@@ -77,7 +93,7 @@ export class CronService {
     });
   }
 
-  @Cron('35 * * * *') // начало каждого часа
+  @Cron('35 * * * *')
   async solveScoresCron() {
     await this.handleRetry(async () => {
       await this.solveScoreService.solveScores();
