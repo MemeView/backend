@@ -28,6 +28,7 @@ export class GraphqlService {
         ${query}
       `,
       variables,
+      fetchPolicy: 'network-only',
     });
 
     return response.data;

@@ -121,11 +121,13 @@ export class DefinedTokensService {
             liquidity,
             volume24,
             createdAt,
+            quoteToken
           }) => ({
             change24,
             volume24,
             liquidity,
             createdAt,
+            quoteToken,
             name: token.name,
             symbol: token.symbol,
             address: token.address,
