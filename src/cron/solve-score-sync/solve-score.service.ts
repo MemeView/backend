@@ -423,12 +423,14 @@ export class SolveScoreService {
     let finalResults = Object.entries(combinedResults).map(
       ([tokenAddress, { score }]) => ({
         tokenAddress,
-        tokenScore: score + 31,
-        liquidity: '', // +16 за холдеров и +15 за 2theMoon
+        tokenScore: score + 31, // +16 за холдеров и +15 за 2theMoon
+        liquidity: '',
       }),
     );
+
     // Получаем адреса токенов из окончательных результатов
     const finalResultsAddresses = finalResults.map((item) => item.tokenAddress);
+
     // Получаем информацию о токенах из базы данных, используя адреса из finalResultsAddresses
     const rawTokens = await this.prisma.tokens.findMany({
       where: { address: { in: finalResultsAddresses } },
@@ -442,7 +444,7 @@ export class SolveScoreService {
         (item) => item.address === result.tokenAddress,
       );
 
-      result.liquidity = token.liquidity;
+      result.liquidity = token?.liquidity ?? '0';
 
       if (token && parseFloat(token.liquidity!) < 3000) {
         // Уменьшаем баллы для токенов с низкой ликвидностью

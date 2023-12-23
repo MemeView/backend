@@ -116,7 +116,6 @@ export class DefinedTokensService {
           ({
             token,
             pair,
-            __typename,
             change24,
             liquidity,
             volume24,
