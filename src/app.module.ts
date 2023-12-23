@@ -14,7 +14,7 @@ import { ExcelModule } from './excel/excel.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['.env.local', '.env'],
+      envFilePath: ['.env'],
     }),
     GraphqlModule,
     CronModule,

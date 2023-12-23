@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { subDays, subHours, startOfDay } from 'date-fns';
+import { IntRange } from '../../common.type';
 
 type QueryResult = {
   tokenAddress: string;
@@ -25,6 +26,32 @@ interface Volume {
   scoreFromVotes?: number;
   scoreFromChange24?: number;
 }
+
+type ColumnName =
+  'tokenScore0h' |
+  'tokenScore1h' |
+  'tokenScore2h' |
+  'tokenScore3h' |
+  'tokenScore4h' |
+  'tokenScore5h' |
+  'tokenScore6h' |
+  'tokenScore7h' |
+  'tokenScore8h' |
+  'tokenScore9h' |
+  'tokenScore10h' |
+  'tokenScore11h' |
+  'tokenScore12h' |
+  'tokenScore13h' |
+  'tokenScore14h' |
+  'tokenScore15h' |
+  'tokenScore16h' |
+  'tokenScore17h' |
+  'tokenScore18h' |
+  'tokenScore19h' |
+  'tokenScore20h' |
+  'tokenScore21h' |
+  'tokenScore22h' |
+  'tokenScore23h';
 
 // Функция для вычисления балла на основе изменения цены за 24 часа
 function calculateScore(change24: string) {
@@ -504,8 +531,9 @@ export class SolveScoreService {
     // Записываем новые результаты в таблицу
     await this.prisma.score.createMany({ data: finalResults });
 
-    const currentHour = now.getHours();
-    const key = `tokenScore${currentHour}h`;
+    const currentHour = now.getHours() as IntRange<0, 23>;
+
+    const key: ColumnName = `tokenScore${currentHour}h`;
 
     const existingTokenAddresses = await this.prisma.scoreByHours.findMany({
       select: {
@@ -517,16 +545,15 @@ export class SolveScoreService {
       existingTokenAddresses.map(({ tokenAddress }) => tokenAddress),
     );
 
+    console.log('key', key);
+
     const createData = [];
-    const updateChunks = [];
-    const chunkSize = 5;
+
+    const updateData = [];
 
     for (const result of finalResults) {
       if (existingTokenAddressesSet.has(result.tokenAddress)) {
-        updateChunks.push({
-          where: { tokenAddress: result.tokenAddress },
-          data: { [key]: result.tokenScore },
-        });
+        updateData.push(result);
       } else {
         createData.push({
           tokenAddress: result.tokenAddress,
@@ -535,16 +562,9 @@ export class SolveScoreService {
       }
     }
 
-    const processChunk = async (chunk) => {
-      await Promise.all(
-        chunk.map((update) => this.prisma.scoreByHours.update(update)),
-      );
-    };
-
-    for (let i = 0; i < updateChunks.length; i += chunkSize) {
-      const chunk = updateChunks.slice(i, i + chunkSize);
-      await processChunk(chunk);
-    }
+    await this.prisma.$transaction(updateData.map((scoreItem) => {
+      return this.prisma.scoreByHours.update({where: {tokenAddress: scoreItem.tokenAddress}, data: {[key]: scoreItem.tokenScore}})
+    }));
 
     if (createData.length > 0) {
       await this.prisma.scoreByHours.createMany({
@@ -568,7 +588,7 @@ export class SolveScoreService {
           }
         }
 
-        if (scores.length >= 10) {
+        if (scores.length >= 2) {
           const sum = scores.reduce((acc, curr) => acc + curr, 0);
           const averageScore = sum / scores.length;
 
