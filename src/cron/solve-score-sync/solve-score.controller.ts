@@ -4,6 +4,7 @@ import {
   HttpStatus,
   HttpException,
   Res,
+  Query,
 } from '@nestjs/common';
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
@@ -56,9 +57,35 @@ export class SolveScoreController {
   }
 
   @Get('/average-score')
-  async averageScore() {
+  async averageScore(@Query('tokenAddress') tokenAddress: string) {
+    if (!tokenAddress) {
+      throw new HttpException(
+        {
+          success: false,
+          error: `Token address is required`,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     try {
-      const result = await this.prisma.dailyScore.findMany();
+      const result = await this.prisma.dailyScore.findUnique({
+        where: {
+          tokenAddress,
+        },
+      });
+
+      if (!result) {
+        return {
+          success: true,
+          result: {
+            tokenAddress,
+            averageScoreToday: null,
+            averageScore24Ago: null,
+            averageScore48Ago: null,
+          },
+        };
+      }
 
       return {
         success: true,

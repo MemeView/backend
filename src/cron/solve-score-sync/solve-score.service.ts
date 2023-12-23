@@ -28,30 +28,30 @@ interface Volume {
 }
 
 type ColumnName =
-  'tokenScore0h' |
-  'tokenScore1h' |
-  'tokenScore2h' |
-  'tokenScore3h' |
-  'tokenScore4h' |
-  'tokenScore5h' |
-  'tokenScore6h' |
-  'tokenScore7h' |
-  'tokenScore8h' |
-  'tokenScore9h' |
-  'tokenScore10h' |
-  'tokenScore11h' |
-  'tokenScore12h' |
-  'tokenScore13h' |
-  'tokenScore14h' |
-  'tokenScore15h' |
-  'tokenScore16h' |
-  'tokenScore17h' |
-  'tokenScore18h' |
-  'tokenScore19h' |
-  'tokenScore20h' |
-  'tokenScore21h' |
-  'tokenScore22h' |
-  'tokenScore23h';
+  | 'tokenScore0h'
+  | 'tokenScore1h'
+  | 'tokenScore2h'
+  | 'tokenScore3h'
+  | 'tokenScore4h'
+  | 'tokenScore5h'
+  | 'tokenScore6h'
+  | 'tokenScore7h'
+  | 'tokenScore8h'
+  | 'tokenScore9h'
+  | 'tokenScore10h'
+  | 'tokenScore11h'
+  | 'tokenScore12h'
+  | 'tokenScore13h'
+  | 'tokenScore14h'
+  | 'tokenScore15h'
+  | 'tokenScore16h'
+  | 'tokenScore17h'
+  | 'tokenScore18h'
+  | 'tokenScore19h'
+  | 'tokenScore20h'
+  | 'tokenScore21h'
+  | 'tokenScore22h'
+  | 'tokenScore23h';
 
 // Функция для вычисления балла на основе изменения цены за 24 часа
 function calculateScore(change24: string) {
@@ -562,9 +562,14 @@ export class SolveScoreService {
       }
     }
 
-    await this.prisma.$transaction(updateData.map((scoreItem) => {
-      return this.prisma.scoreByHours.update({where: {tokenAddress: scoreItem.tokenAddress}, data: {[key]: scoreItem.tokenScore}})
-    }));
+    await this.prisma.$transaction(
+      updateData.map((scoreItem) => {
+        return this.prisma.scoreByHours.update({
+          where: { tokenAddress: scoreItem.tokenAddress },
+          data: { [key]: scoreItem.tokenScore },
+        });
+      }),
+    );
 
     if (createData.length > 0) {
       await this.prisma.scoreByHours.createMany({
@@ -621,24 +626,28 @@ export class SolveScoreService {
           },
         });
 
-        return this.prisma.dailyScore.upsert({
-          where: { tokenAddress },
-          update: {
-            averageScore48Ago: currentScores.averageScore24Ago, // предыдущее значение для 24Ago стало 48Ago
-            averageScore24Ago: currentScores.averageScoreToday, // предыдущее значение для Today стало 24Ago
-            averageScoreToday: averageScore, // новое значение
-          },
-          create: {
-            tokenAddress,
-            averageScoreToday: averageScore,
-            averageScore24Ago: null,
-            averageScore48Ago: null,
-          },
-        });
+        if (!currentScores) {
+          return this.prisma.dailyScore.create({
+            data: {
+              tokenAddress,
+              averageScoreToday: averageScore,
+              averageScore24Ago: null,
+              averageScore48Ago: null,
+            },
+          });
+        } else {
+          return this.prisma.dailyScore.update({
+            where: { tokenAddress },
+            data: {
+              averageScore48Ago: currentScores.averageScore24Ago, // предыдущее значение для 24Ago стало 48Ago
+              averageScore24Ago: currentScores.averageScoreToday, // предыдущее значение для Today стало 24Ago
+              averageScoreToday: averageScore, // новое значение
+            },
+          });
+        }
       });
 
       const results = await Promise.all(updates);
-
       return results;
     };
 
