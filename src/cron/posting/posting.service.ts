@@ -29,27 +29,14 @@ export class PostingService {
     }
   }
 
-  async sendTelegramMessage(
-    tokenAddress: string,
-    change24: string,
-    symbol: string,
-    averageScoreToday: number,
-    score: number,
-  ) {
+  async sendTelegramMessage(message: string) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
     const delay = 100;
-    const message = `
-    tokenAddress: ${tokenAddress},
-    symbol: ${symbol},
-    change24: ${change24},
-    averageScoreYesterday: ${averageScoreToday},
-    score: ${score}
-    `;
 
     const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
       message,
-    )}`;
+    )}&parse_mode=Markdown`;
 
     try {
       await new Promise((resolve) => setTimeout(resolve, delay));
@@ -93,6 +80,8 @@ export class PostingService {
         address: true,
         symbol: true,
         change24: true,
+        quoteToken: true,
+        pairAddress: true,
       },
     });
 
@@ -125,29 +114,25 @@ export class PostingService {
 
       if (
         token.address &&
+        token.pairAddress &&
         token.change24 &&
         token.symbol &&
+        token.quoteToken &&
         averageScoreToday !== undefined &&
         score !== undefined &&
+        averageScoreToday >= 40 &&
         messagesCount < 3
       ) {
         // Создаем сообщение для отправки
-        const message = `
-          tokenAddress: ${token.address},
-          symbol: ${token.symbol},
-          change24: ${token.change24},
-          averageScoreYesterday: ${averageScoreToday},
-          score: ${score}
-        `;
+        const growth = parseFloat(token.change24) * 100;
+        const message =
+          `[${token.symbol}](https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken}) \n\n` +
+          `💹 24h growth: +${growth.toFixed(2)}%\n\n` +
+          `🚀 Yesterday ToTheMoonScore: ${averageScoreToday.toFixed(2)}\n\n` +
+          `#${token.symbol} #${token.symbol.toLowerCase()}growth #TokenWatch`;
 
         // Отправляем сообщение в Телеграм
-        await this.sendTelegramMessage(
-          token.address,
-          token.change24,
-          token.symbol,
-          averageScoreToday,
-          score,
-        );
+        await this.sendTelegramMessage(message);
 
         // Отправляем твит
         await this.sendTwitterMessage(message);
