@@ -10,6 +10,7 @@ import { SolveScoreModule } from './cron/solve-score-sync/solve-score.module';
 import { GraphqlModule } from './graphql/graphql.module';
 import { BlackListModule } from './black-list/black-list.module';
 import { ExcelModule } from './excel/excel.module';
+import { PostingModule } from './cron/posting/posting.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { ExcelModule } from './excel/excel.module';
     VolumeModule,
     BlackListModule,
     ExcelModule,
+    PostingModule,
   ],
   controllers: [AppController],
   providers: [AppService],

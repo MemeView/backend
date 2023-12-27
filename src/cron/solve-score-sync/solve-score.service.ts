@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { subDays, subHours, startOfDay } from 'date-fns';
 import { IntRange } from '../../common.type';
+import axios from 'axios';
 
 type QueryResult = {
   tokenAddress: string;
@@ -18,6 +19,7 @@ interface Result {
 interface Token {
   address: string;
   change24: string;
+  symbol?: string;
 }
 
 interface Volume {
@@ -53,16 +55,16 @@ type ColumnName =
   | 'tokenScore22h'
   | 'tokenScore23h';
 
-// Функция для вычисления балла на основе изменения цены за 24 часа
-function calculateScore(change24: string) {
-  const factor = parseFloat(change24) * 100;
-
-  return factor >= 100 ? 10 : (10 * factor) / 100;
-}
-
 @Injectable()
 export class SolveScoreService {
   constructor(private prisma: PrismaClient) {}
+
+  // Функция для вычисления балла на основе изменения цены за 24 часа
+  async calculateScore(change24: string) {
+    const factor = parseFloat(change24) * 100;
+
+    return factor >= 100 ? 10 : (10 * factor) / 100;
+  }
 
   async solveScores() {
     const totalCount = await this.prisma.votes.count();
@@ -332,7 +334,6 @@ export class SolveScoreService {
       select: {
         address: true,
         change24: true,
-        symbol: true,
       },
       orderBy: {
         change24: 'desc',
@@ -340,17 +341,18 @@ export class SolveScoreService {
     });
 
     // Рассчитываем баллы для изменения цены за последние 24 часа
-    const resultsFromChange24 = (resultsFromChange24Raw as Token[]).map(
-      (item) => {
-        const score = calculateScore(item.change24);
+    const resultsFromChange24Promises = (resultsFromChange24Raw as Token[]).map(
+      async (item) => {
+        const score = await this.calculateScore(item.change24);
         const result: Result = {
           tokenAddress: item.address,
           scoreFromChange24: score || 0,
         };
-
         return result;
       },
     );
+
+    const resultsFromChange24 = await Promise.all(resultsFromChange24Promises);
 
     const uniqueResultFromVolume = resultFromVolume.reduce<Result[]>(
       (unique, item) => {

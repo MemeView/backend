@@ -93,3 +93,14 @@ model Volume {
   volumeCreatedAt DateTime @default(now())
   volume24        String?
 }
+
+model TelegramBotUsers {
+  id  Int  @id @unique
+}
+
+model PostedTokens {
+  tokenAddress        String  @id @unique
+  createdAt           DateTime @default(now())
+}
+
+

@@ -4,6 +4,7 @@ import { DefinedTokensService } from './defined-tokens/defined-tokens.service';
 import { VolumeService } from './volume-sync/volume.service';
 import { SolveScoreService } from './solve-score-sync/solve-score.service';
 import { PrismaClient } from '@prisma/client';
+import { PostingService } from './posting/posting.service';
 
 @Injectable()
 export class CronService {
@@ -14,6 +15,7 @@ export class CronService {
     private readonly definedTokensService: DefinedTokensService,
     private readonly volumeService: VolumeService,
     private readonly solveScoreService: SolveScoreService,
+    private readonly postingService: PostingService,
     private prisma: PrismaClient,
   ) {}
 
@@ -84,6 +86,11 @@ export class CronService {
         console.log(`Cron 'average-score' job completed`);
       });
     }
+
+    await this.handleRetry(async () => {
+      await this.postingService.handleCombinedPosting();
+      console.log(`Cron 'posting' job completed`);
+    });
   }
 
   async volumeCron() {
