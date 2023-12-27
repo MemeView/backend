@@ -17,6 +17,20 @@ const twitterClient = new TwitterApi({
 export class PostingService {
   constructor(private prisma: PrismaClient) {}
 
+  getAbsoluteScore(absoluteScore: number): string {
+    const parts = String(absoluteScore).split('.'); // Разделяем число на целую и десятичную части
+
+    const integerPart = parts[0];
+
+    const decimalPart = parts[1];
+
+    if (decimalPart) {
+      return `${integerPart}.${decimalPart[0]}`;
+    }
+
+    return absoluteScore.toFixed(1).toString();
+  }
+
   async sendTwitterMessage(message) {
     try {
       const tweet = await twitterClient.v2.tweet(message);
@@ -127,8 +141,10 @@ export class PostingService {
         const growth = parseFloat(token.change24) * 100;
         const message =
           `[${token.symbol}](https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken}) \n\n` +
-          `💹 24h growth: +${growth.toFixed(2)}%\n\n` +
-          `🚀 Yesterday ToTheMoonScore: ${averageScoreToday.toFixed(2)}\n\n` +
+          `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
+          `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
+            averageScoreToday,
+          )}\n\n` +
           `#${token.symbol} #${token.symbol.toLowerCase()}growth #TokenWatch`;
 
         // Отправляем сообщение в Телеграм
