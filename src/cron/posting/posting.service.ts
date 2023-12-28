@@ -33,9 +33,9 @@ export class PostingService {
     return absoluteScore.toFixed(1).toString();
   }
 
-  async sendTwitterMessage(message, imagePath) {
+  async sendTwitterMessage(message, twitterPhotoPath) {
     try {
-      const mediaId = await twitterClient.v1.uploadMedia(imagePath);
+      const mediaId = await twitterClient.v1.uploadMedia(twitterPhotoPath);
       const tweet = await twitterClient.v2.tweet(message, {
         media: { media_ids: [mediaId] },
       });
@@ -143,21 +143,25 @@ export class PostingService {
         // Создаем сообщение для отправки
         const growth = parseFloat(token.change24) * 100;
         const message =
-          `[${token.symbol}](https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken}) \n\n` +
+          `[$${token.symbol.toUpperCase()}](https://tokenwatch.ai/en/tokens/${
+            token.pairAddress
+          }?quoteToken=${token.quoteToken}) \n\n` +
           `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
           `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
             averageScoreToday,
           )}\n\n` +
-          `#${token.symbol} #${token.symbol.toLowerCase()}growth #TokenWatch`;
+          `#${token.symbol.toUpperCase()} ` +
+          `#${token.symbol.toUpperCase()}growth ` +
+          `#TokenWatch`;
 
         // Отправляем сообщение в Телеграм
         const photoPath =
-          'https://tvn.md/wp-content/uploads/2023/09/evro-foto-1200-675.jpg';
-        console.log(photoPath);
+          'https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg';
         await this.sendTelegramMessage(message, photoPath);
 
         // Отправляем твит
-        await this.sendTwitterMessage(message, photoPath);
+        const twitterPhotoPath = 'public/images/logo.jpg';
+        await this.sendTwitterMessage(message, twitterPhotoPath);
 
         // Отмечаем токен как разосланный
         await this.prisma.postedTokens.create({
