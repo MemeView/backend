@@ -22,12 +22,14 @@ export class PostingController {
   @Post('/posting-test')
   async sendTelegramMessageTest() {
     try {
-      const fileHandle = await axios.get('https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg', {
-        responseType: 'arraybuffer'
-      });
+      const fileHandle = await axios.get(
+        'https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg',
+        {
+          responseType: 'arraybuffer',
+        },
+      );
 
       await this.telegramService.sendTwitterMessage('message', fileHandle.data);
-
     } catch (error) {
       throw new InternalServerErrorException('bad request');
     }

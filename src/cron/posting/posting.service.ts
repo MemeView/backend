@@ -35,7 +35,9 @@ export class PostingService {
 
   async sendTwitterMessage(message, twitterPhotoPath) {
     try {
-      const mediaId = await twitterClient.v1.uploadMedia(twitterPhotoPath, {mimeType: 'image/jpeg'});
+      const mediaId = await twitterClient.v1.uploadMedia(twitterPhotoPath, {
+        mimeType: 'image/jpeg',
+      });
       const tweet = await twitterClient.v2.tweet(message, {
         media: { media_ids: [mediaId] },
       });
@@ -154,15 +156,28 @@ export class PostingService {
           `#${token.symbol.toUpperCase()}growth ` +
           `#TokenWatch`;
 
+        const twitterMessage =
+          `$${token.symbol.toUpperCase()}\n\n` +
+          `https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
+          `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
+          `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
+            averageScoreToday,
+          )}\n\n` +
+          `#${token.symbol.toUpperCase()} ` +
+          `#${token.symbol.toUpperCase()}growth ` +
+          `#TokenWatch`;
+
         // Отправляем сообщение в Телеграм
         const photoPath =
           'https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg';
         await this.sendTelegramMessage(message, photoPath);
 
         // Отправляем твит
-        const twitterPhotoPath = await axios.get(photoPath, {responseType: 'arraybuffer'});
+        const twitterPhotoPath = await axios.get(photoPath, {
+          responseType: 'arraybuffer',
+        });
 
-        await this.sendTwitterMessage(message, twitterPhotoPath.data);
+        await this.sendTwitterMessage(twitterMessage, twitterPhotoPath.data);
 
         // Отмечаем токен как разосланный
         await this.prisma.postedTokens.create({
