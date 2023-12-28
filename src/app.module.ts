@@ -11,8 +11,7 @@ import { GraphqlModule } from './graphql/graphql.module';
 import { BlackListModule } from './black-list/black-list.module';
 import { ExcelModule } from './excel/excel.module';
 import { PostingModule } from './cron/posting/posting.module';
-import { join } from 'path';
-import { ServeStaticModule } from '@nestjs/serve-static';
+
 
 @Module({
   imports: [
