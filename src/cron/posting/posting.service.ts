@@ -35,7 +35,7 @@ export class PostingService {
 
   async sendTwitterMessage(message, twitterPhotoPath) {
     try {
-      const mediaId = await twitterClient.v1.uploadMedia(twitterPhotoPath);
+      const mediaId = await twitterClient.v1.uploadMedia(twitterPhotoPath, {mimeType: 'image/jpeg'});
       const tweet = await twitterClient.v2.tweet(message, {
         media: { media_ids: [mediaId] },
       });
@@ -160,8 +160,9 @@ export class PostingService {
         await this.sendTelegramMessage(message, photoPath);
 
         // Отправляем твит
-        const twitterPhotoPath = 'public/images/logo.jpg';
-        await this.sendTwitterMessage(message, twitterPhotoPath);
+        const twitterPhotoPath = await axios.get(photoPath, {responseType: 'arraybuffer'});
+
+        await this.sendTwitterMessage(message, twitterPhotoPath.data);
 
         // Отмечаем токен как разосланный
         await this.prisma.postedTokens.create({
