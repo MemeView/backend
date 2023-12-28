@@ -12,6 +12,7 @@ export class PostingController {
   @Post('/posting')
   async sendTelegramMessage() {
     try {
+      await this.prisma.postedTokens.deleteMany();
       await this.telegramService.handleCombinedPosting();
     } catch (error) {
       throw new InternalServerErrorException('bad request');

@@ -5,6 +5,8 @@ import { id } from 'date-fns/locale';
 import axios from 'axios';
 import { subHours } from 'date-fns';
 import { TwitterApi } from 'twitter-api-v2';
+import { join } from 'path';
+import * as fs from 'fs';
 
 const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_APP_KEY,
@@ -31,33 +33,34 @@ export class PostingService {
     return absoluteScore.toFixed(1).toString();
   }
 
-  async sendTwitterMessage(message) {
+  async sendTwitterMessage(message, imagePath) {
     try {
-      const tweet = await twitterClient.v2.tweet(message);
-      console.log('Twitter message sent successfully!', tweet);
+      const mediaId = await twitterClient.v1.uploadMedia(imagePath);
+      const tweet = await twitterClient.v2.tweet(message, {
+        media: { media_ids: [mediaId] },
+      });
+      console.log('Twitter message with image sent successfully!', tweet);
     } catch (error) {
-      console.error('Failed to send Twitter message:', error);
+      console.error('Failed to send Twitter message with image:', error);
       if (error.data) {
         console.error(JSON.stringify(error.data, null, 2));
       }
     }
   }
 
-  async sendTelegramMessage(message: string) {
+  async sendTelegramMessage(message: string, photoPath: string) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
-    const delay = 100;
-
-    const url = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
-      message,
-    )}&parse_mode=Markdown`;
+    const bot = new TelegramBot(botToken);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, delay));
-      await axios.get(url);
-      console.log('Telegram message sent successfully!');
+      await bot.sendPhoto(chatId, photoPath, {
+        caption: message,
+        parse_mode: 'Markdown',
+      });
+      console.log('Telegram photo message sent successfully!');
     } catch (error) {
-      console.error('Failed to send Telegram message:', error);
+      console.error('Failed to send Telegram photo message:', error);
     }
   }
 
@@ -148,10 +151,13 @@ export class PostingService {
           `#${token.symbol} #${token.symbol.toLowerCase()}growth #TokenWatch`;
 
         // Отправляем сообщение в Телеграм
-        await this.sendTelegramMessage(message);
+        const photoPath =
+          'https://tvn.md/wp-content/uploads/2023/09/evro-foto-1200-675.jpg';
+        console.log(photoPath);
+        await this.sendTelegramMessage(message, photoPath);
 
         // Отправляем твит
-        await this.sendTwitterMessage(message);
+        await this.sendTwitterMessage(message, photoPath);
 
         // Отмечаем токен как разосланный
         await this.prisma.postedTokens.create({
