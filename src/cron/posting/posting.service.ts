@@ -158,11 +158,11 @@ export class PostingService {
 
         const twitterMessage =
           `$${token.symbol.toUpperCase()}\n\n` +
-          `https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
           `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
           `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
             averageScoreToday,
           )}\n\n` +
+          `🌐 https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
           `#${token.symbol.toUpperCase()} ` +
           `#${token.symbol.toUpperCase()}growth ` +
           `#TokenWatch`;
