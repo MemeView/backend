@@ -7,6 +7,7 @@ import { subHours } from 'date-fns';
 import { TwitterApi } from 'twitter-api-v2';
 import { join } from 'path';
 import * as fs from 'fs';
+import * as nodemailer from 'nodemailer';
 
 const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_APP_KEY,
@@ -68,133 +69,202 @@ export class PostingService {
 
   pendingTelegramMessages = [];
 
-  async fetchDataByTokenAddress(tokenAddress: string) {
-    const dailyScoresPromise = this.prisma.dailyScore.findUnique({
-      where: { tokenAddress: tokenAddress },
+  async sendEmailMessage(message) {
+    const transporter = nodemailer.createTransport({
+      host: process.env.MAIL_HOST,
+      port: process.env.MAIL_PORT,
+      secure: true,
+      auth: {
+        user: process.env.MAIL_SENDER_LOGIN,
+        pass: process.env.MAIL_SENDER_PASSWORD,
+      },
     });
-    const scorePromise = this.prisma.score.findUnique({
-      where: { tokenAddress: tokenAddress },
-    });
 
-    const [dailyScore, score] = await Promise.all([
-      dailyScoresPromise,
-      scorePromise,
-    ]);
+    const mailOptions = {
+      from: process.env.MAIL_SENDER_LOGIN,
+      to: process.env.MAIL_RECEIVER_LOGIN,
+      subject: 'Tokens Information',
+      text: message,
+    };
 
-    const averageScoreToday = dailyScore?.averageScoreToday;
-    const tokenScore = score?.tokenScore;
-
-    return { averageScoreToday, score: tokenScore };
+    try {
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          return console.log(error);
+        }
+        console.log('Message sent: %s', info.messageId);
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async handleCombinedPosting() {
-    const bestByChange24 = await this.prisma.tokens.findMany({
-      where: {
-        AND: [{ change24: { gte: '0.5' } }, { liquidity: { gte: '3000' } }],
-      },
-      orderBy: {
-        change24: 'desc',
-      },
-      select: {
-        address: true,
-        symbol: true,
-        change24: true,
-        quoteToken: true,
-        pairAddress: true,
-      },
-    });
+    try {
+      const bestByChange24 = await this.prisma.tokens.findMany({
+        where: {
+          AND: [{ change24: { gte: '0.5' } }, { liquidity: { gte: '3000' } }],
+        },
+        orderBy: {
+          change24: 'desc',
+        },
+        select: {
+          address: true,
+          symbol: true,
+          change24: true,
+          quoteToken: true,
+          pairAddress: true,
+        },
+      });
 
-    const now = new Date();
-    const twentyFourHoursAgo = subHours(now, 24);
+      const tokenAddresses = bestByChange24.map((token) => token.address);
 
-    await this.prisma.postedTokens.deleteMany({
-      where: { createdAt: { lt: twentyFourHoursAgo } },
-    });
+      const scores = await this.prisma.dailyScore.findMany({
+        where: {
+          tokenAddress: {
+            in: tokenAddresses,
+          },
+        },
+        select: {
+          tokenAddress: true,
+          averageScoreToday: true,
+        },
+      });
 
-    const postedTokensAddresses = await this.prisma.postedTokens.findMany({
-      select: {
-        tokenAddress: true,
-      },
-    });
+      const mergedTokens = [];
 
-    const postedAddresses = new Set(
-      postedTokensAddresses.map((token) => token.tokenAddress),
-    );
-    let messagesCount = 0;
+      scores.forEach((score) => {
+        const token = bestByChange24.find(
+          (token) => token.address === score.tokenAddress,
+        );
 
-    for (const token of bestByChange24) {
-      if (postedAddresses.has(token.address)) {
-        continue; // Пропускаем уже разосланные
-      }
+        if (
+          token &&
+          score.averageScoreToday !== undefined &&
+          token.symbol &&
+          token.address &&
+          token.change24 &&
+          token.pairAddress &&
+          token.quoteToken
+        ) {
+          mergedTokens.push({
+            ...token,
+            averageScoreToday: score.averageScoreToday,
+          });
+        }
+      });
 
-      const { averageScoreToday, score } = await this.fetchDataByTokenAddress(
-        token.address,
+      const sortedByScore = mergedTokens.sort(
+        (a, b) => b.averageScoreToday - a.averageScoreToday,
       );
 
-      if (
-        token.address &&
-        token.pairAddress &&
-        token.change24 &&
-        token.symbol &&
-        token.quoteToken &&
-        averageScoreToday !== undefined &&
-        score !== undefined &&
-        averageScoreToday >= 40 &&
-        messagesCount < 3
-      ) {
-        // Создаем сообщение для отправки
-        const growth = parseFloat(token.change24) * 100;
-        const message =
-          `[$${token.symbol.toUpperCase()}](https://tokenwatch.ai/en/tokens/${
-            token.pairAddress
-          }?quoteToken=${token.quoteToken}) \n\n` +
-          `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
-          `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
-            averageScoreToday,
-          )}\n\n` +
-          `#${token.symbol.toUpperCase()} ` +
-          `#${token.symbol.toUpperCase()}growth ` +
-          `#TokenWatch`;
+      const now = new Date();
+      const twentyFourHoursAgo = subHours(now, 24);
 
-        const twitterMessage =
-          `$${token.symbol.toUpperCase()}\n\n` +
-          `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
-          `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
-            averageScoreToday,
-          )}\n\n` +
-          `🌐 https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
-          `#${token.symbol.toUpperCase()} ` +
-          `#${token.symbol.toUpperCase()}growth ` +
-          `#TokenWatch`;
+      await this.prisma.postedTokens.deleteMany({
+        where: { createdAt: { lt: twentyFourHoursAgo } },
+      });
 
-        // Отправляем сообщение в Телеграм
-        const photoPath =
-          'https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg';
-        await this.sendTelegramMessage(message, photoPath);
+      const postedTokensAddresses = await this.prisma.postedTokens.findMany({
+        select: {
+          tokenAddress: true,
+        },
+      });
 
-        // Отправляем твит
-        const twitterPhotoPath = await axios.get(photoPath, {
-          responseType: 'arraybuffer',
-        });
+      const postedAddresses = new Set(
+        postedTokensAddresses.map((token) => token.tokenAddress),
+      );
+      let messagesCount = 0;
 
-        await this.sendTwitterMessage(twitterMessage, twitterPhotoPath.data);
+      const tokenDataArray = [];
 
-        // Отмечаем токен как разосланный
-        await this.prisma.postedTokens.create({
-          data: {
-            tokenAddress: token.address,
-          },
-        });
+      for (const token of sortedByScore) {
+        if (postedAddresses.has(token.address)) {
+          continue; // Пропускаем уже разосланные
+        }
 
-        messagesCount++;
+        const tokenData = {
+          address: token.address,
+          pairAddress: token.pairAddress,
+          change24: token.change24,
+          symbol: token.symbol,
+          averageScoreToday: this.getAbsoluteScore(
+            parseFloat(token.averageScoreToday),
+          ),
+        };
+
+        tokenDataArray.push(tokenData);
+
+        if (messagesCount < 2 && token.averageScoreToday >= 60) {
+          // Создаем сообщение для отправки
+          const growth = parseFloat(token.change24) * 100;
+          const message =
+            `[$${token.symbol.toUpperCase()}](https://tokenwatch.ai/en/tokens/${
+              token.pairAddress
+            }?quoteToken=${token.quoteToken}) \n\n` +
+            `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
+            `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
+              token.averageScoreToday,
+            )}\n\n` +
+            `#${token.symbol.toUpperCase()} ` +
+            `#${token.symbol.toUpperCase()}growth ` +
+            `#TokenWatch`;
+
+          const twitterMessage =
+            `$${token.symbol.toUpperCase()}\n\n` +
+            `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
+            `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
+              parseFloat(token.averageScoreToday),
+            )}\n\n` +
+            `🌐 https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
+            `#${token.symbol.toUpperCase()} ` +
+            `#${token.symbol.toUpperCase()}growth ` +
+            `#TokenWatch`;
+
+          // Отправляем сообщение в Телеграм
+          const photoPath =
+            'https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg';
+          await this.sendTelegramMessage(message, photoPath);
+
+          // Отправляем твит
+          const twitterPhotoPath = await axios.get(photoPath, {
+            responseType: 'arraybuffer',
+          });
+
+          await this.sendTwitterMessage(twitterMessage, twitterPhotoPath.data);
+
+          // Отмечаем токен как разосланный
+          await this.prisma.postedTokens.create({
+            data: {
+              tokenAddress: token.address,
+            },
+          });
+
+          messagesCount++;
+        }
+        console.log('==================');
+        console.log('tokenAddress', token.address);
+        console.log('change24', token.change24);
+        console.log('symbol', token.symbol);
+        console.log('averageScoreYesterday', token.averageScoreToday);
+        console.log('==================');
       }
-      console.log('==================');
-      console.log('tokenAddress', token.address);
-      console.log('change24', token.change24);
-      console.log('symbol', token.symbol);
-      console.log('averageScoreYesterday', averageScoreToday);
-      console.log('score', score);
-      console.log('==================');
+
+      const emailMessage = tokenDataArray
+        .map(
+          (token) => `
+      Token Symbol: ${token.symbol}
+      Address: ${token.address}
+      Pair Address: ${token.pairAddress}
+      Change (24H): ${token.change24}
+      Average Score Yesterday: ${token.averageScoreToday}
+    `,
+        )
+        .join('\n');
+
+      await this.sendEmailMessage(emailMessage);
+    } catch (error) {
+      console.log(error);
     }
   }
 
