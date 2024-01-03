@@ -1,13 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { PrismaClient } from '@prisma/client';
-import { id } from 'date-fns/locale';
 import axios from 'axios';
 import { subHours } from 'date-fns';
 import { TwitterApi } from 'twitter-api-v2';
-import { join } from 'path';
-import * as fs from 'fs';
-import * as nodemailer from 'nodemailer';
+import nodemailer from 'nodemailer';
 
 const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_APP_KEY,
@@ -71,9 +68,7 @@ export class PostingService {
 
   async sendEmailMessage(message) {
     const transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: process.env.MAIL_PORT,
-      secure: true,
+      service: "Gmail",
       auth: {
         user: process.env.MAIL_SENDER_LOGIN,
         pass: process.env.MAIL_SENDER_PASSWORD,
