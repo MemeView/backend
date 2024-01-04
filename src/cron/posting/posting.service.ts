@@ -4,7 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import axios from 'axios';
 import { subHours } from 'date-fns';
 import { TwitterApi } from 'twitter-api-v2';
-import nodemailer from 'nodemailer';
+import * as nodemailer from 'nodemailer';
 
 const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_APP_KEY,
