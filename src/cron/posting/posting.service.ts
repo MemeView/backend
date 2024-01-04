@@ -79,7 +79,7 @@ export class PostingService {
     const mailOptions = {
       from: process.env.MAIL_SENDER_LOGIN,
       to: process.env.MAIL_RECEIVER_LOGIN,
-      subject: `${moment(new Date()).format('YYYY.MM.DD HH:mm')} Tokens Information`,
+      subject: `${moment(new Date()).format('YYYY.MM.DD')} Tokens Information`,
       text: message,
     };
 
