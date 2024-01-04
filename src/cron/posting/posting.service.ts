@@ -68,7 +68,7 @@ export class PostingService {
 
   async sendEmailMessage(message) {
     const transporter = nodemailer.createTransport({
-      service: "Gmail",
+      service: "hotmail",
       auth: {
         user: process.env.MAIL_SENDER_LOGIN,
         pass: process.env.MAIL_SENDER_PASSWORD,

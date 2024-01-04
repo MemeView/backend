@@ -6,14 +6,14 @@ import axios from 'axios';
 @Controller('api')
 export class PostingController {
   constructor(
-    private telegramService: PostingService,
+    private postingService: PostingService,
     private prisma: PrismaClient,
   ) {}
 
   @Post('/posting')
   async sendTelegramMessage() {
     try {
-      await this.telegramService.handleCombinedPosting();
+      await this.postingService.handleCombinedPosting();
     } catch (error) {
       throw new InternalServerErrorException('bad request');
     }
@@ -29,7 +29,7 @@ export class PostingController {
         },
       );
 
-      await this.telegramService.sendTwitterMessage('message', fileHandle.data);
+      await this.postingService.sendEmailMessage('Test');
     } catch (error) {
       throw new InternalServerErrorException('bad request');
     }
