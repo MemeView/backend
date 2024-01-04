@@ -5,6 +5,7 @@ import axios from 'axios';
 import { subHours } from 'date-fns';
 import { TwitterApi } from 'twitter-api-v2';
 import * as nodemailer from 'nodemailer';
+import * as moment from 'moment/moment';
 
 const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_APP_KEY,
@@ -78,7 +79,7 @@ export class PostingService {
     const mailOptions = {
       from: process.env.MAIL_SENDER_LOGIN,
       to: process.env.MAIL_RECEIVER_LOGIN,
-      subject: 'Tokens Information',
+      subject: `${moment(new Date()).format('YYYY.MM.DD HH:mm')} Tokens Information`,
       text: message,
     };
 
