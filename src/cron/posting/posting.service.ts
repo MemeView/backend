@@ -68,22 +68,22 @@ export class PostingService {
   pendingTelegramMessages = [];
 
   async sendEmailMessage(message) {
-    const transporter = nodemailer.createTransport({
-      service: "hotmail",
-      auth: {
-        user: process.env.MAIL_SENDER_LOGIN,
-        pass: process.env.MAIL_SENDER_PASSWORD,
-      },
-    });
-
-    const mailOptions = {
-      from: process.env.MAIL_SENDER_LOGIN,
-      to: process.env.MAIL_RECEIVER_LOGIN,
-      subject: `${moment(new Date()).format('YYYY.MM.DD')} Tokens Information`,
-      text: message,
-    };
-
     try {
+      const transporter = nodemailer.createTransport({
+        service: "hotmail",
+        auth: {
+          user: process.env.MAIL_SENDER_LOGIN,
+          pass: process.env.MAIL_SENDER_PASSWORD,
+        },
+      });
+
+      const mailOptions = {
+        from: process.env.MAIL_SENDER_LOGIN,
+        to: process.env.MAIL_RECEIVER_LOGIN,
+        subject: `${moment(new Date()).format('YYYY.MM.DD')} Tokens Information`,
+        text: message,
+      };
+
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           return console.log(error);
