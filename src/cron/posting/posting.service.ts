@@ -86,7 +86,7 @@ export class PostingService {
 
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          return console.log(error);
+          return console.log('sendMail', error);
         }
         console.log('Message sent: %s', info.messageId);
       });
@@ -246,19 +246,19 @@ export class PostingService {
         console.log('==================');
       }
 
-      const emailMessage = tokenDataArray
-        .map(
-          (token) => `
-      Token Symbol: ${token.symbol}
-      Address: ${token.address}
-      Pair Address: ${token.pairAddress}
-      Change (24H): ${token.change24}
-      Average Score Yesterday: ${token.averageScoreToday}
-    `,
-        )
-        .join('\n');
+    //   const emailMessage = tokenDataArray
+    //     .map(
+    //       (token) => `
+    //   Token Symbol: ${token.symbol}
+    //   Address: ${token.address}
+    //   Pair Address: ${token.pairAddress}
+    //   Change (24H): ${token.change24}
+    //   Average Score Yesterday: ${token.averageScoreToday}
+    // `,
+    //     )
+    //     .join('\n');
 
-      await this.sendEmailMessage(emailMessage);
+      // await this.sendEmailMessage(emailMessage);
     } catch (error) {
       console.log(error);
     }
