@@ -70,7 +70,7 @@ export class PostingService {
   async sendEmailMessage(message) {
     try {
       const transporter = nodemailer.createTransport({
-        service: "hotmail",
+        service: 'hotmail',
         auth: {
           user: process.env.MAIL_SENDER_LOGIN,
           pass: process.env.MAIL_SENDER_PASSWORD,
@@ -80,7 +80,9 @@ export class PostingService {
       const mailOptions = {
         from: process.env.MAIL_SENDER_LOGIN,
         to: process.env.MAIL_RECEIVER_LOGIN,
-        subject: `${moment(new Date()).format('YYYY.MM.DD')} Tokens Information`,
+        subject: `${moment(new Date()).format(
+          'YYYY.MM.DD',
+        )} Tokens Information`,
         text: message,
       };
 
@@ -99,7 +101,7 @@ export class PostingService {
     try {
       const bestByChange24 = await this.prisma.tokens.findMany({
         where: {
-          AND: [{ change24: { gte: '0.5' } }, { liquidity: { gte: '3000' } }],
+          AND: [{ change24: { gte: '0.5' } }, { liquidity: { gte: '10000' } }],
         },
         orderBy: {
           change24: 'desc',
@@ -175,7 +177,10 @@ export class PostingService {
       const tokenDataArray = [];
 
       for (const token of sortedByScore) {
-        if (postedAddresses.has(token.address)) {
+        if (
+          postedAddresses.has(token.address) ||
+          parseFloat(token.change24) * 100 >= 200
+        ) {
           continue; // Пропускаем уже разосланные
         }
 
@@ -246,17 +251,17 @@ export class PostingService {
         console.log('==================');
       }
 
-    //   const emailMessage = tokenDataArray
-    //     .map(
-    //       (token) => `
-    //   Token Symbol: ${token.symbol}
-    //   Address: ${token.address}
-    //   Pair Address: ${token.pairAddress}
-    //   Change (24H): ${token.change24}
-    //   Average Score Yesterday: ${token.averageScoreToday}
-    // `,
-    //     )
-    //     .join('\n');
+      //   const emailMessage = tokenDataArray
+      //     .map(
+      //       (token) => `
+      //   Token Symbol: ${token.symbol}
+      //   Address: ${token.address}
+      //   Pair Address: ${token.pairAddress}
+      //   Change (24H): ${token.change24}
+      //   Average Score Yesterday: ${token.averageScoreToday}
+      // `,
+      //     )
+      //     .join('\n');
 
       // await this.sendEmailMessage(emailMessage);
     } catch (error) {
