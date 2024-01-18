@@ -169,18 +169,31 @@ export class SolveScoreService {
               });
             }
           } else {
-            // Рассчитываем отношение объема за вчера к объему за два дня назад
-            volumeRatio =
-              parseFloat(tokenYesterday.volume24) /
-              parseFloat(tokenTwoDaysAgo.volume24);
-            let volumeScore = volumeRatio >= 4 ? 10 : (volumeRatio / 4) * 10;
-            volumeScore += 10;
-            if (tokenTwoDaysAgo.address != null) {
-              // Добавляем результаты в массив
-              resultFromVolume.push({
-                tokenAddress: tokenTwoDaysAgo.address,
-                scoreFromVolume: volumeScore,
-              });
+            if (
+              parseFloat(tokenTwoDaysAgo.volume24) !=
+              parseFloat(tokenYesterday.volume24)
+            ) {
+              // Рассчитываем отношение объема за вчера к объему за два дня назад
+              volumeRatio =
+                parseFloat(tokenYesterday.volume24) /
+                parseFloat(tokenTwoDaysAgo.volume24);
+              let volumeScore = volumeRatio >= 4 ? 10 : (volumeRatio / 4) * 10;
+              volumeScore += 10;
+              if (tokenTwoDaysAgo.address != null) {
+                // Добавляем результаты в массив
+                resultFromVolume.push({
+                  tokenAddress: tokenTwoDaysAgo.address,
+                  scoreFromVolume: volumeScore,
+                });
+              }
+            } else {
+              if (tokenTwoDaysAgo.address != null) {
+                // Добавляем результаты в массив
+                resultFromVolume.push({
+                  tokenAddress: tokenTwoDaysAgo.address,
+                  scoreFromVolume: 1,
+                });
+              }
             }
           }
         }
