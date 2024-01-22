@@ -196,7 +196,7 @@ export class PostingService {
 
         tokenDataArray.push(tokenData);
 
-        if (messagesCount < 1 && token.averageScoreToday >= 60) {
+        if (messagesCount < 1 && token.averageScoreToday >= 50) {
           // Создаем сообщение для отправки
           const growth = parseFloat(token.change24) * 100;
           const message =
