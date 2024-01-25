@@ -32,36 +32,28 @@ export class PostingService {
     return absoluteScore.toFixed(1).toString();
   }
 
-  async sendTwitterMessage(message, twitterPhotoPath) {
+  async sendTwitterMessage(message) {
     try {
-      const mediaId = await twitterClient.v1.uploadMedia(twitterPhotoPath, {
-        mimeType: 'image/jpeg',
-      });
-      const tweet = await twitterClient.v2.tweet(message, {
-        media: { media_ids: [mediaId] },
-      });
-      console.log('Twitter message with image sent successfully!', tweet);
+      const tweet = await twitterClient.v2.tweet(message);
+      console.log('Twitter message sent successfully!', tweet);
     } catch (error) {
-      console.error('Failed to send Twitter message with image:', error);
+      console.error('Failed to send Twitter message:', error);
       if (error.data) {
         console.error(JSON.stringify(error.data, null, 2));
       }
     }
   }
 
-  async sendTelegramMessage(message: string, photoPath: string) {
+  async sendTelegramMessage(message) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
     const bot = new TelegramBot(botToken);
 
     try {
-      await bot.sendPhoto(chatId, photoPath, {
-        caption: message,
-        parse_mode: 'Markdown',
-      });
-      console.log('Telegram photo message sent successfully!');
+      await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
+      console.log('Telegram message sent successfully!');
     } catch (error) {
-      console.error('Failed to send Telegram photo message:', error);
+      console.error('Failed to send Telegram message:', error);
     }
   }
 
@@ -225,14 +217,14 @@ export class PostingService {
           // Отправляем сообщение в Телеграм
           const photoPath =
             'https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg';
-          await this.sendTelegramMessage(message, photoPath);
+          await this.sendTelegramMessage(message);
 
           // Отправляем твит
           const twitterPhotoPath = await axios.get(photoPath, {
             responseType: 'arraybuffer',
           });
 
-          await this.sendTwitterMessage(twitterMessage, twitterPhotoPath.data);
+          await this.sendTwitterMessage(twitterMessage);
 
           // Отмечаем токен как разосланный
           await this.prisma.postedTokens.create({

@@ -101,4 +101,28 @@ export class SolveScoreController {
       );
     }
   }
+
+  @Get('/holders-test')
+  async holdersTest() {
+    try {
+      // const result = await this.solveScoreService.solveHoldersScore();
+
+      const result = await this.prisma.tokens.findFirst({
+        where: { address: '0xba7d68081d430d2d3443417c547aee9b4a0d0a8b' },
+      });
+
+      return {
+        success: true,
+        result,
+      };
+    } catch (e) {
+      throw new HttpException(
+        {
+          success: false,
+          error: `An error occurred while trying to fetch the data: ${e.message}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 }

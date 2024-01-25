@@ -120,7 +120,7 @@ export class DefinedTokensService {
             liquidity,
             volume24,
             createdAt,
-            quoteToken
+            quoteToken,
           }) => ({
             change24,
             volume24,

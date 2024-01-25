@@ -6,9 +6,10 @@ import { VolumeService } from './volume-sync/volume.service';
 import { PrismaModule } from 'prisma/prisma.module';
 import { SolveScoreService } from './solve-score-sync/solve-score.service';
 import { PostingService } from './posting/posting.service';
+import { HoldersModule } from './holders/holders.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), PrismaModule],
+  imports: [ScheduleModule.forRoot(), PrismaModule, HoldersModule],
   providers: [
     DefinedTokensService,
     VolumeService,

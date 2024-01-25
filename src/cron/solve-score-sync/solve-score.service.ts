@@ -488,14 +488,14 @@ export class SolveScoreService {
 
       result.liquidity = token?.liquidity ?? '0';
 
-      if (token && parseFloat(token.liquidity!) < 3000) {
+      if (token && parseFloat(token.liquidity!) < 5000) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
         result.tokenScore -= 99;
       }
 
       if (
         token &&
-        parseFloat(token.liquidity!) >= 3000 &&
+        parseFloat(token.liquidity!) >= 5000 &&
         parseFloat(token.liquidity!) < 30000
       ) {
         // Увеличиваем баллы для токенов с ликвидностью от 3000 до 30000
@@ -673,5 +673,30 @@ export class SolveScoreService {
     }
 
     return 'ok';
+  }
+
+  async solveHoldersScore() {
+    const mockArray = [];
+    for (let i = 1; i <= 100; i++) {
+      const tokenAddress = `token${i}`;
+      const holdersCount = Math.floor(Math.random() * 300000);
+      console.log(holdersCount);
+      mockArray.push({ tokenAddress, holdersCount });
+    }
+
+    const processedArray = mockArray.map((item) => {
+      const { tokenAddress, holdersCount } = item;
+      let tokenScore;
+      if (holdersCount <= 5000) {
+        tokenScore = 7;
+      } else if (holdersCount >= 100000) {
+        tokenScore = 1;
+      } else {
+        tokenScore = 6 - ((holdersCount - 5000) / 95000) * 5;
+      }
+      return { tokenAddress, tokenScore };
+    });
+
+    return processedArray;
   }
 }
