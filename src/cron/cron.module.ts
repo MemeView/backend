@@ -7,6 +7,7 @@ import { PrismaModule } from 'prisma/prisma.module';
 import { SolveScoreService } from './solve-score-sync/solve-score.service';
 import { PostingService } from './posting/posting.service';
 import { HoldersModule } from './holders/holders.module';
+import { CronController } from './cron.controller';
 
 @Module({
   imports: [ScheduleModule.forRoot(), PrismaModule, HoldersModule],
@@ -17,5 +18,6 @@ import { HoldersModule } from './holders/holders.module';
     CronService,
     PostingService,
   ],
+  controllers: [CronController],
 })
 export class CronModule {}

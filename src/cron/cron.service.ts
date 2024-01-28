@@ -5,6 +5,7 @@ import { VolumeService } from './volume-sync/volume.service';
 import { SolveScoreService } from './solve-score-sync/solve-score.service';
 import { PrismaClient } from '@prisma/client';
 import { PostingService } from './posting/posting.service';
+import * as process from 'process';
 
 @Injectable()
 export class CronService {
@@ -44,7 +45,7 @@ export class CronService {
     }
   }
 
-  @Cron('0 * * * *') // начало каждого часа
+  @Cron('0 * * * *', {disabled : process.env.NODE_ENV === 'development'}) // начало каждого часа
   async tokensCron() {
     const now = new Date();
     const currentHour = now.getHours();
@@ -54,15 +55,19 @@ export class CronService {
       let totalAddedCount = 0;
 
       for (let i = 1; i <= 6; i++) {
-        const { deletedCount, addedCount } =
-          await this.definedTokensService.handleTokens(i);
-        totalDeletedCount += deletedCount;
-        totalAddedCount += addedCount;
-      }
+        try {
+          const { deletedCount, addedCount } = await this.definedTokensService.handleTokens(i);
 
-      console.log(
-        `Cron job completed: ${totalDeletedCount} tokens deleted, ${totalAddedCount} tokens added.`,
-      );
+          totalDeletedCount += deletedCount;
+          totalAddedCount += addedCount;
+
+          console.log(
+            `Cron job completed: ${totalDeletedCount} tokens deleted, ${totalAddedCount} tokens added.`,
+          );
+        } catch (e) {
+          break;
+        }
+      }
     });
 
     await this.handleRetry(async () => {
@@ -100,7 +105,7 @@ export class CronService {
     });
   }
 
-  @Cron('35 * * * *')
+  @Cron('35 * * * *', {disabled : process.env.NODE_ENV === 'development'})
   async solveScoresCron() {
     await this.handleRetry(async () => {
       await this.solveScoreService.solveScores();

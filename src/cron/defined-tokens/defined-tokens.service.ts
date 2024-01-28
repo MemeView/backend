@@ -13,6 +13,7 @@ import { definedSDK } from 'src/defined-api/definedSDK';
 import { GET_FILTER_TOKENS } from '../../graphql/getFilterTokens';
 import { GET_FILTER_TOKENS_SHORT } from 'src/graphql/getFilterTokensShort';
 import { GraphqlService } from '../../graphql/graphql.service';
+import { th } from 'date-fns/locale';
 
 @Injectable()
 export class DefinedTokensService {
@@ -48,6 +49,10 @@ export class DefinedTokensService {
       });
 
       createTimestamp = lastCronToken?.createdAt ?? null;
+
+      if (!createTimestamp) {
+        throw new Error(`Токены в итерации ${iteration - 1} отсутствуют`);
+      }
     }
 
     let oldTokens: Array<any> = [];
@@ -74,6 +79,10 @@ export class DefinedTokensService {
         });
 
         const { filterTokens } = result;
+
+        if (!filterTokens.count) {
+          break;
+        }
 
         currentIterationResult =
           (filterTokens?.results as TokenFilterResult[]) || [];
@@ -135,6 +144,16 @@ export class DefinedTokensService {
             cronCount: iteration,
           }),
         );
+
+      console.log(
+        '============================================================',
+      );
+
+      console.log('resultAfterFilter', resultAfterFilter);
+
+      console.log(
+        '============================================================',
+      );
 
       oldTokens = await this.prisma.tokens.findMany();
 
