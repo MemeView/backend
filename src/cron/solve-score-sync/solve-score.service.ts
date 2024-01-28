@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ScoreByHours } from '@prisma/client';
 import { subDays, subHours, startOfDay } from 'date-fns';
 import { IntRange } from '../../common.type';
-import axios from 'axios';
+import { utcToZonedTime } from 'date-fns-tz';
 
 type QueryResult = {
   tokenAddress: string;
@@ -71,11 +71,13 @@ export class SolveScoreService {
 
     // переменные для дат и времени
     const now = new Date();
-    const today = startOfDay(now);
-    const yesterday = subDays(startOfDay(now), 1);
-    const twoDaysAgo = subDays(startOfDay(now), 2);
-    const sevenDaysAgo = subDays(now, 7);
-    const twentyFourHoursAgo = subHours(now, 24);
+    const utcDate = utcToZonedTime(now, 'UTC');
+
+    const today = startOfDay(utcDate);
+    const yesterday = subDays(startOfDay(utcDate), 1);
+    const twoDaysAgo = subDays(startOfDay(utcDate), 2);
+    const sevenDaysAgo = subDays(utcDate, 7);
+    const twentyFourHoursAgo = subHours(utcDate, 24);
 
     // возвращает голоса за 24 часа
     const resultToday = await this.prisma.votes.groupBy({
@@ -546,65 +548,39 @@ export class SolveScoreService {
     // Записываем новые результаты в таблицу
     await this.prisma.score.createMany({ data: scoreFinalResults });
 
-    const currentHour = now.getHours() as IntRange<0, 23>;
+    const currentHour = utcDate.getHours() as IntRange<0, 23>;
 
     const key: ColumnName = `tokenScore${currentHour}h`;
 
-    const existingTokenAddresses = await this.prisma.scoreByHours.findMany({
-      select: {
-        tokenAddress: true,
-      },
-    });
-
-    const existingTokenAddressesSet = new Set(
-      existingTokenAddresses.map(({ tokenAddress }) => tokenAddress),
-    );
-
     console.log(`Копируем текущий TTMS в колонку ${key}`);
 
-    const createData = [];
+    const scoreByHoursTable = await this.prisma.scoreByHours.findMany();
 
-    const updateData = [];
-
-    console.time('scoreFinalResultsMap');
-
-    for (const result of scoreFinalResults) {
-      if (existingTokenAddressesSet.has(result.tokenAddress)) {
-        updateData.push(result);
-      } else {
-        createData.push({
-          tokenAddress: result.tokenAddress,
-          [key]: result.tokenScore,
-        });
-      }
-    }
-
-    console.timeEnd('scoreFinalResultsMap');
-
-    console.time('scoreByHoursUpdate');
-
-    await this.prisma.$transaction(
-      updateData.map((scoreItem) => {
-        return this.prisma.scoreByHours.update({
-          where: { tokenAddress: scoreItem.tokenAddress },
-          data: { [key]: scoreItem.tokenScore },
-        });
-      }),
+    const scoreByHoursTableMap = new Map<string, Partial<ScoreByHours>>(
+      scoreByHoursTable.map((item) => [item.tokenAddress, item]),
     );
 
-    console.timeEnd('scoreByHoursUpdate');
+    const ttmsScoreMap = new Map(scoreFinalResults.map((item) => [item.tokenAddress, item]))
 
 
+    ttmsScoreMap.forEach((updateItem) => {
+      if (scoreByHoursTableMap.has(updateItem.tokenAddress)) {
+        scoreByHoursTableMap.set(updateItem.tokenAddress, {...scoreByHoursTableMap.get(updateItem.tokenAddress), [key]: updateItem.tokenScore});
+      }
 
-    if (createData.length > 0) {
-      console.time('scoreByHoursCreateMany');
-      await this.prisma.scoreByHours.createMany({
-        data: createData,
-      });
-      console.timeEnd('scoreByHoursCreateMany');
-    }
+      if (!scoreByHoursTableMap.has(updateItem.tokenAddress)) {
+        scoreByHoursTableMap.set(updateItem.tokenAddress, { tokenAddress: updateItem.tokenAddress, [key]: updateItem.tokenScore });
+      }
+    });
 
-    return scoreFinalResults;
+    const tableArray = Array.from(scoreByHoursTableMap.entries()).map(([tokenAddress, item]) => ({ tokenAddress, ...item }));
+
+    await this.prisma.scoreByHours.deleteMany();
+
+    await this.prisma.scoreByHours.createMany({ data: tableArray});
+
+
+    return { scoreFinalResults, scoreByHoursData: tableArray };
   }
 
   async updateDailyScores() {
