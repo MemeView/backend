@@ -103,4 +103,11 @@ model PostedTokens {
   createdAt           DateTime @default(now())
 }
 
+model Holders {
+  id              Int @id @default(autoincrement())
+  tokenAddress    String?
+  holdersCount    Int? @default(0)
+  createdAt       DateTime @default(now())
+}
+
 
