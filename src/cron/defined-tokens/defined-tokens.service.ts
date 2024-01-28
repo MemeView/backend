@@ -68,7 +68,7 @@ export class DefinedTokensService {
           },
           filters: {
             network: [1],
-            liquidity: { gt: 1000 },
+            liquidity: { gt: 5000 },
             ...(createTimestamp && { createdAt: { gt: createTimestamp } }),
           },
         });
