@@ -8,12 +8,8 @@ import {
   FilterTokensQueryVariables,
 } from '@definedfi/sdk/dist/sdk/generated/graphql';
 
-import { definedSDK } from 'src/defined-api/definedSDK';
-
-import { GET_FILTER_TOKENS } from '../../graphql/getFilterTokens';
 import { GET_FILTER_TOKENS_SHORT } from 'src/graphql/getFilterTokensShort';
 import { GraphqlService } from '../../graphql/graphql.service';
-import { th } from 'date-fns/locale';
 
 @Injectable()
 export class DefinedTokensService {
@@ -89,16 +85,10 @@ export class DefinedTokensService {
 
         allTokens = [...allTokens, ...currentIterationResult];
 
-        console.log(
-          '============================================================',
-        );
-        console.log('Current Iteration Index', iterationCount);
-        console.log('Current Iteration Offset', offset);
-        console.log('Latest Token CreateAt', createTimestamp);
-        console.log('Total Tokens Count', allTokens.length);
-        console.log(
-          '============================================================',
-        );
+        console.log('=========================================');
+        console.log(`Outer Iteration: ${iteration}, Inner Iteration: ${iterationCount}, Offset: ${offset}`);
+        console.log(`Outer Iteration ${iteration} Total Tokens Count`, allTokens.length);
+        console.log('=========================================');
 
         iterationCount += 1;
 
@@ -145,15 +135,11 @@ export class DefinedTokensService {
           }),
         );
 
-      console.log(
-        '============================================================',
-      );
+      console.log('=========================================');
 
-      console.log('resultAfterFilter', resultAfterFilter);
+      console.log('Total tokens count after filter', resultAfterFilter);
 
-      console.log(
-        '============================================================',
-      );
+      console.log('=========================================');
 
       oldTokens = await this.prisma.tokens.findMany();
 
@@ -175,11 +161,6 @@ export class DefinedTokensService {
         data: resultAfterFilter,
       });
 
-      console.log(
-        iteration,
-        'итерация завершилась',
-        JSON.stringify({ addedCount, deletedCount }),
-      );
 
       return { deletedCount, addedCount };
     } catch (error) {
