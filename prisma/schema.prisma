@@ -27,8 +27,8 @@ model Tokens {
 }
 
 model Blacklist {
-  id            Int @id @default(autoincrement())
-  tokenAddress  String @unique
+  id           Int    @id @default(autoincrement())
+  tokenAddress String @unique
 }
 
 model Votes {
@@ -39,44 +39,44 @@ model Votes {
 }
 
 model Score {
-  tokenAddress     String @id @unique
-  tokenScore       Float
-  liquidity        String?
+  tokenAddress String  @id @unique
+  tokenScore   Float
+  liquidity    String?
 }
 
 model ScoreByHours {
-  tokenAddress     String @id @unique
-  tokenScore0h     Float?
-  tokenScore1h     Float?
-  tokenScore2h     Float?
-  tokenScore3h     Float?
-  tokenScore4h     Float?
-  tokenScore5h     Float?
-  tokenScore6h     Float?
-  tokenScore7h     Float?
-  tokenScore8h     Float?
-  tokenScore9h     Float?
-  tokenScore10h    Float?
-  tokenScore11h    Float?
-  tokenScore12h    Float?
-  tokenScore13h    Float?
-  tokenScore14h    Float?
-  tokenScore15h    Float?
-  tokenScore16h    Float?
-  tokenScore17h    Float?
-  tokenScore18h    Float?
-  tokenScore19h    Float?
-  tokenScore20h    Float?
-  tokenScore21h    Float?
-  tokenScore22h    Float?
-  tokenScore23h    Float?
+  tokenAddress  String @id @unique
+  tokenScore0h  Float?
+  tokenScore1h  Float?
+  tokenScore2h  Float?
+  tokenScore3h  Float?
+  tokenScore4h  Float?
+  tokenScore5h  Float?
+  tokenScore6h  Float?
+  tokenScore7h  Float?
+  tokenScore8h  Float?
+  tokenScore9h  Float?
+  tokenScore10h Float?
+  tokenScore11h Float?
+  tokenScore12h Float?
+  tokenScore13h Float?
+  tokenScore14h Float?
+  tokenScore15h Float?
+  tokenScore16h Float?
+  tokenScore17h Float?
+  tokenScore18h Float?
+  tokenScore19h Float?
+  tokenScore20h Float?
+  tokenScore21h Float?
+  tokenScore22h Float?
+  tokenScore23h Float?
 }
 
 model DailyScore {
-  tokenAddress          String @id @unique
-  averageScoreToday     Float?
-  averageScore24Ago     Float?
-  averageScore48Ago     Float?
+  tokenAddress      String @id @unique
+  averageScoreToday Float?
+  averageScore24Ago Float?
+  averageScore48Ago Float?
 }
 
 model Users {
@@ -95,12 +95,10 @@ model Volume {
 }
 
 model TelegramBotUsers {
-  id  Int  @id @unique
+  id Int @id @unique
 }
 
 model PostedTokens {
-  tokenAddress        String  @id @unique
-  createdAt           DateTime @default(now())
+  tokenAddress String   @id @unique
+  createdAt    DateTime @default(now())
 }
-
-
