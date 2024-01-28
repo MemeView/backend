@@ -21,7 +21,7 @@ export class DefinedTokensService {
     this.graphqlService = new GraphqlService();
   }
 
-  public async handleTokens(iteration: number) {
+  public async handleTokens(outerIteration: number) {
     const limit = 200;
 
     let iterationCount = 0;
@@ -34,10 +34,10 @@ export class DefinedTokensService {
 
     let createTimestamp: number | null = null;
 
-    if (iteration > 1) {
+    if (outerIteration > 1) {
       const lastCronToken = await this.prisma.tokens.findFirst({
         where: {
-          cronCount: iteration - 1,
+          cronCount: outerIteration - 1,
         },
         orderBy: {
           createdAt: 'desc',
@@ -47,7 +47,7 @@ export class DefinedTokensService {
       createTimestamp = lastCronToken?.createdAt ?? null;
 
       if (!createTimestamp) {
-        throw new Error(`Токены в итерации ${iteration - 1} отсутствуют`);
+        throw new Error(`Токены во внешней итерации ${outerIteration - 1} отсутствуют`);
       }
     }
 
@@ -86,8 +86,8 @@ export class DefinedTokensService {
         allTokens = [...allTokens, ...currentIterationResult];
 
         console.log('=========================================');
-        console.log(`Outer Iteration: ${iteration}, Inner Iteration: ${iterationCount}, Offset: ${offset}`);
-        console.log(`Outer Iteration ${iteration} Total Tokens Count`, allTokens.length);
+        console.log(`Outer Iteration: ${outerIteration}, Inner Iteration: ${iterationCount}, Offset: ${offset}`);
+        console.log(`Outer Iteration ${outerIteration} Total Tokens Count`, allTokens.length);
         console.log('=========================================');
 
         iterationCount += 1;
@@ -131,13 +131,13 @@ export class DefinedTokensService {
             address: token.address,
             token: token,
             pairAddress: pair?.address,
-            cronCount: iteration,
+            cronCount: outerIteration,
           }),
         );
 
       console.log('=========================================');
 
-      console.log('Total tokens count after filter', resultAfterFilter);
+      console.log('Total tokens count after filter', resultAfterFilter.length);
 
       console.log('=========================================');
 
@@ -145,9 +145,9 @@ export class DefinedTokensService {
 
       // Сначала удаляем
       let deletedCount;
-      if (iteration != 1) {
+      if (outerIteration != 1) {
         const { count } = await this.prisma.tokens.deleteMany({
-          where: { cronCount: iteration },
+          where: { cronCount: outerIteration },
         });
         deletedCount = count;
       } else {

@@ -462,7 +462,7 @@ export class SolveScoreService {
     }, {});
 
     // Преобразуем объединенные результаты в окончательные результаты
-    let finalResults = Object.entries(combinedResults).map(
+    let scoreFinalResults = Object.entries(combinedResults).map(
       ([tokenAddress, { score }]) => ({
         tokenAddress,
         tokenScore: score + 31, // +16 за холдеров и +15 за 2theMoon
@@ -471,7 +471,7 @@ export class SolveScoreService {
     );
 
     // Получаем адреса токенов из окончательных результатов
-    const finalResultsAddresses = finalResults.map((item) => item.tokenAddress);
+    const finalResultsAddresses = scoreFinalResults.map((item) => item.tokenAddress);
 
     // Получаем информацию о токенах из базы данных, используя адреса из finalResultsAddresses
     const rawTokens = await this.prisma.tokens.findMany({
@@ -480,7 +480,7 @@ export class SolveScoreService {
     });
 
     // Обновляем баллы для токенов в зависимости от их ликвидности
-    finalResults.forEach((result) => {
+    scoreFinalResults.forEach((result) => {
       // Находим информацию о текущем токене в rawTokens
       const token = rawTokens.find(
         (item) => item.address === result.tokenAddress,
@@ -519,7 +519,7 @@ export class SolveScoreService {
     });
 
     // Фильтруем токены, оставляя только те, у которых баллы больше 0
-    finalResults = finalResults.filter((item) => item.tokenScore > 0);
+    scoreFinalResults = scoreFinalResults.filter((item) => item.tokenScore > 0);
 
     // Объяснение, как я вывел формулу:
 
@@ -544,7 +544,7 @@ export class SolveScoreService {
     // Очищаем таблицу с предыдущими результатами
     await this.prisma.score.deleteMany();
     // Записываем новые результаты в таблицу
-    await this.prisma.score.createMany({ data: finalResults });
+    await this.prisma.score.createMany({ data: scoreFinalResults });
 
     const currentHour = now.getHours() as IntRange<0, 23>;
 
@@ -560,13 +560,15 @@ export class SolveScoreService {
       existingTokenAddresses.map(({ tokenAddress }) => tokenAddress),
     );
 
-    console.log('key', key);
+    console.log(`Копируем текущий TTMS в колонку ${key}`);
 
     const createData = [];
 
     const updateData = [];
 
-    for (const result of finalResults) {
+    console.time('scoreFinalResultsMap');
+
+    for (const result of scoreFinalResults) {
       if (existingTokenAddressesSet.has(result.tokenAddress)) {
         updateData.push(result);
       } else {
@@ -577,6 +579,10 @@ export class SolveScoreService {
       }
     }
 
+    console.timeEnd('scoreFinalResultsMap');
+
+    console.time('scoreByHoursUpdate');
+
     await this.prisma.$transaction(
       updateData.map((scoreItem) => {
         return this.prisma.scoreByHours.update({
@@ -586,13 +592,19 @@ export class SolveScoreService {
       }),
     );
 
+    console.timeEnd('scoreByHoursUpdate');
+
+
+
     if (createData.length > 0) {
+      console.time('scoreByHoursCreateMany');
       await this.prisma.scoreByHours.createMany({
         data: createData,
       });
+      console.timeEnd('scoreByHoursCreateMany');
     }
 
-    return finalResults;
+    return scoreFinalResults;
   }
 
   async updateDailyScores() {
