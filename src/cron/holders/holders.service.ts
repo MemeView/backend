@@ -241,7 +241,9 @@ export class HoldersService {
             }
 
             holdersScore.push({ tokenAddress: token.tokenAddress, tokenScore });
-            // console.log(holdersScore);
+            console.log(
+              `для ${holdersScore.length} токенов найдено количество холдеров`,
+            );
           });
           await Promise.all(promises);
         }

@@ -63,7 +63,11 @@ export class SolveScoreService {
   async calculateScore(change24: string) {
     const factor = parseFloat(change24) * 100;
 
-    return factor >= 100 ? 10 : (10 * factor) / 100;
+    if (factor > 0) {
+      return factor >= 100 ? 10 : (10 * factor) / 100;
+    } else {
+      return 0;
+    }
   }
 
   async solveScores() {
@@ -78,6 +82,8 @@ export class SolveScoreService {
     const twoDaysAgo = subDays(startOfDay(utcDate), 2);
     const sevenDaysAgo = subDays(utcDate, 7);
     const twentyFourHoursAgo = subHours(utcDate, 24);
+
+    const currentUnixTimestamp: number = Math.floor(Date.now() / 1000);
 
     // возвращает голоса за 24 часа
     const resultToday = await this.prisma.votes.groupBy({
@@ -467,18 +473,20 @@ export class SolveScoreService {
     let scoreFinalResults = Object.entries(combinedResults).map(
       ([tokenAddress, { score }]) => ({
         tokenAddress,
-        tokenScore: score + 31, // +16 за холдеров и +15 за 2theMoon
+        tokenScore: score + 15, // +15 за 2theMoon
         liquidity: '',
       }),
     );
 
     // Получаем адреса токенов из окончательных результатов
-    const finalResultsAddresses = scoreFinalResults.map((item) => item.tokenAddress);
+    const finalResultsAddresses = scoreFinalResults.map(
+      (item) => item.tokenAddress,
+    );
 
     // Получаем информацию о токенах из базы данных, используя адреса из finalResultsAddresses
     const rawTokens = await this.prisma.tokens.findMany({
       where: { address: { in: finalResultsAddresses } },
-      select: { address: true, liquidity: true },
+      select: { address: true, liquidity: true, createdAt: true },
     });
 
     // Обновляем баллы для токенов в зависимости от их ликвидности
@@ -498,25 +506,59 @@ export class SolveScoreService {
       if (
         token &&
         parseFloat(token.liquidity!) >= 5000 &&
-        parseFloat(token.liquidity!) < 30000
+        parseFloat(token.liquidity!) < 10000
       ) {
-        // Увеличиваем баллы для токенов с ликвидностью от 3000 до 30000
+        result.tokenScore += 1;
+      }
+
+      if (
+        token &&
+        parseFloat(token.liquidity!) >= 10000 &&
+        parseFloat(token.liquidity!) < 50000
+      ) {
+        // Увеличиваем баллы для токенов с ликвидностью от 10000 до 50000
         result.tokenScore += 10;
       }
 
       if (
         token &&
-        parseFloat(token.liquidity!) >= 30000 &&
-        parseFloat(token.liquidity!) < 300000
+        parseFloat(token.liquidity!) >= 50000 &&
+        parseFloat(token.liquidity!) < 500000
       ) {
-        // Увеличиваем баллы для токенов с ликвидностью от 30000 до 300000, учитывая изменение по формуле
+        // Увеличиваем баллы для токенов с ликвидностью от 50000 до 500000, учитывая изменение по формуле
         result.tokenScore +=
-          10 - ((parseFloat(token.liquidity!) - 30000) * 9) / 270000;
+          10 - ((parseFloat(token.liquidity!) - 50000) * 9) / 450000;
       }
 
-      if (token && parseFloat(token.liquidity!) >= 300000) {
-        // Увеличиваем баллы для токенов с высокой ликвидностью (больше или равно 300000)
+      if (token && parseFloat(token.liquidity!) >= 500000) {
+        // Увеличиваем баллы для токенов с высокой ликвидностью (больше или равно 500000)
         result.tokenScore += 1;
+      }
+
+      // Уменьшаю баллы, если токену меньше 24 часов. Число 86400 это 24 часа в секундах
+      if (token && currentUnixTimestamp - token.createdAt < 86400) {
+        result.tokenScore -= 40;
+        console.log('-40');
+      }
+
+      // Уменьшаю баллы, если токен был создан в промежутке между 24 часов и 48 часов.
+      if (
+        token &&
+        currentUnixTimestamp - token.createdAt >= 86400 &&
+        currentUnixTimestamp - token.createdAt < 172800
+      ) {
+        result.tokenScore -= 20;
+        console.log('-20');
+      }
+
+      // Уменьшаю баллы, если токен был создан в промежутке между 48 часов и 72 часов.
+      if (
+        token &&
+        currentUnixTimestamp - token.createdAt >= 172800 &&
+        currentUnixTimestamp - token.createdAt < 259200
+      ) {
+        result.tokenScore -= 10;
+        console.log('-10');
       }
     });
 
@@ -560,27 +602,35 @@ export class SolveScoreService {
       scoreByHoursTable.map((item) => [item.tokenAddress, item]),
     );
 
-    const ttmsScoreMap = new Map(scoreFinalResults.map((item) => [item.tokenAddress, item]))
-
+    const ttmsScoreMap = new Map(
+      scoreFinalResults.map((item) => [item.tokenAddress, item]),
+    );
 
     ttmsScoreMap.forEach((updateItem) => {
       if (scoreByHoursTableMap.has(updateItem.tokenAddress)) {
-        scoreByHoursTableMap.set(updateItem.tokenAddress, {...scoreByHoursTableMap.get(updateItem.tokenAddress), [key]: updateItem.tokenScore});
+        scoreByHoursTableMap.set(updateItem.tokenAddress, {
+          ...scoreByHoursTableMap.get(updateItem.tokenAddress),
+          [key]: updateItem.tokenScore,
+        });
       }
 
       if (!scoreByHoursTableMap.has(updateItem.tokenAddress)) {
-        scoreByHoursTableMap.set(updateItem.tokenAddress, { tokenAddress: updateItem.tokenAddress, [key]: updateItem.tokenScore });
+        scoreByHoursTableMap.set(updateItem.tokenAddress, {
+          tokenAddress: updateItem.tokenAddress,
+          [key]: updateItem.tokenScore,
+        });
       }
     });
 
-    const tableArray = Array.from(scoreByHoursTableMap.entries()).map(([tokenAddress, item]) => ({ tokenAddress, ...item }));
+    const tableArray = Array.from(scoreByHoursTableMap.entries()).map(
+      ([tokenAddress, item]) => ({ tokenAddress, ...item }),
+    );
 
     await this.prisma.scoreByHours.deleteMany();
 
-    await this.prisma.scoreByHours.createMany({ data: tableArray});
+    await this.prisma.scoreByHours.createMany({ data: tableArray });
 
-
-    return { scoreFinalResults, scoreByHoursData: tableArray };
+    return { scoreFinalResults };
   }
 
   async updateDailyScores() {

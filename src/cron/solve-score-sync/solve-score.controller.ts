@@ -125,4 +125,19 @@ export class SolveScoreController {
       );
     }
   }
+
+  @Get('/take-score')
+  async takeScore() {
+    try {
+      const result = await this.prisma.score.findMany({
+        orderBy: {
+          tokenScore: 'desc',
+        },
+      });
+
+      return result;
+    } catch (e) {
+      return e;
+    }
+  }
 }
