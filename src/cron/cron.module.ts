@@ -8,6 +8,7 @@ import { SolveScoreService } from './solve-score-sync/solve-score.service';
 import { PostingService } from './posting/posting.service';
 import { HoldersModule } from './holders/holders.module';
 import { CronController } from './cron.controller';
+import { HoldersService } from './holders/holders.service';
 
 @Module({
   imports: [ScheduleModule.forRoot(), PrismaModule, HoldersModule],
@@ -16,6 +17,7 @@ import { CronController } from './cron.controller';
     VolumeService,
     SolveScoreService,
     CronService,
+    HoldersService,
     PostingService,
   ],
   controllers: [CronController],

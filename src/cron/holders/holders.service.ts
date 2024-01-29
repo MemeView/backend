@@ -114,11 +114,11 @@ export class HoldersService {
     const oneWeekAgo = subHours(now, 167);
 
     try {
-      const tokensRaw = await this.prisma.tokens.findMany({
-        select: {
-          address: true,
-        },
-      });
+      // const tokensRaw = await this.prisma.tokens.findMany({
+      //   select: {
+      //     address: true,
+      //   },
+      // });
 
       const holders = await this.prisma.holders.findMany({
         where: {
@@ -126,44 +126,47 @@ export class HoldersService {
         },
       });
 
-      console.log(startOfCurrentHour);
+      // console.log(startOfCurrentHour);
 
-      return holders;
-
+      // return holders;
 
       // console.log(holdersRaw);
 
       const holdersScore: { tokenAddress: string; tokenScore: number }[] = [];
 
-      if (tokensRaw) {
-        const chunkedTokens = await this.chunk(tokensRaw, 8);
+      if (holders) {
+        const chunkedTokens = await this.chunk(holders, 8);
         for (const tokensChunk of chunkedTokens) {
           const promises = tokensChunk.map(async (token) => {
             let tokenScore = 0;
+            // console.log(token);
 
             // баллы за количество холдеров
-            if (token.holders <= 5000) {
-              tokenScore += 7;
+            if (token.holdersCount <= 3000) {
+              tokenScore += 12;
 
               // holdersScore.push({ tokenAddress: token.address, tokenScore });
-            } else if (token.holders >= 100000) {
+            } else if (token.holdersCount >= 100000) {
               tokenScore += 1;
 
               // holdersScore.push({ tokenAddress: token.address, tokenScore });
             } else {
-              tokenScore += 6 - ((token.holders - 5000) / 95000) * 5;
+              tokenScore += 12 - ((token.holdersCount - 3000) / 97000) * 5;
 
               // holdersScore.push({ tokenAddress: token.address, tokenScore });
             }
 
-            const holdersCountNow = token.holders;
+            const holdersCountNow = token.holdersCount;
 
             const holdersCountOneHourAgo = await this.prisma.holders.findFirst({
               where: {
                 AND: [
-                  { tokenAddress: token.address },
-                  { createdAt: { gte: oneHourAgo } },
+                  { tokenAddress: token.tokenAddress },
+                  { createdAt: { lt: startOfCurrentHour } },
                 ],
+              },
+              orderBy: {
+                createdAt: 'desc',
               },
             });
 
@@ -177,9 +180,9 @@ export class HoldersService {
                 holdersCountNow / holdersCountOneHourAgo.holdersCount;
 
               if (holdersRatio >= 5) {
-                tokenScore += 12;
+                tokenScore += 15;
               } else {
-                tokenScore += 12 * (holdersRatio / (5 / 100) / 100);
+                tokenScore += 15 * (holdersRatio / (5 / 100) / 100);
               }
             }
 
@@ -187,10 +190,13 @@ export class HoldersService {
               await this.prisma.holders.findFirst({
                 where: {
                   AND: [
-                    { tokenAddress: token.address },
+                    { tokenAddress: token.tokenAddress },
                     { createdAt: { gte: twentyFourHoursAgo } },
                     { createdAt: { lte: twentyThreeHoursAgo } },
                   ],
+                },
+                orderBy: {
+                  createdAt: 'desc',
                 },
               });
 
@@ -204,16 +210,16 @@ export class HoldersService {
                 holdersCountNow / holdersCountTwentyFourHoursAgo.holdersCount;
 
               if (holdersRatio >= 2) {
-                tokenScore += 6;
+                tokenScore += 8;
               } else {
-                tokenScore += 6 * (holdersRatio / (2 / 100) / 100);
+                tokenScore += 8 * (holdersRatio / (2 / 100) / 100);
               }
             }
 
             const holdersCountOneWeekAgo = await this.prisma.holders.findFirst({
               where: {
                 AND: [
-                  { tokenAddress: token.address },
+                  { tokenAddress: token.tokenAddress },
                   { createdAt: { lte: oneWeekAgo } },
                 ],
               },
@@ -228,30 +234,70 @@ export class HoldersService {
               const holdersRatio =
                 holdersCountNow / holdersCountOneWeekAgo.holdersCount;
               if (holdersRatio >= 1.5) {
-                tokenScore += 4;
+                tokenScore += 2;
               } else {
-                tokenScore += 4 * (holdersRatio / (1.5 / 100) / 100);
+                tokenScore += 2 * (holdersRatio / (1.5 / 100) / 100);
               }
             }
 
-            holdersScore.push({ tokenAddress: token.address, tokenScore });
+            holdersScore.push({ tokenAddress: token.tokenAddress, tokenScore });
             // console.log(holdersScore);
           });
           await Promise.all(promises);
         }
       }
 
-      return holdersScore;
+      const oldScore = await this.prisma.score.findMany();
+
+      const mergedScores = {};
+
+      // Суммируем баллы из массива holdersScore
+      holdersScore.forEach((item) => {
+        if (mergedScores[item.tokenAddress]) {
+          mergedScores[item.tokenAddress] += item.tokenScore;
+        } else {
+          mergedScores[item.tokenAddress] = {
+            tokenScore: item.tokenScore,
+            liquidity: null, // Добавляем liquidity с начальным значением null
+          };
+        }
+      });
+
+      // Суммируем баллы из массива oldScore
+      oldScore.forEach((item) => {
+        if (mergedScores[item.tokenAddress]) {
+          mergedScores[item.tokenAddress].tokenScore += item.tokenScore;
+          mergedScores[item.tokenAddress].liquidity = item.liquidity;
+        } else {
+          mergedScores[item.tokenAddress] = {
+            tokenScore: item.tokenScore,
+            liquidity: item.liquidity,
+          };
+        }
+      });
+
+      // Преобразуем объект в массив нужного типа
+      const mergedArray = Object.keys(mergedScores).map((key) => ({
+        tokenAddress: key,
+        tokenScore: mergedScores[key].tokenScore as number,
+        liquidity: mergedScores[key].liquidity as string,
+      }));
+
+      const { count: deletedCount } = await this.prisma.score.deleteMany();
+      const { count: addedCount } = await this.prisma.score.createMany({
+        data: mergedArray,
+      });
+
+      console.log('deletedCount', deletedCount);
+      console.log('addedCount', addedCount);
+
+      // console.log(oldScore.length);
+      // console.log(holdersScore.length);
+      // console.log(mergedArray.length);
+
+      return { deletedCount, addedCount };
     } catch (error) {
       return error;
     }
   }
-
-  // public async chunkArray<T>(array: T[], size: number): Promise<T[][]> {
-  //   const result: T[][] = [];
-  //   for (let i = 0; i < array.length; i += size) {
-  //     result.push(array.slice(i, i + size));
-  //   }
-  //   return result;
-  // }
 }

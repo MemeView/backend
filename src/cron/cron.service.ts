@@ -6,6 +6,8 @@ import { SolveScoreService } from './solve-score-sync/solve-score.service';
 import { PrismaClient } from '@prisma/client';
 import { PostingService } from './posting/posting.service';
 import * as process from 'process';
+import { HoldersService } from './holders/holders.service';
+import { startOfHour } from 'date-fns';
 
 @Injectable()
 export class CronService {
@@ -17,6 +19,7 @@ export class CronService {
     private readonly volumeService: VolumeService,
     private readonly solveScoreService: SolveScoreService,
     private readonly postingService: PostingService,
+    private readonly holdersService: HoldersService,
     private prisma: PrismaClient,
   ) {}
 
@@ -45,10 +48,11 @@ export class CronService {
     }
   }
 
-  @Cron('0 * * * *', {disabled : process.env.NODE_ENV === 'development'}) // начало каждого часа
+  @Cron('0 * * * *', { disabled: process.env.NODE_ENV === 'development' }) // начало каждого часа
   async tokensCron() {
     const now = new Date();
     const currentHour = now.getHours();
+    const startOfCurrentHour = startOfHour(now);
 
     await this.handleRetry(async () => {
       let totalDeletedCount = 0;
@@ -56,7 +60,8 @@ export class CronService {
 
       for (let i = 1; i <= 6; i++) {
         try {
-          const { deletedCount, addedCount } = await this.definedTokensService.handleTokens(i);
+          const { deletedCount, addedCount } =
+            await this.definedTokensService.handleTokens(i);
 
           totalDeletedCount += deletedCount;
           totalAddedCount += addedCount;
@@ -68,6 +73,18 @@ export class CronService {
           break;
         }
       }
+    });
+
+    await this.handleRetry(async () => {
+      await this.prisma.holders.deleteMany({
+        where: {
+          createdAt: { gte: startOfCurrentHour },
+        },
+      });
+
+      await this.holdersService.handleHolders();
+
+      console.log(`handleHolders job completed'`);
     });
 
     await this.handleRetry(async () => {
@@ -83,6 +100,16 @@ export class CronService {
       await this.solveScoreService.solveScores();
 
       console.log(`solveScoreService job completed'`);
+    });
+
+    await this.handleRetry(async () => {
+      const { deletedCount, addedCount } =
+        await this.holdersService.handleHoldersScore();
+
+      console.log('deletedCount', deletedCount);
+      console.log('addedCount', addedCount);
+
+      console.log(`handleHoldersScore job completed'`);
     });
 
     if (currentHour === 23) {
@@ -105,7 +132,7 @@ export class CronService {
     });
   }
 
-  @Cron('35 * * * *', {disabled : process.env.NODE_ENV === 'development'})
+  @Cron('35 * * * *', { disabled: process.env.NODE_ENV === 'development' })
   async solveScoresCron() {
     await this.handleRetry(async () => {
       await this.solveScoreService.solveScores();
