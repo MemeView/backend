@@ -107,147 +107,144 @@ export class HoldersService {
 
   public async handleHoldersScore() {
     const now = new Date();
-    const oneHourAgo = subHours(now, 1);
+    // начало текущего часа
     const startOfCurrentHour = startOfHour(now);
-    const twentyThreeHoursAgo = subHours(now, 23);
-    const twentyFourHoursAgo = subHours(now, 24);
-    const oneWeekAgo = subHours(now, 167);
+    // начало прошлого часа
+    const startOfPreviousHour = startOfHour(subHours(now, 1));
+    // начало часа 23 часа назад
+    const startOfHourOneDayAgoMinusOneHour = startOfHour(subHours(now, 23));
+    // начало часа 24 часа назад
+    const startOfHourOneDayAgo = startOfHour(subHours(now, 24));
+    // начало часа неделю назад минус 1 час
+    const startOfPreviousWeekMinusOneHour = startOfHour(subHours(now, 167));
+    // начало часа неделю назад
+    const startOfPreviousWeekHour = startOfHour(subHours(now, 168));
 
     try {
-      // const tokensRaw = await this.prisma.tokens.findMany({
-      //   select: {
-      //     address: true,
-      //   },
-      // });
-
-      const holders = await this.prisma.holders.findMany({
+      // Все холдеры сейчас
+      const holdersNowRaw = await this.prisma.holders.findMany({
         where: {
           createdAt: { gte: startOfCurrentHour },
         },
       });
 
-      // console.log(startOfCurrentHour);
+      // Все холдеры 1 час назад
+      const holdersOneHourAgoRaw = await this.prisma.holders.findMany({
+        where: {
+          AND: [
+            { createdAt: { gte: startOfPreviousHour } },
+            { createdAt: { lt: startOfCurrentHour } },
+          ],
+        },
+      });
 
-      // return holders;
+      // Все холдеры 1 день назад
+      const holdersOneDayAgoRaw = await this.prisma.holders.findMany({
+        where: {
+          AND: [
+            { createdAt: { gte: startOfHourOneDayAgoMinusOneHour } },
+            { createdAt: { lt: startOfHourOneDayAgo } },
+          ],
+        },
+      });
 
-      // console.log(holdersRaw);
+      // Все холдеры неделю назад
+      const holdersOneWeekAgoRaw = await this.prisma.holders.findMany({
+        where: {
+          AND: [
+            { createdAt: { gte: startOfPreviousWeekMinusOneHour } },
+            { createdAt: { lt: startOfPreviousWeekHour } },
+          ],
+        },
+      });
 
       const holdersScore: { tokenAddress: string; tokenScore: number }[] = [];
 
-      if (holders) {
-        const chunkedTokens = await this.chunk(holders, 8);
-        for (const tokensChunk of chunkedTokens) {
-          const promises = tokensChunk.map(async (token) => {
-            let tokenScore = 0;
-            // console.log(token);
+      await Promise.allSettled(
+        holdersNowRaw.map(async (token) => {
+          let tokenScore = 0;
 
-            // баллы за количество холдеров
-            if (token.holdersCount <= 3000) {
-              tokenScore += 12;
+          // баллы за количество холдеров
+          if (token.holdersCount <= 3000) {
+            tokenScore += 12;
+          } else if (token.holdersCount >= 100000) {
+            tokenScore += 1;
+          } else {
+            tokenScore += 12 - ((token.holdersCount - 3000) / 97000) * 5;
+          }
 
-              // holdersScore.push({ tokenAddress: token.address, tokenScore });
-            } else if (token.holdersCount >= 100000) {
-              tokenScore += 1;
+          // находим количество холдеров для этого токена 1 час назад
+          const holdersOneHourAgo = holdersOneHourAgoRaw.find(
+            (holder) => holder.tokenAddress === token.tokenAddress,
+          );
 
-              // holdersScore.push({ tokenAddress: token.address, tokenScore });
+          // находим количество холдеров для этого токена 1 день назад
+          const holdersOneDayAgo = holdersOneDayAgoRaw.find(
+            (holder) => holder.tokenAddress === token.tokenAddress,
+          );
+
+          // находим количество холдеров для этого токена 1 неделю назад
+          const holdersOneWeekAgo = holdersOneWeekAgoRaw.find(
+            (holder) => holder.tokenAddress === token.tokenAddress,
+          );
+
+          // баллы за прирост % холдеров за 1 час
+          if (
+            holdersOneHourAgo &&
+            token.holdersCount != null &&
+            holdersOneHourAgo.holdersCount != null &&
+            token.holdersCount > holdersOneHourAgo.holdersCount
+          ) {
+            const holdersRatio =
+              token.holdersCount / holdersOneHourAgo.holdersCount;
+
+            if (holdersRatio >= 5) {
+              tokenScore += 15;
             } else {
-              tokenScore += 12 - ((token.holdersCount - 3000) / 97000) * 5;
-
-              // holdersScore.push({ tokenAddress: token.address, tokenScore });
+              tokenScore += 15 * (holdersRatio / (5 / 100) / 100);
             }
+          }
 
-            const holdersCountNow = token.holdersCount;
+          // баллы за прирост % холдеров за 1 день
+          if (
+            holdersOneDayAgo &&
+            token.holdersCount != null &&
+            holdersOneDayAgo.holdersCount != null &&
+            token.holdersCount > holdersOneDayAgo.holdersCount
+          ) {
+            const holdersRatio =
+              token.holdersCount / holdersOneDayAgo.holdersCount;
 
-            const holdersCountOneHourAgo = await this.prisma.holders.findFirst({
-              where: {
-                AND: [
-                  { tokenAddress: token.tokenAddress },
-                  { createdAt: { lt: startOfCurrentHour } },
-                ],
-              },
-              orderBy: {
-                createdAt: 'desc',
-              },
-            });
-
-            // баллы за прирост % холдеров за 1 час
-            if (
-              holdersCountNow != null &&
-              holdersCountOneHourAgo != null &&
-              holdersCountNow > holdersCountOneHourAgo.holdersCount
-            ) {
-              const holdersRatio =
-                holdersCountNow / holdersCountOneHourAgo.holdersCount;
-
-              if (holdersRatio >= 5) {
-                tokenScore += 15;
-              } else {
-                tokenScore += 15 * (holdersRatio / (5 / 100) / 100);
-              }
+            if (holdersRatio >= 2) {
+              tokenScore += 8;
+            } else {
+              tokenScore += 8 * (holdersRatio / (2 / 100) / 100);
             }
+          }
 
-            const holdersCountTwentyFourHoursAgo =
-              await this.prisma.holders.findFirst({
-                where: {
-                  AND: [
-                    { tokenAddress: token.tokenAddress },
-                    { createdAt: { gte: twentyFourHoursAgo } },
-                    { createdAt: { lte: twentyThreeHoursAgo } },
-                  ],
-                },
-                orderBy: {
-                  createdAt: 'desc',
-                },
-              });
+          // баллы за прирост % холдеров за 1 неделю
+          if (
+            holdersOneWeekAgo &&
+            token.holdersCount != null &&
+            holdersOneWeekAgo.holdersCount != null &&
+            token.holdersCount > holdersOneWeekAgo.holdersCount
+          ) {
+            const holdersRatio =
+              token.holdersCount / holdersOneWeekAgo.holdersCount;
 
-            // баллы за прирост % холдеров за 24 часа
-            if (
-              holdersCountNow != null &&
-              holdersCountTwentyFourHoursAgo != null &&
-              holdersCountNow > holdersCountTwentyFourHoursAgo.holdersCount
-            ) {
-              const holdersRatio =
-                holdersCountNow / holdersCountTwentyFourHoursAgo.holdersCount;
-
-              if (holdersRatio >= 2) {
-                tokenScore += 8;
-              } else {
-                tokenScore += 8 * (holdersRatio / (2 / 100) / 100);
-              }
+            if (holdersRatio >= 1.5) {
+              tokenScore += 2;
+            } else {
+              tokenScore += 2 * (holdersRatio / (1.5 / 100) / 100);
             }
+          }
 
-            const holdersCountOneWeekAgo = await this.prisma.holders.findFirst({
-              where: {
-                AND: [
-                  { tokenAddress: token.tokenAddress },
-                  { createdAt: { lte: oneWeekAgo } },
-                ],
-              },
-            });
-
-            // баллы за % прироста холдеров за 7 дней
-            if (
-              holdersCountNow != null &&
-              holdersCountOneWeekAgo != null &&
-              holdersCountNow > holdersCountOneWeekAgo.holdersCount
-            ) {
-              const holdersRatio =
-                holdersCountNow / holdersCountOneWeekAgo.holdersCount;
-              if (holdersRatio >= 1.5) {
-                tokenScore += 2;
-              } else {
-                tokenScore += 2 * (holdersRatio / (1.5 / 100) / 100);
-              }
-            }
-
-            holdersScore.push({ tokenAddress: token.tokenAddress, tokenScore });
-            console.log(
-              `для ${holdersScore.length} токенов найдено количество холдеров`,
-            );
+          await holdersScore.push({
+            tokenAddress: token.tokenAddress,
+            tokenScore,
           });
-          await Promise.all(promises);
-        }
-      }
+        }),
+      );
 
       const oldScore = await this.prisma.score.findMany();
 

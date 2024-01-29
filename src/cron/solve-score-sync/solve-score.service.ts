@@ -538,7 +538,6 @@ export class SolveScoreService {
       // Уменьшаю баллы, если токену меньше 24 часов. Число 86400 это 24 часа в секундах
       if (token && currentUnixTimestamp - token.createdAt < 86400) {
         result.tokenScore -= 40;
-        console.log('-40');
       }
 
       // Уменьшаю баллы, если токен был создан в промежутке между 24 часов и 48 часов.
@@ -548,7 +547,6 @@ export class SolveScoreService {
         currentUnixTimestamp - token.createdAt < 172800
       ) {
         result.tokenScore -= 20;
-        console.log('-20');
       }
 
       // Уменьшаю баллы, если токен был создан в промежутке между 48 часов и 72 часов.
@@ -558,7 +556,6 @@ export class SolveScoreService {
         currentUnixTimestamp - token.createdAt < 259200
       ) {
         result.tokenScore -= 10;
-        console.log('-10');
       }
     });
 
