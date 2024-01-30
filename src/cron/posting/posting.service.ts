@@ -188,7 +188,7 @@ export class PostingService {
 
         tokenDataArray.push(tokenData);
 
-        if (messagesCount < 1 && token.averageScoreToday >= 50) {
+        if (messagesCount < 2 && token.averageScoreToday >= 50) {
           // Создаем сообщение для отправки
           const growth = parseFloat(token.change24) * 100;
           const message =
@@ -203,6 +203,21 @@ export class PostingService {
             `#${token.symbol.toUpperCase()}growth ` +
             `#TokenWatch`;
 
+          const testMessage =
+            `$${token.symbol.toUpperCase()}\n\n` +
+            `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
+            `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
+              parseFloat(token.averageScoreToday),
+            )}\n\n` +
+            `🌐 https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
+            `#${token.symbol.toUpperCase()} ` +
+            `#${token.symbol.toUpperCase()}growth ` +
+            `#TokenWatch ` +
+            `#CryptoCurrency ` +
+            `#CryptoMarket ` +
+            `#Signals\n\n` +
+            `by @TokenWatch\\_ai`;
+
           const twitterMessage =
             `$${token.symbol.toUpperCase()}\n\n` +
             `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
@@ -215,16 +230,17 @@ export class PostingService {
             `#TokenWatch`;
 
           // Отправляем сообщение в Телеграм
-          const photoPath =
-            'https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg';
-          await this.sendTelegramMessage(message);
+          // const photoPath =
+          //   'https://tokenwatch.ai/assets/tokenwatch_post_standard.jpg';
+          // await this.sendTelegramMessage(message);
+          await this.sendTelegramMessage(testMessage);
 
           // Отправляем твит
-          const twitterPhotoPath = await axios.get(photoPath, {
-            responseType: 'arraybuffer',
-          });
+          // const twitterPhotoPath = await axios.get(photoPath, {
+          //   responseType: 'arraybuffer',
+          // });
 
-          await this.sendTwitterMessage(twitterMessage);
+          // await this.sendTwitterMessage(twitterMessage);
 
           // Отмечаем токен как разосланный
           await this.prisma.postedTokens.create({
