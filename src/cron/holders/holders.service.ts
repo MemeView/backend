@@ -31,6 +31,7 @@ export class HoldersService {
     const twoDaysAgo = subDays(startOfDay(now), 2);
     const sevenDaysAgo = subDays(now, 7);
     const twentyFourHoursAgo = subHours(now, 24);
+    const startOfHourOneDayAgo = startOfHour(subHours(now, 24));
     const oneWeekAgo = subHours(now, 168);
 
     try {
@@ -46,7 +47,7 @@ export class HoldersService {
 
       await this.prisma.holders.deleteMany({
         where: {
-          createdAt: { lte: oneWeekAgo },
+          createdAt: { lt: startOfHourOneDayAgo },
         },
       });
 
@@ -112,7 +113,7 @@ export class HoldersService {
     // начало прошлого часа
     const startOfPreviousHour = startOfHour(subHours(now, 1));
     // начало часа 23 часа назад
-    const startOfHourOneDayAgoMinusOneHour = startOfHour(subHours(now, 23));
+    const startOfHourOneDayAgoPlusOneHour = startOfHour(subHours(now, 23));
     // начало часа 24 часа назад
     const startOfHourOneDayAgo = startOfHour(subHours(now, 24));
     // начало часа неделю назад минус 1 час
@@ -142,18 +143,8 @@ export class HoldersService {
       const holdersOneDayAgoRaw = await this.prisma.holders.findMany({
         where: {
           AND: [
-            { createdAt: { gte: startOfHourOneDayAgoMinusOneHour } },
+            { createdAt: { gte: startOfHourOneDayAgoPlusOneHour } },
             { createdAt: { lt: startOfHourOneDayAgo } },
-          ],
-        },
-      });
-
-      // Все холдеры неделю назад
-      const holdersOneWeekAgoRaw = await this.prisma.holders.findMany({
-        where: {
-          AND: [
-            { createdAt: { gte: startOfPreviousWeekMinusOneHour } },
-            { createdAt: { lt: startOfPreviousWeekHour } },
           ],
         },
       });
@@ -165,12 +156,21 @@ export class HoldersService {
           let tokenScore = 0;
 
           // баллы за количество холдеров
-          if (token.holdersCount <= 3000) {
+          if (token.holdersCount >= 50 && token.holdersCount <= 200) {
+            tokenScore += (token.holdersCount - 50) * (12 / 150);
+          }
+
+          if (token.holdersCount > 200 && token.holdersCount <= 3000) {
             tokenScore += 12;
-          } else if (token.holdersCount >= 100000) {
+          }
+
+          if (token.holdersCount > 3000 && token.holdersCount <= 10000) {
+            tokenScore +=
+              (token.holdersCount - 3001) * ((1 - 12) / (10000 - 3001)) + 12;
+          }
+
+          if (token.holdersCount > 10000) {
             tokenScore += 1;
-          } else {
-            tokenScore += 12 - ((token.holdersCount - 3000) / 97000) * 5;
           }
 
           // находим количество холдеров для этого токена 1 час назад
@@ -183,11 +183,6 @@ export class HoldersService {
             (holder) => holder.tokenAddress === token.tokenAddress,
           );
 
-          // находим количество холдеров для этого токена 1 неделю назад
-          const holdersOneWeekAgo = holdersOneWeekAgoRaw.find(
-            (holder) => holder.tokenAddress === token.tokenAddress,
-          );
-
           // баллы за прирост % холдеров за 1 час
           if (
             holdersOneHourAgo &&
@@ -195,13 +190,31 @@ export class HoldersService {
             holdersOneHourAgo.holdersCount != null &&
             token.holdersCount > holdersOneHourAgo.holdersCount
           ) {
+            //коэффицент во сколько раз увеличилось количество холдеров
             const holdersRatio =
               token.holdersCount / holdersOneHourAgo.holdersCount;
 
-            if (holdersRatio >= 5) {
-              tokenScore += 15;
-            } else {
-              tokenScore += 15 * (holdersRatio / (5 / 100) / 100);
+            // на сколько процентов увеличилось количество холдеров
+            const holdersPercentage = holdersRatio * 100 - 100;
+
+            if (holdersPercentage >= 0 && holdersPercentage < 50) {
+              tokenScore += holdersPercentage * (18 / 50);
+            }
+
+            if (holdersPercentage >= 50 && holdersPercentage < 100) {
+              tokenScore += 18;
+            }
+
+            if (holdersPercentage >= 100 && holdersPercentage < 200) {
+              tokenScore += 18 - (holdersPercentage - 100) * (18 / 100);
+            }
+
+            if (holdersPercentage >= 200 && holdersPercentage < 300) {
+              tokenScore += (holdersPercentage - 200) * (-18 / 100);
+            }
+
+            if (holdersPercentage >= 300) {
+              tokenScore += -18;
             }
           }
 
@@ -215,27 +228,26 @@ export class HoldersService {
             const holdersRatio =
               token.holdersCount / holdersOneDayAgo.holdersCount;
 
-            if (holdersRatio >= 2) {
-              tokenScore += 8;
-            } else {
-              tokenScore += 8 * (holdersRatio / (2 / 100) / 100);
+            const holdersPercentage = holdersRatio * 100 - 100;
+
+            if (holdersPercentage >= 0 && holdersPercentage < 50) {
+              tokenScore += holdersPercentage * (12 / 50);
             }
-          }
 
-          // баллы за прирост % холдеров за 1 неделю
-          if (
-            holdersOneWeekAgo &&
-            token.holdersCount != null &&
-            holdersOneWeekAgo.holdersCount != null &&
-            token.holdersCount > holdersOneWeekAgo.holdersCount
-          ) {
-            const holdersRatio =
-              token.holdersCount / holdersOneWeekAgo.holdersCount;
+            if (holdersPercentage >= 50 && holdersPercentage < 100) {
+              tokenScore += 12;
+            }
 
-            if (holdersRatio >= 1.5) {
-              tokenScore += 2;
-            } else {
-              tokenScore += 2 * (holdersRatio / (1.5 / 100) / 100);
+            if (holdersPercentage >= 100 && holdersPercentage < 200) {
+              tokenScore += 12 - (holdersPercentage - 100) * (12 / 100);
+            }
+
+            if (holdersPercentage >= 200 && holdersPercentage < 300) {
+              tokenScore += 0 - (holdersPercentage - 200) * (12 / 100);
+            }
+
+            if (holdersPercentage >= 300) {
+              tokenScore += -12;
             }
           }
 

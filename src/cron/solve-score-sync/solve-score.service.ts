@@ -63,10 +63,38 @@ export class SolveScoreService {
   async calculateScore(change24: string) {
     const factor = parseFloat(change24) * 100;
 
-    if (factor > 0) {
-      return factor >= 100 ? 10 : (10 * factor) / 100;
-    } else {
+    if (factor < -50) {
+      return -15;
+    }
+
+    if (factor >= -50 && factor < -30) {
+      // такая формула получилась из (factor - -50) * ((0 - -15) / (-30 - -50)) + -15
+      return (factor + 50) * (15 / 20) - 15;
+    }
+
+    if (factor >= -30 && factor < 0) {
       return 0;
+    }
+
+    if (factor >= 0 && factor < 15) {
+      return factor;
+    }
+
+    if (factor >= 15 && factor < 50) {
+      return 15;
+    }
+
+    // формула строится из (Исходное значение - 50) * ((0 - 15) / (200 - 50)) + 15
+    if (factor >= 50 && factor < 200) {
+      return (factor - 50) * (-15 / 150) + 15;
+    }
+
+    if (factor >= 200 && factor < 400) {
+      return (factor - 200) * (-15 / 200);
+    }
+
+    if (factor >= 400) {
+      return -15;
     }
   }
 
@@ -151,76 +179,145 @@ export class SolveScoreService {
       );
 
       if (tokenYesterday) {
+        const change24Percentage = parseFloat(tokenYesterday.change24) * 100;
+        let volumeScore = 0;
+        let volumePercentage = 0;
+
         if (
-          tokenYesterday &&
-          tokenYesterday.volume24 !== null &&
-          tokenTwoDaysAgo.volume24 !== null &&
-          parseFloat(tokenYesterday.volume24) !== 0 &&
-          parseFloat(tokenTwoDaysAgo.volume24) !== 0
+          parseFloat(tokenYesterday.volume24) >
+          parseFloat(tokenTwoDaysAgo.volume24)
         ) {
-          let volumeRatio: number;
-          // Рассчитываем отношение объема за два дня назад к объему за вчера
-          if (
-            parseFloat(tokenTwoDaysAgo.volume24) >
-            parseFloat(tokenYesterday.volume24)
-          ) {
-            volumeRatio =
-              parseFloat(tokenTwoDaysAgo.volume24) /
-              parseFloat(tokenYesterday.volume24);
-            const volumeScore =
-              volumeRatio >= 4 ? 0 : (1 - volumeRatio / 4) * 10;
-            if (tokenTwoDaysAgo.address != null && volumeScore !== 0) {
-              // Добавляем результаты в массив
-              resultFromVolume.push({
-                tokenAddress: tokenTwoDaysAgo.address,
-                scoreFromVolume: volumeScore,
-              });
-            }
-          } else {
-            if (
-              parseFloat(tokenTwoDaysAgo.volume24) !=
-              parseFloat(tokenYesterday.volume24)
-            ) {
-              // Рассчитываем отношение объема за вчера к объему за два дня назад
-              volumeRatio =
-                parseFloat(tokenYesterday.volume24) /
-                parseFloat(tokenTwoDaysAgo.volume24);
-              let volumeScore = volumeRatio >= 4 ? 10 : (volumeRatio / 4) * 10;
-              volumeScore += 10;
-              if (tokenTwoDaysAgo.address != null) {
-                // Добавляем результаты в массив
-                resultFromVolume.push({
-                  tokenAddress: tokenTwoDaysAgo.address,
-                  scoreFromVolume: volumeScore,
-                });
-              }
-            } else {
-              if (tokenTwoDaysAgo.address != null) {
-                // Добавляем результаты в массив
-                resultFromVolume.push({
-                  tokenAddress: tokenTwoDaysAgo.address,
-                  scoreFromVolume: 1,
-                });
-              }
-            }
+          const volumeRatio =
+            parseFloat(tokenYesterday.volume24) /
+            parseFloat(tokenTwoDaysAgo.volume24);
+
+          volumePercentage = volumeRatio * 100;
+        }
+
+        if (
+          parseFloat(tokenYesterday.volume24) <
+          parseFloat(tokenTwoDaysAgo.volume24)
+        ) {
+          const volumeRatio =
+            parseFloat(tokenTwoDaysAgo.volume24) /
+            parseFloat(tokenYesterday.volume24);
+
+          volumePercentage = 0 - volumeRatio * 100;
+        }
+
+        if (change24Percentage >= -50) {
+          if (volumePercentage < -50) {
+            volumeScore -= 10;
+          }
+
+          if (volumePercentage >= -50 && volumePercentage < 0) {
+            volumeScore += 3 - (0 - volumePercentage) * (3 / 50);
+          }
+
+          if (volumePercentage >= 0 && volumePercentage < 100) {
+            volumeScore += 3 + volumePercentage * (7 / 100);
+          }
+
+          if (volumePercentage >= 100 && volumePercentage < 200) {
+            volumeScore += 10;
+          }
+
+          if (volumePercentage >= 200 && volumePercentage < 300) {
+            volumeScore += 10 - (volumePercentage - 200) * (10 / 100);
+          }
+
+          if (volumePercentage > 900) {
+            volumeScore -= 10;
           }
         }
-        // случай, когда токен имел нулевой объем, а потом вырос
-        if (
-          tokenYesterday &&
-          tokenYesterday.volume24 !== null &&
-          tokenTwoDaysAgo.volume24 !== null &&
-          parseFloat(tokenYesterday.volume24) !== 0 &&
-          parseFloat(tokenTwoDaysAgo.volume24) === 0
-        ) {
-          if (tokenTwoDaysAgo.address != null) {
-            resultFromVolume.push({
-              tokenAddress: tokenTwoDaysAgo.address,
-              scoreFromVolume: 20,
-            });
+
+        if (change24Percentage < -50) {
+          if (volumePercentage >= -50 && volumePercentage < 100) {
+            volumeScore += 0 - (volumePercentage + 50) * (10 / 150);
+          }
+
+          if (volumePercentage >= 100) {
+            volumeScore -= 10;
           }
         }
+        resultFromVolume.push({
+          tokenAddress: tokenTwoDaysAgo.address,
+          scoreFromVolume: volumeScore,
+        });
       }
+
+      // ////////////////
+      // if (tokenYesterday) {
+      //   if (
+      //     tokenYesterday &&
+      //     tokenYesterday.volume24 !== null &&
+      //     tokenTwoDaysAgo.volume24 !== null &&
+      //     parseFloat(tokenYesterday.volume24) !== 0 &&
+      //     parseFloat(tokenTwoDaysAgo.volume24) !== 0
+      //   ) {
+      //     let volumeRatio: number;
+      //     // Рассчитываем отношение объема за два дня назад к объему за вчера
+      //     if (
+      //       parseFloat(tokenTwoDaysAgo.volume24) >
+      //       parseFloat(tokenYesterday.volume24)
+      //     ) {
+      //       volumeRatio =
+      //         parseFloat(tokenTwoDaysAgo.volume24) /
+      //         parseFloat(tokenYesterday.volume24);
+      //       const volumeScore =
+      //         volumeRatio >= 4 ? 0 : (1 - volumeRatio / 4) * 10;
+      //       if (tokenTwoDaysAgo.address != null && volumeScore !== 0) {
+      //         // Добавляем результаты в массив
+      //         resultFromVolume.push({
+      //           tokenAddress: tokenTwoDaysAgo.address,
+      //           scoreFromVolume: volumeScore,
+      //         });
+      //       }
+      //     } else {
+      //       if (
+      //         parseFloat(tokenTwoDaysAgo.volume24) !=
+      //         parseFloat(tokenYesterday.volume24)
+      //       ) {
+      //         // Рассчитываем отношение объема за вчера к объему за два дня назад
+      //         volumeRatio =
+      //           parseFloat(tokenYesterday.volume24) /
+      //           parseFloat(tokenTwoDaysAgo.volume24);
+      //         let volumeScore = volumeRatio >= 4 ? 10 : (volumeRatio / 4) * 10;
+      //         volumeScore += 10;
+      //         if (tokenTwoDaysAgo.address != null) {
+      //           // Добавляем результаты в массив
+      //           resultFromVolume.push({
+      //             tokenAddress: tokenTwoDaysAgo.address,
+      //             scoreFromVolume: volumeScore,
+      //           });
+      //         }
+      //       } else {
+      //         if (tokenTwoDaysAgo.address != null) {
+      //           // Добавляем результаты в массив
+      //           resultFromVolume.push({
+      //             tokenAddress: tokenTwoDaysAgo.address,
+      //             scoreFromVolume: 1,
+      //           });
+      //         }
+      //       }
+      //     }
+      //   }
+      //   // случай, когда токен имел нулевой объем, а потом вырос
+      //   if (
+      //     tokenYesterday &&
+      //     tokenYesterday.volume24 !== null &&
+      //     tokenTwoDaysAgo.volume24 !== null &&
+      //     parseFloat(tokenYesterday.volume24) !== 0 &&
+      //     parseFloat(tokenTwoDaysAgo.volume24) === 0
+      //   ) {
+      //     if (tokenTwoDaysAgo.address != null) {
+      //       resultFromVolume.push({
+      //         tokenAddress: tokenTwoDaysAgo.address,
+      //         scoreFromVolume: 20,
+      //       });
+      //     }
+      //   }
+      // }
     });
 
     // Определяем количество воутеров за сегодня
@@ -347,11 +444,6 @@ export class SolveScoreService {
 
     // Получаем информацию о токенах с изменением цены за последние 24 часа
     const resultsFromChange24Raw = await this.prisma.tokens.findMany({
-      where: {
-        change24: {
-          gt: '0',
-        },
-      },
       select: {
         address: true,
         change24: true,
@@ -708,30 +800,5 @@ export class SolveScoreService {
     }
 
     return 'ok';
-  }
-
-  async solveHoldersScore() {
-    const mockArray = [];
-    for (let i = 1; i <= 100; i++) {
-      const tokenAddress = `token${i}`;
-      const holdersCount = Math.floor(Math.random() * 300000);
-      console.log(holdersCount);
-      mockArray.push({ tokenAddress, holdersCount });
-    }
-
-    const processedArray = mockArray.map((item) => {
-      const { tokenAddress, holdersCount } = item;
-      let tokenScore;
-      if (holdersCount <= 5000) {
-        tokenScore = 7;
-      } else if (holdersCount >= 100000) {
-        tokenScore = 1;
-      } else {
-        tokenScore = 6 - ((holdersCount - 5000) / 95000) * 5;
-      }
-      return { tokenAddress, tokenScore };
-    });
-
-    return processedArray;
   }
 }

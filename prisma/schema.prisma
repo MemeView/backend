@@ -92,6 +92,7 @@ model Volume {
   address         String
   volumeCreatedAt DateTime @default(now())
   volume24        String?
+  change24        String?  @default("0")
 }
 
 model TelegramBotUsers {

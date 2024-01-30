@@ -22,6 +22,7 @@ export class VolumeService {
       select: {
         address: true,
         volume24: true,
+        change24: true,
       },
     });
 
