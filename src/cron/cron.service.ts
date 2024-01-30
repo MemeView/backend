@@ -138,5 +138,15 @@ export class CronService {
       await this.solveScoreService.solveScores();
       console.log(`solveScoresCron job completed`);
     });
+
+    await this.handleRetry(async () => {
+      const { deletedCount, addedCount } =
+        await this.holdersService.handleHoldersScore();
+
+      console.log('deletedCount', deletedCount);
+      console.log('addedCount', addedCount);
+
+      console.log(`handleHoldersScore job completed'`);
+    });
   }
 }
