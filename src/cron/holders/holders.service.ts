@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client';
 import { startOfDay, startOfHour, subDays, subHours } from 'date-fns';
 import { GraphqlService } from 'src/graphql/graphql.service';
 import { holdersQuery } from 'src/graphql/holdersQuery';
+import { SolveScoreService } from '../solve-score-sync/solve-score.service';
 
 type holdersScore = {
   tokenAddress: string;
@@ -16,13 +17,11 @@ type holders = {
 
 @Injectable()
 export class HoldersService {
-  private readonly prisma: PrismaClient;
-  private readonly graphqlService: GraphqlService;
-
-  constructor() {
-    this.prisma = new PrismaClient();
-    this.graphqlService = new GraphqlService();
-  }
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly graphqlService: GraphqlService,
+    private readonly solveScoreService: SolveScoreService,
+  ) {}
 
   public async handleHolders() {
     const now = new Date();
@@ -288,11 +287,13 @@ export class HoldersService {
       });
 
       // Преобразуем объект в массив нужного типа
-      const mergedArray = Object.keys(mergedScores).map((key) => ({
+      let mergedArray = Object.keys(mergedScores).map((key) => ({
         tokenAddress: key,
         tokenScore: mergedScores[key].tokenScore as number,
         liquidity: mergedScores[key].liquidity as string,
       }));
+
+      mergedArray = mergedArray.filter((item) => item.tokenScore > 0);
 
       const { count: deletedCount } = await this.prisma.score.deleteMany();
       const { count: addedCount } = await this.prisma.score.createMany({
@@ -301,6 +302,8 @@ export class HoldersService {
 
       console.log('deletedCount', deletedCount);
       console.log('addedCount', addedCount);
+
+      await this.solveScoreService.handleScoreByHours(mergedArray);
 
       // console.log(oldScore.length);
       // console.log(holdersScore.length);

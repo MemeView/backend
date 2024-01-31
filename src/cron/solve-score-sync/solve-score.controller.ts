@@ -8,6 +8,15 @@ import {
 } from '@nestjs/common';
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
+import { utcToZonedTime } from 'date-fns-tz';
+import {
+  getHours,
+  startOfDay,
+  startOfHour,
+  startOfTomorrow,
+  subDays,
+  subHours,
+} from 'date-fns';
 
 @Controller('api')
 export class SolveScoreController {

@@ -9,6 +9,12 @@ type QueryResult = {
   _count: number;
 };
 
+interface finalResults {
+  tokenAddress: string;
+  tokenScore: number;
+  liquidity: string;
+}
+
 interface Result {
   tokenAddress: string;
   scoreFromVotes?: number;
@@ -177,9 +183,11 @@ export class SolveScoreService {
       const tokenYesterday = resultYesterday.find(
         (token) => token.address === tokenTwoDaysAgo.address,
       );
+      console.log(tokenYesterday);
 
       if (tokenYesterday) {
         const change24Percentage = parseFloat(tokenYesterday.change24) * 100;
+        console.log(change24Percentage);
         let volumeScore = 0;
         let volumePercentage = 0;
 
@@ -240,6 +248,7 @@ export class SolveScoreService {
             volumeScore -= 10;
           }
         }
+        console.log(volumeScore);
         resultFromVolume.push({
           tokenAddress: tokenTwoDaysAgo.address,
           scoreFromVolume: volumeScore,
@@ -679,6 +688,12 @@ export class SolveScoreService {
     // Записываем новые результаты в таблицу
     await this.prisma.score.createMany({ data: scoreFinalResults });
 
+    return { scoreFinalResults };
+  }
+
+  public async handleScoreByHours(scoreFinalResults: finalResults[]) {
+    const now = new Date();
+    const utcDate = utcToZonedTime(now, 'UTC');
     const currentHour = utcDate.getHours() as IntRange<0, 23>;
 
     const key: ColumnName = `tokenScore${currentHour}h`;
@@ -695,7 +710,7 @@ export class SolveScoreService {
       scoreFinalResults.map((item) => [item.tokenAddress, item]),
     );
 
-    ttmsScoreMap.forEach((updateItem) => {
+    ttmsScoreMap.forEach((updateItem: finalResults) => {
       if (scoreByHoursTableMap.has(updateItem.tokenAddress)) {
         scoreByHoursTableMap.set(updateItem.tokenAddress, {
           ...scoreByHoursTableMap.get(updateItem.tokenAddress),
@@ -718,8 +733,6 @@ export class SolveScoreService {
     await this.prisma.scoreByHours.deleteMany();
 
     await this.prisma.scoreByHours.createMany({ data: tableArray });
-
-    return { scoreFinalResults };
   }
 
   async updateDailyScores() {

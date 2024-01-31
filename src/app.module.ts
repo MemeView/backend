@@ -12,7 +12,6 @@ import { BlackListModule } from './black-list/black-list.module';
 import { ExcelModule } from './excel/excel.module';
 import { PostingModule } from './cron/posting/posting.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({

@@ -9,14 +9,22 @@ import { PostingService } from './posting/posting.service';
 import { HoldersModule } from './holders/holders.module';
 import { CronController } from './cron.controller';
 import { HoldersService } from './holders/holders.service';
+import { VotesSyncModule } from './votes-sync/votes-sync.module';
+import { GraphqlService } from 'src/graphql/graphql.service';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), PrismaModule, HoldersModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    PrismaModule,
+    HoldersModule,
+    VotesSyncModule,
+  ],
   providers: [
     DefinedTokensService,
     VolumeService,
     SolveScoreService,
     CronService,
+    GraphqlService,
     HoldersService,
     PostingService,
   ],
