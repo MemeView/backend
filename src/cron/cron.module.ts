@@ -9,16 +9,12 @@ import { PostingService } from './posting/posting.service';
 import { HoldersModule } from './holders/holders.module';
 import { CronController } from './cron.controller';
 import { HoldersService } from './holders/holders.service';
-import { VotesSyncModule } from './votes-sync/votes-sync.module';
+import { VotesModule } from './votes-sync/votes.module';
 import { GraphqlService } from 'src/graphql/graphql.service';
+import { VotesService } from './votes-sync/votes.service';
 
 @Module({
-  imports: [
-    ScheduleModule.forRoot(),
-    PrismaModule,
-    HoldersModule,
-    VotesSyncModule,
-  ],
+  imports: [ScheduleModule.forRoot(), PrismaModule, HoldersModule, VotesModule],
   providers: [
     DefinedTokensService,
     VolumeService,
@@ -27,6 +23,7 @@ import { GraphqlService } from 'src/graphql/graphql.service';
     GraphqlService,
     HoldersService,
     PostingService,
+    VotesService,
   ],
   controllers: [CronController],
 })

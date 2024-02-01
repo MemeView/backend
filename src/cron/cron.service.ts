@@ -8,6 +8,7 @@ import { PostingService } from './posting/posting.service';
 import * as process from 'process';
 import { HoldersService } from './holders/holders.service';
 import { startOfHour } from 'date-fns';
+import { VotesService } from './votes-sync/votes.service';
 
 @Injectable()
 export class CronService {
@@ -20,6 +21,7 @@ export class CronService {
     private readonly solveScoreService: SolveScoreService,
     private readonly postingService: PostingService,
     private readonly holdersService: HoldersService,
+    private readonly votesService: VotesService,
     private prisma: PrismaClient,
   ) {}
 
@@ -134,6 +136,11 @@ export class CronService {
 
   @Cron('35 * * * *', { disabled: process.env.NODE_ENV === 'development' })
   async solveScoresCron() {
+    await this.handleRetry(async () => {
+      const result = await this.votesService.handleAutoVoting();
+      console.log(`autoVotingCron job completed with result: ${result}`);
+    });
+
     await this.handleRetry(async () => {
       await this.solveScoreService.solveScores();
       console.log(`solveScoresCron job completed`);
