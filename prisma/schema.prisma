@@ -24,6 +24,7 @@ model Tokens {
   volume24    String?
   token       Json?
   cronCount   Int?
+  networkId   Int?
 }
 
 model Blacklist {

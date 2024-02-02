@@ -183,11 +183,9 @@ export class SolveScoreService {
       const tokenYesterday = resultYesterday.find(
         (token) => token.address === tokenTwoDaysAgo.address,
       );
-      console.log(tokenYesterday);
 
       if (tokenYesterday) {
         const change24Percentage = parseFloat(tokenYesterday.change24) * 100;
-        console.log(change24Percentage);
         let volumeScore = 0;
         let volumePercentage = 0;
 
@@ -248,7 +246,6 @@ export class SolveScoreService {
             volumeScore -= 10;
           }
         }
-        console.log(volumeScore);
         resultFromVolume.push({
           tokenAddress: tokenTwoDaysAgo.address,
           scoreFromVolume: volumeScore,

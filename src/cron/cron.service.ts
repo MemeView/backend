@@ -60,16 +60,36 @@ export class CronService {
       let totalDeletedCount = 0;
       let totalAddedCount = 0;
 
+      // ищем токены на networkId = 1
       for (let i = 1; i <= 6; i++) {
         try {
+          const networkId = 1;
           const { deletedCount, addedCount } =
-            await this.definedTokensService.handleTokens(i);
+            await this.definedTokensService.handleTokens(i, networkId);
 
           totalDeletedCount += deletedCount;
           totalAddedCount += addedCount;
 
           console.log(
-            `Cron job completed: ${totalDeletedCount} tokens deleted, ${totalAddedCount} tokens added.`,
+            `Cron job completed: ${totalDeletedCount} tokens deleted, ${totalAddedCount} tokens added on network ${networkId}`,
+          );
+        } catch (e) {
+          break;
+        }
+      }
+
+      // ищем токены на networkId = 56
+      for (let i = 1; i <= 6; i++) {
+        try {
+          const networkId = 56;
+          const { deletedCount, addedCount } =
+            await this.definedTokensService.handleTokens(i, networkId);
+
+          totalDeletedCount += deletedCount;
+          totalAddedCount += addedCount;
+
+          console.log(
+            `Cron job completed: ${totalAddedCount} tokens added on both networks`,
           );
         } catch (e) {
           break;
@@ -78,13 +98,12 @@ export class CronService {
     });
 
     await this.handleRetry(async () => {
-      await this.prisma.holders.deleteMany({
-        where: {
-          createdAt: { gte: startOfCurrentHour },
-        },
-      });
-
-      await this.holdersService.handleHolders();
+      if (currentHour === 0) {
+        await this.holdersService.handleHolders(0);
+      }
+      if (currentHour !== 0) {
+        await this.holdersService.handleHolders(currentHour);
+      }
 
       console.log(`handleHolders job completed'`);
     });

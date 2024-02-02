@@ -14,8 +14,9 @@ export class DefinedTokensController {
       let totalAddedCount = 0;
 
       for (let i = 1; i <= 6; i++) {
+        const networkId = 1;
         const { deletedCount, addedCount } =
-          await this.definedTokensService.handleTokens(i);
+          await this.definedTokensService.handleTokens(i, networkId);
         totalDeletedCount += deletedCount;
         totalAddedCount += addedCount;
       }

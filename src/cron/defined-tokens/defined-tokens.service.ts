@@ -21,7 +21,7 @@ export class DefinedTokensService {
     this.graphqlService = new GraphqlService();
   }
 
-  public async handleTokens(outerIteration: number) {
+  public async handleTokens(outerIteration: number, networkId: number) {
     const limit = 200;
 
     let iterationCount = 0;
@@ -37,7 +37,7 @@ export class DefinedTokensService {
     if (outerIteration > 1) {
       const lastCronToken = await this.prisma.tokens.findFirst({
         where: {
-          cronCount: outerIteration - 1,
+          AND: [{ cronCount: outerIteration - 1 }, { networkId: networkId }],
         },
         orderBy: {
           createdAt: 'desc',
@@ -47,7 +47,9 @@ export class DefinedTokensService {
       createTimestamp = lastCronToken?.createdAt ?? null;
 
       if (!createTimestamp) {
-        throw new Error(`Токены во внешней итерации ${outerIteration - 1} отсутствуют`);
+        throw new Error(
+          `Токены во внешней итерации ${outerIteration - 1} отсутствуют`,
+        );
       }
     }
 
@@ -68,7 +70,7 @@ export class DefinedTokensService {
             direction: RankingDirection.Asc,
           },
           filters: {
-            network: [1],
+            network: [networkId],
             liquidity: { gt: 5000 },
             ...(createTimestamp && { createdAt: { gt: createTimestamp } }),
           },
@@ -86,8 +88,13 @@ export class DefinedTokensService {
         allTokens = [...allTokens, ...currentIterationResult];
 
         console.log('=========================================');
-        console.log(`Outer Iteration: ${outerIteration}, Inner Iteration: ${iterationCount}, Offset: ${offset}`);
-        console.log(`Outer Iteration ${outerIteration} Total Tokens Count`, allTokens.length);
+        console.log(
+          `Outer Iteration: ${outerIteration}, Inner Iteration: ${iterationCount}, Offset: ${offset}`,
+        );
+        console.log(
+          `Outer Iteration ${outerIteration} Total Tokens Count`,
+          allTokens.length,
+        );
         console.log('=========================================');
 
         iterationCount += 1;
@@ -132,6 +139,7 @@ export class DefinedTokensService {
             token: token,
             pairAddress: pair?.address,
             cronCount: outerIteration,
+            networkId: networkId,
           }),
         );
 
@@ -147,10 +155,13 @@ export class DefinedTokensService {
       let deletedCount;
       if (outerIteration != 1) {
         const { count } = await this.prisma.tokens.deleteMany({
-          where: { cronCount: outerIteration },
+          where: {
+            AND: [{ cronCount: outerIteration }, { networkId: networkId }],
+          },
         });
         deletedCount = count;
-      } else {
+      }
+      if (outerIteration === 1 && networkId === 1) {
         const { count } = await this.prisma.tokens.deleteMany();
         deletedCount = count;
       }
@@ -160,7 +171,6 @@ export class DefinedTokensService {
         skipDuplicates: true,
         data: resultAfterFilter,
       });
-
 
       return { deletedCount, addedCount };
     } catch (error) {

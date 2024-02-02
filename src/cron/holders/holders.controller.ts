@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { HoldersService } from './holders.service';
 import { PrismaClient } from '@prisma/client';
-import { startOfDay, startOfHour, subHours } from 'date-fns';
+import { endOfDay, startOfDay, startOfHour, subDays, subHours } from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
 
 @Controller('api')
 export class HoldersController {
@@ -13,7 +14,7 @@ export class HoldersController {
   @Post('/holders')
   async getHolders() {
     try {
-      const result = await this.holdersService.handleHolders();
+      const result = await this.holdersService.handleHolders(1);
 
       return result;
     } catch (e) {

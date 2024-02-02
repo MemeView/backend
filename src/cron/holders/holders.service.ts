@@ -1,10 +1,11 @@
 import { HoldersInput } from '@definedfi/sdk/dist/resources/graphql';
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { startOfDay, startOfHour, subDays, subHours } from 'date-fns';
+import { endOfDay, startOfDay, startOfHour, subDays, subHours } from 'date-fns';
 import { GraphqlService } from 'src/graphql/graphql.service';
 import { holdersQuery } from 'src/graphql/holdersQuery';
 import { SolveScoreService } from '../solve-score-sync/solve-score.service';
+import { utcToZonedTime } from 'date-fns-tz';
 
 type holdersScore = {
   tokenAddress: string;
@@ -23,8 +24,9 @@ export class HoldersService {
     private readonly solveScoreService: SolveScoreService,
   ) {}
 
-  public async handleHolders() {
+  public async handleHolders(currentHour: number) {
     const now = new Date();
+    const startOfCurrentHour = startOfHour(now);
     const today = startOfDay(now);
     const yesterday = subDays(startOfDay(now), 1);
     const twoDaysAgo = subDays(startOfDay(now), 2);
@@ -35,33 +37,98 @@ export class HoldersService {
 
     try {
       const tokenAddresses = await this.prisma.tokens.findMany({
+        where: { liquidity: { gte: '10000' } },
         select: {
           address: true,
+          networkId: true,
         },
       });
 
       // const chunkSize = tokenAddresses.length / 200 + 1;
 
+      // разбиваю наш большой массив, на мелкие с максимальным количеством элементов 200, чтобы потом параллельно их обрабатывать.
       const subarrays = await this.chunk(tokenAddresses, 200);
 
+      // удаляю всех холдеров которые уже были созданы за этот час или старые значения, старше 24 часов.
+      // Сделано на случай, если крон будет запускаться чаще, чем раз в час и чтобы не получилось,
+      // что за один час у токена есть два значения по холдерам
       await this.prisma.holders.deleteMany({
         where: {
-          createdAt: { lt: startOfHourOneDayAgo },
+          OR: [
+            { createdAt: { lt: startOfHourOneDayAgo } },
+            { createdAt: { gte: startOfCurrentHour } },
+          ],
         },
       });
 
-      const allHolders = await Promise.all(
-        subarrays.map(async (subarray) => {
-          const holders = await this.processTokenAddresses(subarray);
-          return holders;
-        }),
-      );
+      // обрабатываем тот случай, когда мы находим холдеров не по всем токенам, а по тем,
+      // у которых volume вырос на 1000 и выше
+      if (currentHour !== 0) {
+        const now = new Date();
+        const utcDate = utcToZonedTime(now, 'UTC');
 
-      const flattenedHolders = allHolders.flat();
+        const today = startOfDay(utcDate);
+        const yesterday = startOfDay(subDays(utcDate, 1));
+        const twoDaysAgo = startOfDay(subDays(utcDate, 2));
 
-      await this.prisma.holders.createMany({
-        data: flattenedHolders,
-      });
+        // возвращает volume за позавчера
+        const volumeTwoDaysAgo = await this.prisma.volume.findMany({
+          where: {
+            AND: [
+              { volumeCreatedAt: { gte: twoDaysAgo } },
+              { volumeCreatedAt: { lt: yesterday } },
+            ],
+          },
+        });
+
+        // возвращает volume за вчера
+        const volumeYesterday = await this.prisma.volume.findMany({
+          where: {
+            AND: [
+              { volumeCreatedAt: { gte: yesterday } },
+              { volumeCreatedAt: { lt: today } },
+            ],
+          },
+        });
+
+        const allHolders = await Promise.all(
+          subarrays.map(async (subarray) => {
+            const holders = await this.processTokenAddresses(
+              subarray,
+              currentHour,
+              volumeTwoDaysAgo,
+              volumeYesterday,
+            );
+
+            return holders;
+          }),
+        );
+
+        const flattenedHolders = allHolders.flat();
+
+        const { count: createdCount } = await this.prisma.holders.createMany({
+          data: flattenedHolders,
+        });
+        console.log(`Для ${createdCount} токенов найдены холдеры`);
+      } else {
+        const allHolders = await Promise.all(
+          subarrays.map(async (subarray) => {
+            const holders = await this.processTokenAddresses(
+              subarray,
+              currentHour,
+            );
+
+            return holders;
+          }),
+        );
+
+        const flattenedHolders = allHolders.flat();
+
+        const { count: createdCount } = await this.prisma.holders.createMany({
+          data: flattenedHolders,
+        });
+        console.log(`Для ${createdCount} токенов найдены холдеры`);
+      }
 
       return 'ok';
     } catch (error) {
@@ -69,23 +136,70 @@ export class HoldersService {
     }
   }
 
-  public async processTokenAddresses(tokenAddresses) {
+  public async processTokenAddresses(
+    tokenAddresses,
+    currentHour: number,
+    volumeTwoDaysAgo?,
+    volumeYesterday?,
+  ) {
     const holders = [];
 
     for (const token of tokenAddresses) {
       // console.log(token.address + ':1');
-      const result: holders = await this.graphqlService.makeQuery(
-        holdersQuery(token.address + ':1'),
-        {
-          cursor: null,
-          tokenId: token.address + ':1',
-        },
-      );
+      // Ищем холдеров для всех токенов на networkId = 1. Это условие срабатывает только раз в сутки
+      if (token.networkId === 1 && currentHour === 0) {
+        const result: holders = await this.graphqlService.makeQuery(
+          holdersQuery(token.address + ':1'),
+          {
+            cursor: null,
+            tokenId: token.address + ':1',
+          },
+        );
 
-      holders.push({
-        tokenAddress: token.address,
-        holdersCount: result.holders.count,
-      });
+        holders.push({
+          tokenAddress: token.address,
+          holdersCount: result.holders.count,
+        });
+      }
+
+      // Ищем холдеров для токенов на networkId = 1 и, у которых объем продаж вырос на 1000 или более
+      if (token.networkId === null && currentHour !== 0) {
+        const volumeCountTwoDaysAgo = volumeTwoDaysAgo.find(
+          (volume) => volume.address === token.address,
+        );
+
+        const volumeCountYesterday = volumeYesterday.find(
+          (volume) => (volume.address = token.address),
+        );
+
+        if (
+          volumeCountTwoDaysAgo &&
+          volumeCountYesterday &&
+          parseFloat(volumeCountTwoDaysAgo.volume24) -
+            parseFloat(volumeCountYesterday.volume24) >=
+            1000
+        ) {
+          const result: holders = await this.graphqlService.makeQuery(
+            holdersQuery(token.address + ':1'),
+            {
+              cursor: null,
+              tokenId: token.address + ':1',
+            },
+          );
+
+          holders.push({
+            tokenAddress: token.address,
+            holdersCount: result.holders.count,
+          });
+        }
+      }
+
+      if (token.networkId !== 1) {
+        holders.push({
+          tokenAddress: token.address,
+          holdersCount: -1,
+        });
+      }
     }
 
     console.log(tokenAddresses.length);
@@ -153,6 +267,11 @@ export class HoldersService {
       await Promise.allSettled(
         holdersNowRaw.map(async (token) => {
           let tokenScore = 0;
+
+          // баллы для токенов, у которых networkId не 1
+          if (token.holdersCount === -1) {
+            tokenScore += 16;
+          }
 
           // баллы за количество холдеров
           if (token.holdersCount >= 50 && token.holdersCount <= 200) {
