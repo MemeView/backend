@@ -156,7 +156,7 @@ export class HoldersService {
       }
 
       // Ищем холдеров для токенов на networkId = 1 и, у которых объем продаж вырос на 1000 или более
-      if (token.networkId === null && currentHour !== 0) {
+      if (token.networkId === 1 && currentHour !== 0) {
         const volumeCountTwoDaysAgo = volumeTwoDaysAgo.find(
           (volume) => volume.address === token.address,
         );
