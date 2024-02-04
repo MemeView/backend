@@ -6,6 +6,7 @@ import { subHours } from 'date-fns';
 import { TwitterApi } from 'twitter-api-v2';
 import * as nodemailer from 'nodemailer';
 import * as moment from 'moment/moment';
+import { UTCDate } from '@date-fns/utc';
 
 const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_APP_KEY,
@@ -148,8 +149,9 @@ export class PostingService {
         (a, b) => b.averageScoreToday - a.averageScoreToday,
       );
 
-      const now = new Date();
-      const twentyFourHoursAgo = subHours(now, 24);
+      const utcDate = new UTCDate();
+
+      const twentyFourHoursAgo = subHours(utcDate, 24);
 
       await this.prisma.postedTokens.deleteMany({
         where: { createdAt: { lt: twentyFourHoursAgo } },

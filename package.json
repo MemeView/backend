@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@apollo/server": "^4.9.5",
+    "@date-fns/utc": "^1.1.1",
     "@definedfi/sdk": "^0.5.1",
     "@graphql-tools/graphql-file-loader": "^8.0.0",
     "@nestjs/apollo": "^12.0.11",
@@ -40,8 +41,7 @@
     "apollo-link-http": "^1.5.17",
     "axios": "^1.6.2",
     "canvas": "^2.11.2",
-    "date-fns": "^2.30.0",
-    "date-fns-tz": "^2.0.0",
+    "date-fns": "^3.3.1",
     "exceljs": "^4.4.0",
     "fs": "^0.0.1-security",
     "graphql": "^16.8.1",
