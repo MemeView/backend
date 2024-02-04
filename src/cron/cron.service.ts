@@ -9,6 +9,7 @@ import * as process from 'process';
 import { HoldersService } from './holders/holders.service';
 import { startOfHour } from 'date-fns';
 import { VotesService } from './votes-sync/votes.service';
+import { UTCDate } from '@date-fns/utc';
 
 @Injectable()
 export class CronService {
@@ -52,9 +53,9 @@ export class CronService {
 
   @Cron('0 * * * *', { disabled: process.env.NODE_ENV === 'development' }) // начало каждого часа
   async tokensCron() {
-    const now = new Date();
-    const currentHour = now.getHours();
-    const startOfCurrentHour = startOfHour(now);
+    const utcDate = new UTCDate();
+
+    const currentHour = utcDate.getHours();
 
     await this.handleRetry(async () => {
       let totalDeletedCount = 0;

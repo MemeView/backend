@@ -5,7 +5,7 @@ import { endOfDay, startOfDay, startOfHour, subDays, subHours } from 'date-fns';
 import { GraphqlService } from 'src/graphql/graphql.service';
 import { holdersQuery } from 'src/graphql/holdersQuery';
 import { SolveScoreService } from '../solve-score-sync/solve-score.service';
-import { utcToZonedTime } from 'date-fns-tz';
+import { UTCDate } from '@date-fns/utc';
 
 type holdersScore = {
   tokenAddress: string;
@@ -25,15 +25,10 @@ export class HoldersService {
   ) {}
 
   public async handleHolders(currentHour: number) {
-    const now = new Date();
-    const startOfCurrentHour = startOfHour(now);
-    const today = startOfDay(now);
-    const yesterday = subDays(startOfDay(now), 1);
-    const twoDaysAgo = subDays(startOfDay(now), 2);
-    const sevenDaysAgo = subDays(now, 7);
-    const twentyFourHoursAgo = subHours(now, 24);
-    const startOfHourOneDayAgo = startOfHour(subHours(now, 24));
-    const oneWeekAgo = subHours(now, 168);
+    const utcDate = new UTCDate();
+
+    const startOfCurrentHour = startOfHour(utcDate);
+    const startOfHourOneDayAgo = startOfHour(subHours(utcDate, 24));
 
     try {
       const tokenAddresses = await this.prisma.tokens.findMany({
@@ -64,9 +59,7 @@ export class HoldersService {
       // обрабатываем тот случай, когда мы находим холдеров не по всем токенам, а по тем,
       // у которых volume вырос на 1000 и выше
       if (currentHour !== 0) {
-        const now = new Date();
-        const utcDate = utcToZonedTime(now, 'UTC');
-
+        const utcDate = new UTCDate();
         const today = startOfDay(utcDate);
         const yesterday = startOfDay(subDays(utcDate, 1));
         const twoDaysAgo = startOfDay(subDays(utcDate, 2));

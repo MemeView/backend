@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaClient, ScoreByHours } from '@prisma/client';
 import { subDays, subHours, startOfDay } from 'date-fns';
 import { IntRange } from '../../common.type';
-import { utcToZonedTime } from 'date-fns-tz';
+import { UTCDate } from '@date-fns/utc';
 
 type QueryResult = {
   tokenAddress: string;
@@ -108,16 +108,13 @@ export class SolveScoreService {
     const totalCount = await this.prisma.votes.count();
 
     // переменные для дат и времени
-    const now = new Date();
-    const utcDate = utcToZonedTime(now, 'UTC');
-
+    const utcDate = new UTCDate();
     const today = startOfDay(utcDate);
     const yesterday = subDays(startOfDay(utcDate), 1);
     const twoDaysAgo = subDays(startOfDay(utcDate), 2);
     const sevenDaysAgo = subDays(utcDate, 7);
     const twentyFourHoursAgo = subHours(utcDate, 24);
-
-    const currentUnixTimestamp: number = Math.floor(Date.now() / 1000);
+    const currentTimestampInSeconds: number = Math.floor(utcDate.getTime() / 1000);
 
     // возвращает голоса за 24 часа
     const resultToday = await this.prisma.votes.groupBy({
@@ -634,15 +631,15 @@ export class SolveScoreService {
       }
 
       // Уменьшаю баллы, если токену меньше 24 часов. Число 86400 это 24 часа в секундах
-      if (token && currentUnixTimestamp - token.createdAt < 86400) {
+      if (token && currentTimestampInSeconds - token.createdAt < 86400) {
         result.tokenScore -= 40;
       }
 
       // Уменьшаю баллы, если токен был создан в промежутке между 24 часов и 48 часов.
       if (
         token &&
-        currentUnixTimestamp - token.createdAt >= 86400 &&
-        currentUnixTimestamp - token.createdAt < 172800
+        currentTimestampInSeconds - token.createdAt >= 86400 &&
+        currentTimestampInSeconds - token.createdAt < 172800
       ) {
         result.tokenScore -= 20;
       }
@@ -650,8 +647,8 @@ export class SolveScoreService {
       // Уменьшаю баллы, если токен был создан в промежутке между 48 часов и 72 часов.
       if (
         token &&
-        currentUnixTimestamp - token.createdAt >= 172800 &&
-        currentUnixTimestamp - token.createdAt < 259200
+        currentTimestampInSeconds - token.createdAt >= 172800 &&
+        currentTimestampInSeconds - token.createdAt < 259200
       ) {
         result.tokenScore -= 10;
       }
@@ -689,8 +686,8 @@ export class SolveScoreService {
   }
 
   public async handleScoreByHours(scoreFinalResults: finalResults[]) {
-    const now = new Date();
-    const utcDate = utcToZonedTime(now, 'UTC');
+    const utcDate = new UTCDate();
+
     const currentHour = utcDate.getHours() as IntRange<0, 23>;
 
     const key: ColumnName = `tokenScore${currentHour}h`;
