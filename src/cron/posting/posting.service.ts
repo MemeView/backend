@@ -105,6 +105,7 @@ export class PostingService {
           change24: true,
           quoteToken: true,
           pairAddress: true,
+          networkId: true,
         },
       });
 
@@ -190,11 +191,21 @@ export class PostingService {
 
         tokenDataArray.push(tokenData);
 
+        let network: string;
+
+        if (token.networkId === 1) {
+          network = 'eth';
+        }
+
+        if (token.networkId === 56) {
+          network = 'bsc';
+        }
+
         if (messagesCount < 2 && token.averageScoreToday >= 50) {
           // Создаем сообщение для отправки
           const growth = parseFloat(token.change24) * 100;
           const message =
-            `[$${token.symbol.toUpperCase()}](https://tokenwatch.ai/en/tokens/${
+            `[$${token.symbol.toUpperCase()}](https://tokenwatch.ai/en/tokens/${network}/${
               token.pairAddress
             }?quoteToken=${token.quoteToken}) \n\n` +
             `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
@@ -211,7 +222,7 @@ export class PostingService {
             `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
               parseFloat(token.averageScoreToday),
             )}\n\n` +
-            `🌐 https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
+            `🌐 https://tokenwatch.ai/en/tokens/${network}/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
             `#${token.symbol.toUpperCase()} ` +
             `#${token.symbol.toUpperCase()}growth ` +
             `#TokenWatch ` +
@@ -226,7 +237,7 @@ export class PostingService {
             `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
               parseFloat(token.averageScoreToday),
             )}\n\n` +
-            `🌐 https://tokenwatch.ai/en/tokens/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
+            `🌐 https://tokenwatch.ai/en/tokens/${network}/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
             `#${token.symbol.toUpperCase()} ` +
             `#${token.symbol.toUpperCase()}growth ` +
             `#TokenWatch`;
