@@ -12,10 +12,16 @@ import { HoldersService } from './holders/holders.service';
 import { VotesModule } from './votes-sync/votes.module';
 import { GraphqlService } from 'src/graphql/graphql.service';
 import { VotesService } from './votes-sync/votes.service';
-import { PrivateBotModule } from './private-bot/private-bot.module';
+import { SignalBotModule } from './signal-bot/signal-bot.module';
 
 @Module({
-  imports: [ScheduleModule.forRoot(), PrismaModule, HoldersModule, VotesModule, PrivateBotModule],
+  imports: [
+    ScheduleModule.forRoot(),
+    PrismaModule,
+    HoldersModule,
+    VotesModule,
+    SignalBotModule,
+  ],
   providers: [
     DefinedTokensService,
     VolumeService,
