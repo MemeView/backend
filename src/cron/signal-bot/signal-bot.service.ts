@@ -121,15 +121,15 @@ export class SignalBotService {
       );
     });
 
-    // this.bot.on('callback_query', (query) => {
-    //   const { data } = query;
-    //   const chatId = query.message.chat.id;
+    this.bot.on('callback_query', (query) => {
+      const { data } = query;
+      const chatId = query.message.chat.id;
 
-    //   if (data === 'button6') {
-    //     const supportMessage = `In a case of any issues feel free to reach our Support Team at support@tokenwatch.ai\n\nPlease be patient and expect the answer in 72 hours.`;
+      if (data === 'button6') {
+        const supportMessage = `In a case of any issues feel free to reach our Support Team at support@tokenwatch.ai\n\nPlease be patient and expect the answer in 72 hours.`;
 
-    //     this.bot.sendMessage(chatId, supportMessage);
-    //   }
-    // });
+        this.bot.sendMessage(chatId, supportMessage);
+      }
+    });
   }
 }
