@@ -11,6 +11,7 @@ import { GraphqlModule } from './graphql/graphql.module';
 import { BlackListModule } from './black-list/black-list.module';
 import { ExcelModule } from './excel/excel.module';
 import { PostingModule } from './cron/posting/posting.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { PostingModule } from './cron/posting/posting.module';
     BlackListModule,
     ExcelModule,
     PostingModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

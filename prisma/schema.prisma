@@ -82,10 +82,12 @@ model DailyScore {
 
 model Users {
   walletAddress         String   @id @unique
+  telegramId            String?
   votes                 Int      @default(5)
   updatedAt             DateTime @default(now())
   refreshToken          String?
   refreshTokenCreatedAt DateTime @default(now())
+  freeTrialWasTaken     Boolean  @default(false)
 }
 
 model Volume {
