@@ -57,10 +57,7 @@ export class AuthController {
     @Query('tokenAddress') tokenAddress: string,
   ) {
     try {
-      const result = await this.authService.getTokenBalance(
-        walletAddress,
-        tokenAddress,
-      );
+      const result = await this.authService.getTokenBalance(walletAddress);
 
       return result;
     } catch (error) {

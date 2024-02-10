@@ -174,15 +174,12 @@ export class AuthService {
     }
   }
 
-  async getTokenBalance(
-    walletAddress: string,
-    tokenAddress: string,
-  ): Promise<string> {
+  async getTokenBalance(walletAddress: string): Promise<string> {
     const web3 = new Web3(process.env.INFURA_URL);
 
     // Получаем баланс токенов из криптокошелька
     const balance = await web3.eth.call({
-      to: tokenAddress,
+      to: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
       data:
         web3.eth.abi.encodeFunctionSignature('balanceOf(address)') +
         web3.eth.abi.encodeParameters(['address'], [walletAddress]).substr(2),
