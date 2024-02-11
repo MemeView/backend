@@ -114,4 +114,13 @@ model Holders {
   createdAt       DateTime @default(now())
 }
 
+model Subscriptions {
+  id                  Int @id @default(autoincrement())
+  title               String
+  subTitle            String?
+  description         String?
+  period              String
+  holdingTWAmount     Int
+}
+
 

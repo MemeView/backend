@@ -51,17 +51,45 @@ export class AuthController {
     }
   }
 
-  @Get('/token-balance')
-  async tokenBalance(
-    @Query('walletAddress') walletAddress: string,
-    @Query('tokenAddress') tokenAddress: string,
-  ) {
+  @Get('/TW-balance-check')
+  async tokenBalance(@Query('walletAddress') walletAddress: string) {
     try {
       const result = await this.authService.getTokenBalance(walletAddress);
 
       return result;
     } catch (error) {
       return { error: error.message };
+    }
+  }
+
+  @Post('/create-subs')
+  async createSubs() {
+    try {
+      const result = await this.prisma.subscriptions.create({
+        data: {
+          title: 'PLAN 1',
+          subTitle: 'Signals 2 times a day',
+          description:
+            'You will be messaged with Top-30 tokens 2 times a day: 9am and 9pm PST',
+          period: 'infinity',
+          holdingTWAmount: 2000,
+        },
+      });
+
+      const result2 = await this.prisma.subscriptions.create({
+        data: {
+          title: 'PLAN 2',
+          subTitle: 'Signals 4 times a day',
+          description:
+            'You will be messaged with Top-30 tokens 2 times a day: 3am, 9am, 3pm, and 9pm PST.',
+          period: 'infinity',
+          holdingTWAmount: 5000,
+        },
+      });
+
+      return { result, result2 };
+    } catch (error) {
+      return error;
     }
   }
 }

@@ -184,7 +184,10 @@ export class AuthService {
         web3.eth.abi.encodeFunctionSignature('balanceOf(address)') +
         web3.eth.abi.encodeParameters(['address'], [walletAddress]).substr(2),
     });
+    const balanceBigInt = parseFloat(balance);
 
-    return balance;
+    const balanceString = balanceBigInt.toString();
+
+    return balanceString;
   }
 }
