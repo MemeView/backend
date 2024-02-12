@@ -7,7 +7,7 @@ export class SignalBotService {
   private authorizedUsers: Set<number>; // множество для хранения id авторизованных пользователей
 
   constructor() {
-    this.bot = new TelegramBot(process.env.AUTH_TELEGRAM_BOT_TOKEN_TEST, {
+    this.bot = new TelegramBot(process.env.TG_SIGNAL_BOT_TOKEN, {
       polling: true,
     });
     this.authorizedUsers = new Set();
