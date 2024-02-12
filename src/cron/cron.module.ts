@@ -13,6 +13,9 @@ import { VotesModule } from './votes-sync/votes.module';
 import { GraphqlService } from 'src/graphql/graphql.service';
 import { VotesService } from './votes-sync/votes.service';
 import { SignalBotModule } from './signal-bot/signal-bot.module';
+import { AuthModule } from 'src/auth/auth.module';
+import { AuthService } from 'src/auth/auth.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -21,6 +24,7 @@ import { SignalBotModule } from './signal-bot/signal-bot.module';
     HoldersModule,
     VotesModule,
     SignalBotModule,
+    AuthModule,
   ],
   providers: [
     DefinedTokensService,
@@ -31,6 +35,8 @@ import { SignalBotModule } from './signal-bot/signal-bot.module';
     HoldersService,
     PostingService,
     VotesService,
+    JwtService,
+    AuthService,
   ],
   controllers: [CronController],
 })

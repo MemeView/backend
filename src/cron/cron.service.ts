@@ -10,6 +10,7 @@ import { HoldersService } from './holders/holders.service';
 import { startOfHour } from 'date-fns';
 import { VotesService } from './votes-sync/votes.service';
 import { UTCDate } from '@date-fns/utc';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class CronService {
@@ -23,6 +24,7 @@ export class CronService {
     private readonly postingService: PostingService,
     private readonly holdersService: HoldersService,
     private readonly votesService: VotesService,
+    private readonly authService: AuthService,
     private prisma: PrismaClient,
   ) {}
 
@@ -145,6 +147,9 @@ export class CronService {
       await this.postingService.handleCombinedPosting();
       console.log(`Cron 'posting' job completed`);
     });
+
+    await this.authService.recalculateSubscriptionsLevel();
+    console.log(`Cron 'recalculate-subscribers' job complited`);
   }
 
   async volumeCron() {

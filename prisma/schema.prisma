@@ -15,6 +15,7 @@ model Tokens {
   id          Int     @id @default(autoincrement())
   address     String? @unique
   pairAddress String?
+  priceUSD    String?
   quoteToken  String?
   createdAt   Int?
   name        String?
@@ -121,6 +122,14 @@ model Subscriptions {
   description         String?
   period              String
   holdingTWAmount     Int
+}
+
+model Subscribers {
+  walletAddress         String @id @unique
+  telegramId            String?
+  holdingTWAmount       Int
+  holdingTWAmountUSDT   Int
+  subscriptionLevel     String
 }
 
 

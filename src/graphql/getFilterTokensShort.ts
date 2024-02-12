@@ -7,6 +7,7 @@ export const GET_FILTER_TOKENS_SHORT = `query ($tokens: [String], $limit: Int, $
         liquidity
         volume24
         createdAt
+        priceUSD
         quoteToken
         pair {
           address

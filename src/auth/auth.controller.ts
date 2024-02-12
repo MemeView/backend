@@ -62,32 +62,27 @@ export class AuthController {
     }
   }
 
-  @Post('/create-subs')
-  async createSubs() {
+  @Post('/calculate-subscriptions')
+  async calculateSubscriptionLevel(
+    @Body('walletAddress') walletAddress: string,
+  ) {
     try {
-      const result = await this.prisma.subscriptions.create({
-        data: {
-          title: 'PLAN 1',
-          subTitle: 'Signals 2 times a day',
-          description:
-            'You will be messaged with Top-30 tokens 2 times a day: 9am and 9pm PST',
-          period: 'infinity',
-          holdingTWAmount: 2000,
-        },
-      });
+      const result = await this.authService.calculateSubscriptionLevel(
+        walletAddress,
+      );
 
-      const result2 = await this.prisma.subscriptions.create({
-        data: {
-          title: 'PLAN 2',
-          subTitle: 'Signals 4 times a day',
-          description:
-            'You will be messaged with Top-30 tokens 2 times a day: 3am, 9am, 3pm, and 9pm PST.',
-          period: 'infinity',
-          holdingTWAmount: 5000,
-        },
-      });
+      return result;
+    } catch (error) {
+      return error;
+    }
+  }
 
-      return { result, result2 };
+  @Post('/recalculate-subscriptions')
+  async recalculateSubscriptionLevel() {
+    try {
+      const result = await this.authService.recalculateSubscriptionsLevel();
+
+      return result;
     } catch (error) {
       return error;
     }

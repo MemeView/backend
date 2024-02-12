@@ -7,6 +7,14 @@ import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import Web3 from 'web3';
 
+interface subscriber {
+  walletAddress: string;
+  telegramId: string;
+  holdingTWAmount: number;
+  holdingTWAmountUSDT: number;
+  subscriptionLevel: string;
+}
+
 const jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
   secretOrKey: process.env.JWT_SECRET,
@@ -174,7 +182,7 @@ export class AuthService {
     }
   }
 
-  async getTokenBalance(walletAddress: string): Promise<string> {
+  async getTokenBalance(walletAddress: string): Promise<number> {
     const web3 = new Web3(process.env.INFURA_URL);
 
     // Получаем баланс токенов из криптокошелька
@@ -184,10 +192,144 @@ export class AuthService {
         web3.eth.abi.encodeFunctionSignature('balanceOf(address)') +
         web3.eth.abi.encodeParameters(['address'], [walletAddress]).substr(2),
     });
-    const balanceBigInt = parseFloat(balance);
 
-    const balanceString = balanceBigInt.toString();
+    return parseFloat(balance);
+  }
 
-    return balanceString;
+  async calculateSubscriptionLevel(walletAddress: string): Promise<object> {
+    const balance = await this.getTokenBalance(walletAddress);
+
+    const currentTWPrice = await this.prisma.tokens.findFirst({
+      where: {
+        address: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
+      },
+      select: {
+        priceUSD: true,
+      },
+    });
+
+    const user = await this.prisma.users.findUnique({
+      where: {
+        walletAddress: walletAddress,
+      },
+    });
+
+    const holdingTWAmountUSDT = balance * parseFloat(currentTWPrice.priceUSD);
+
+    if (holdingTWAmountUSDT < 2000) {
+      const result = await this.prisma.subscribers.upsert({
+        where: {
+          walletAddress: walletAddress,
+        },
+        update: {
+          telegramId: user.telegramId,
+          holdingTWAmount: balance,
+          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          subscriptionLevel: '0',
+        },
+        create: {
+          walletAddress: walletAddress,
+          telegramId: user.telegramId,
+          holdingTWAmount: balance,
+          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          subscriptionLevel: '0',
+        },
+      });
+
+      return result;
+    }
+
+    if (holdingTWAmountUSDT >= 2000 && holdingTWAmountUSDT < 5000) {
+      const result = await this.prisma.subscribers.upsert({
+        where: {
+          walletAddress: walletAddress,
+        },
+        update: {
+          telegramId: user.telegramId,
+          holdingTWAmount: balance,
+          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          subscriptionLevel: '1',
+        },
+        create: {
+          walletAddress: walletAddress,
+          telegramId: user.telegramId,
+          holdingTWAmount: balance,
+          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          subscriptionLevel: '1',
+        },
+      });
+
+      return result;
+    }
+
+    if (holdingTWAmountUSDT >= 5000) {
+      const result = await this.prisma.subscribers.upsert({
+        where: {
+          walletAddress: walletAddress,
+        },
+        update: {
+          telegramId: user.telegramId,
+          holdingTWAmount: balance,
+          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          subscriptionLevel: '2',
+        },
+        create: {
+          walletAddress: walletAddress,
+          telegramId: user.telegramId,
+          holdingTWAmount: balance,
+          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          subscriptionLevel: '2',
+        },
+      });
+
+      return result;
+    }
+  }
+
+  async recalculateSubscriptionsLevel() {
+    try {
+      const subscribers = await this.prisma.subscribers.findMany();
+
+      const currentTWPrice = await this.prisma.tokens.findFirst({
+        where: { address: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3' },
+      });
+
+      const recalculatedSubscribers = await Promise.all(
+        subscribers.map(async (subscriber) => {
+          const holdingTWAmount = await this.getTokenBalance(
+            subscriber.walletAddress,
+          );
+          const holdingTWAmountUSDT =
+            holdingTWAmount * parseFloat(currentTWPrice.priceUSD);
+
+          let subscriptionLevel = '0';
+
+          if (holdingTWAmountUSDT >= 2000 && holdingTWAmountUSDT < 5000) {
+            subscriptionLevel = '1';
+          }
+
+          if (holdingTWAmountUSDT >= 5000) {
+            subscriptionLevel = '2';
+          }
+
+          return {
+            walletAddress: subscriber.walletAddress,
+            telegramId: subscriber.telegramId,
+            holdingTWAmount: holdingTWAmount,
+            holdingTWAmountUSDT: holdingTWAmountUSDT,
+            subscriptionLevel: subscriptionLevel,
+          };
+        }),
+      );
+
+      await this.prisma.subscribers.deleteMany();
+      await this.prisma.subscribers.createMany({
+        data: recalculatedSubscribers,
+      });
+
+      return recalculatedSubscribers;
+    } catch (error) {
+      return error;
+    }
   }
 }
