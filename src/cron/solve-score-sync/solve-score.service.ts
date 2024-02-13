@@ -90,13 +90,13 @@ export class SolveScoreService {
       return 15;
     }
 
-    // формула строится из (Исходное значение - 50) * ((0 - 15) / (200 - 50)) + 15
-    if (factor >= 50 && factor < 200) {
-      return (factor - 50) * (-15 / 150) + 15;
+    // формула строится из (Исходное значение - 50) * ((0 - 15) / (100 - 50)) + 15
+    if (factor >= 50 && factor < 100) {
+      return (factor - 50) * (-15 / 50) + 15;
     }
 
-    if (factor >= 200 && factor < 400) {
-      return (factor - 200) * (-15 / 200);
+    if (factor >= 100 && factor < 400) {
+      return (factor - 100) * (-15 / 300);
     }
 
     if (factor >= 400) {
@@ -114,7 +114,9 @@ export class SolveScoreService {
     const twoDaysAgo = subDays(startOfDay(utcDate), 2);
     const sevenDaysAgo = subDays(utcDate, 7);
     const twentyFourHoursAgo = subHours(utcDate, 24);
-    const currentTimestampInSeconds: number = Math.floor(utcDate.getTime() / 1000);
+    const currentTimestampInSeconds: number = Math.floor(
+      utcDate.getTime() / 1000,
+    );
 
     // возвращает голоса за 24 часа
     const resultToday = await this.prisma.votes.groupBy({
@@ -568,7 +570,7 @@ export class SolveScoreService {
     let scoreFinalResults = Object.entries(combinedResults).map(
       ([tokenAddress, { score }]) => ({
         tokenAddress,
-        tokenScore: score + 15, // +15 за 2theMoon
+        tokenScore: score + 20, // +20 за 2theMoon
         liquidity: '',
       }),
     );

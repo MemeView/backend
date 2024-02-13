@@ -14,21 +14,8 @@ export class SignalBotService {
 
     this.bot.onText(/\/start/, (msg) => {
       const chatId = msg.chat.id;
-      const welcomeMessage = `Hi there! 👋
 
-  Welcome to the TokenWatch AI bot.
-  
-  Tap one of the buttons below:
-  
-  🚀 Top-30 ToTheMoonScore - receive up to 4 times a day ToTheMoonScore AI predictions
-  
-  💰 Referral - earn $TOKENWATCH tokens for inviting friends
-  
-  ℹ️ About - more info about this bot and links
-  
-  We are here to help your daily tokens investment decisions become smarter 🧠
-  
-  To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonScore”.`;
+      const payload = msg.text!.substring(7);
 
       const buttons = [
         [
@@ -54,6 +41,28 @@ export class SignalBotService {
         reply_markup: replyMarkup,
         disable_notification: true,
       };
+
+      if (payload.length && payload === 'custom') {
+        const customMessage = `Custom message`;
+
+        return this.bot.sendMessage(chatId, customMessage, options);
+      }
+
+      const welcomeMessage = `Hi there! 👋
+
+  Welcome to the TokenWatch AI bot.
+  
+  Tap one of the buttons below:
+  
+  🚀 Top-30 ToTheMoonScore - receive up to 4 times a day ToTheMoonScore AI predictions
+  
+  💰 Referral - earn $TOKENWATCH tokens for inviting friends
+  
+  ℹ️ About - more info about this bot and links
+  
+  We are here to help your daily tokens investment decisions become smarter 🧠
+  
+  To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonScore”.`;
 
       this.bot.sendMessage(chatId, welcomeMessage, options);
     });
