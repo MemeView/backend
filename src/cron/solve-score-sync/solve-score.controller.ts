@@ -5,9 +5,17 @@ import {
   HttpException,
   Res,
   Query,
+  Post,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
+import { UTCDate } from '@date-fns/utc';
+import { subHours } from 'date-fns';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { Request } from 'express';
+import * as jwt from 'jsonwebtoken';
 
 @Controller('api')
 export class SolveScoreController {
@@ -132,6 +140,79 @@ export class SolveScoreController {
       const result = await this.prisma.score.findMany({
         orderBy: {
           tokenScore: 'desc',
+        },
+      });
+
+      return result;
+    } catch (e) {
+      return e;
+    }
+  }
+
+  @Get('/ttms-by-hours')
+  @UseGuards(JwtAuthGuard)
+  async ttmsByHours(@Query('hour') hour: number, @Req() request: Request) {
+    try {
+      let scoreQuery = ``;
+
+      const accessToken = request.cookies['accessToken'];
+
+      // Декодируем accessToken, чтобы получить данные пользователя
+      const decodedToken: { walletAddress: string } = jwt.verify(
+        accessToken,
+        process.env.JWT_SECRET,
+      ) as { walletAddress: string };
+
+      const user = await this.prisma.subscribers.findUnique({
+        where: {
+          walletAddress: decodedToken.walletAddress,
+        },
+      });
+
+      if (
+        user.subscriptionLevel !== 'PLAN 1' &&
+        user.subscriptionLevel !== 'PLAN 2'
+      ) {
+        return `You dont have permission to tokens score`;
+      }
+
+      if (hour < 3) {
+        scoreQuery = `score9pm`;
+      }
+
+      if (hour >= 3 && hour < 9) {
+        if (user.subscriptionLevel === 'PLAN 1') {
+          scoreQuery = `score9pm`;
+        } else {
+          scoreQuery = `score3am`;
+        }
+      }
+
+      if (hour >= 9 && hour < 15) {
+        scoreQuery = `score9am`;
+      }
+
+      if (hour >= 15 && hour < 21) {
+        if (user.subscriptionLevel === 'PLAN 1') {
+          scoreQuery = `score9am`;
+        } else {
+          scoreQuery = `score3pm`;
+        }
+      }
+
+      if (hour >= 21) {
+        scoreQuery = `score9pm`;
+      }
+
+      const result = await this.prisma.ttmsByHours.findFirst({
+        where: {
+          [scoreQuery]: { not: null },
+        },
+        orderBy: {
+          id: 'desc',
+        },
+        select: {
+          [scoreQuery]: true,
         },
       });
 

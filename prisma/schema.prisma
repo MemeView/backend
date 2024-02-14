@@ -130,6 +130,16 @@ model Subscribers {
   holdingTWAmount       Int
   holdingTWAmountUSDT   Int
   subscriptionLevel     String
+  trialCreatedAt        DateTime?
+}
+
+model TtmsByHours {
+  id          Int @id @default(autoincrement())
+  score3am       Json?
+  score9am       Json?
+  score3pm       Json?
+  score9pm       Json?
+  createdAt      DateTime @default(now())
 }
 
 

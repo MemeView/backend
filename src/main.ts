@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import 'graphql-import-node';
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const now = new Date();
+  app.use(cookieParser());
   app.enableCors();
   await app.listen(3000);
 }

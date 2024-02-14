@@ -7,7 +7,7 @@ import { PrismaClient } from '@prisma/client';
 import { PostingService } from './posting/posting.service';
 import * as process from 'process';
 import { HoldersService } from './holders/holders.service';
-import { startOfHour } from 'date-fns';
+import { startOfHour, subHours } from 'date-fns';
 import { VotesService } from './votes-sync/votes.service';
 import { UTCDate } from '@date-fns/utc';
 import { AuthService } from 'src/auth/auth.service';
@@ -148,8 +148,25 @@ export class CronService {
       console.log(`Cron 'posting' job completed`);
     });
 
-    await this.authService.recalculateSubscriptionsLevel();
-    console.log(`Cron 'recalculate-subscribers' job complited`);
+    if (currentHour === 3) {
+      await this.solveScoreService.solveTtmsByHours('3am');
+      console.log(`Current ttms has beet copied to the column 3am`);
+    }
+
+    if (currentHour === 9) {
+      await this.solveScoreService.solveTtmsByHours('9am');
+      console.log(`Current ttms has beet copied to the column 9am`);
+    }
+
+    if (currentHour === 15) {
+      await this.solveScoreService.solveTtmsByHours('3pm');
+      console.log(`Current ttms has beet copied to the column 3pm`);
+    }
+
+    if (currentHour === 21) {
+      await this.solveScoreService.solveTtmsByHours('9pm');
+      console.log(`Current ttms has beet copied to the column 9pm`);
+    }
   }
 
   async volumeCron() {

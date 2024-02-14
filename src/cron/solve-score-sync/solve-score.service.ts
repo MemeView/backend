@@ -3,6 +3,7 @@ import { PrismaClient, ScoreByHours } from '@prisma/client';
 import { subDays, subHours, startOfDay } from 'date-fns';
 import { IntRange } from '../../common.type';
 import { UTCDate } from '@date-fns/utc';
+import { getAbsoluteScore } from 'src/helpers/getAbsoluteScore';
 
 type QueryResult = {
   tokenAddress: string;
@@ -809,5 +810,63 @@ export class SolveScoreService {
     }
 
     return 'ok';
+  }
+
+  async solveTtmsByHours(hour: string) {
+    const scores = await this.prisma.score.findMany({
+      orderBy: [{ tokenScore: 'desc' }, { liquidity: 'desc' }],
+    });
+
+    const scoresQuery: string[] = [];
+    scores.forEach((element) => {
+      scoresQuery.push(element.tokenAddress);
+    });
+
+    const tokenList = await this.prisma.tokens.findMany({
+      where: {
+        address: {
+          in: scoresQuery,
+        },
+      },
+    });
+
+    let result = tokenList.map((token) => {
+      const score = scores.find(
+        (element) => element.tokenAddress === token.address,
+      );
+
+      return {
+        absoluteScore: score!.tokenScore,
+        score: Math.ceil(score!.tokenScore),
+        ...token,
+      };
+    });
+
+    result = result.sort((a, b) => {
+      if (
+        getAbsoluteScore(a.absoluteScore) === getAbsoluteScore(b.absoluteScore)
+      ) {
+        return Number(b.liquidity) - Number(a.liquidity);
+      }
+      return b.absoluteScore - a.absoluteScore;
+    });
+
+    const scoreByCurrentHour = `score${hour}`;
+
+    const utcDate = new UTCDate();
+    // удаляем старый счёт
+    await this.prisma.ttmsByHours.deleteMany({
+      where: {
+        createdAt: { lte: subHours(utcDate, 24) },
+      },
+    });
+
+    const ttmsNow = await this.prisma.ttmsByHours.create({
+      data: {
+        [scoreByCurrentHour]: result.slice(0, 50),
+      },
+    });
+
+    return ttmsNow;
   }
 }

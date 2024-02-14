@@ -10,6 +10,7 @@ import {
 import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { PrismaClient } from '@prisma/client';
+import { UTCDate } from '@date-fns/utc';
 
 @Controller('api')
 export class AuthController {
@@ -62,25 +63,16 @@ export class AuthController {
     }
   }
 
-  @Post('/calculate-subscriptions')
+  @Post('/choose-subscription')
   async calculateSubscriptionLevel(
     @Body('walletAddress') walletAddress: string,
+    @Body('plan') plan: string,
   ) {
     try {
       const result = await this.authService.calculateSubscriptionLevel(
         walletAddress,
+        plan,
       );
-
-      return result;
-    } catch (error) {
-      return error;
-    }
-  }
-
-  @Post('/recalculate-subscriptions')
-  async recalculateSubscriptionLevel() {
-    try {
-      const result = await this.authService.recalculateSubscriptionsLevel();
 
       return result;
     } catch (error) {
