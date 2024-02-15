@@ -1,9 +1,11 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { RefreshMiddleware } from './refresh-jwt.middleware';
 
 @Module({
   imports: [
@@ -14,6 +16,10 @@ import { JwtStrategy } from './jwt.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtService, JwtStrategy],
+  providers: [AuthService, JwtService, JwtStrategy, JwtAuthGuard],
 })
-export class AuthModule {}
+export class AuthModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RefreshMiddleware).forRoutes('api/choose-subscription');
+  }
+}

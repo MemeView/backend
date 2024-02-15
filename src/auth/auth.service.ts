@@ -82,7 +82,7 @@ export class AuthService {
       // Установка cookie с accessToken
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        maxAge: 600000, // 10 минут в миллисекундах
+        maxAge: 1200000, // 20 минут в миллисекундах
       });
 
       return {
@@ -96,7 +96,10 @@ export class AuthService {
 
   async refreshTokens(refreshToken: string, res: Response) {
     try {
-      const decoded = this.jwtService.verify(refreshToken);
+      const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET) as {
+        walletAddress: string;
+        exp: number;
+      };
 
       if (decoded) {
         const user = await this.validateUser(decoded.walletAddress);
@@ -115,19 +118,6 @@ export class AuthService {
               expiresIn: '7d',
             },
           );
-
-          await this.prisma.users.update({
-            where: { walletAddress: user.walletAddress },
-            data: {
-              refreshToken,
-              refreshTokenCreatedAt: new Date(),
-            },
-          });
-
-          res.cookie('accessToken', accessToken, {
-            httpOnly: true,
-            maxAge: 600000, // 10 минут в миллисекундах
-          });
 
           return {
             accessToken,

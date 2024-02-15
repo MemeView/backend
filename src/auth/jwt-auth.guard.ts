@@ -1,14 +1,35 @@
-import { Injectable, ExecutionContext } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import * as jwt from 'jsonwebtoken';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-  canActivate(context: ExecutionContext) {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const token = request.cookies['accessToken']; // Извлекаем токен из cookie
+    const accessToken = request.cookies['accessToken'];
 
-    request.headers['authorization'] = `Bearer ${token}`; // Устанавливаем токен в заголовке авторизации
+    if (!accessToken) {
+      throw new UnauthorizedException('Access token not found');
+    }
 
-    return super.canActivate(context);
+    try {
+      const decodedAccessToken = jwt.verify(
+        accessToken,
+        process.env.JWT_SECRET,
+      ) as {
+        walletAddress: string;
+        exp: number;
+      };
+
+      request.headers['authorization'] = `Bearer ${accessToken}`;
+      return true;
+    } catch (error) {
+      console.log(error.message);
+      throw new UnauthorizedException();
+    }
   }
 }

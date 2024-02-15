@@ -6,11 +6,15 @@ import {
   HttpStatus,
   Get,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
+import * as jwt from 'jsonwebtoken';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('api')
 export class AuthController {
@@ -63,12 +67,23 @@ export class AuthController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post('/choose-subscription')
   async calculateSubscriptionLevel(
-    @Body('walletAddress') walletAddress: string,
     @Body('plan') plan: string,
+    @Req() request: Request,
   ) {
     try {
+      const accessToken = request.cookies['accessToken'];
+
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
       const result = await this.authService.calculateSubscriptionLevel(
         walletAddress,
         plan,

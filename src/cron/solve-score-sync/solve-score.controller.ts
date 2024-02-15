@@ -8,19 +8,25 @@ import {
   Post,
   UseGuards,
   Req,
+  UnauthorizedException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
-import { subHours } from 'date-fns';
+import { subDays, subHours } from 'date-fns';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
+import { AuthService } from 'src/auth/auth.service';
+import { RefreshMiddleware } from 'src/auth/refresh-jwt.middleware';
+import { useMiddleware } from 'graphql-config/typings/helpers';
 
 @Controller('api')
 export class SolveScoreController {
   constructor(
     private readonly solveScoreService: SolveScoreService,
+    private readonly authService: AuthService,
     private prisma: PrismaClient,
   ) {}
 
@@ -151,23 +157,46 @@ export class SolveScoreController {
 
   @Get('/ttms-by-hours')
   @UseGuards(JwtAuthGuard)
-  async ttmsByHours(@Query('hour') hour: number, @Req() request: Request) {
+  async ttmsByHours(
+    @Query('hour') hour: number,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     try {
       let scoreQuery = ``;
+      const utcDate = new UTCDate();
+      const sevenDaysAgo = subDays(utcDate, 7);
 
       const accessToken = request.cookies['accessToken'];
 
       // Декодируем accessToken, чтобы получить данные пользователя
-      const decodedToken: { walletAddress: string } = jwt.verify(
-        accessToken,
-        process.env.JWT_SECRET,
-      ) as { walletAddress: string };
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        iat: number;
+        exp: number;
+      };
 
       const user = await this.prisma.subscribers.findUnique({
         where: {
-          walletAddress: decodedToken.walletAddress,
+          walletAddress: decodedAccessToken.walletAddress,
         },
       });
+
+      if (
+        user.subscriptionLevel === 'TRIAL' &&
+        user.trialCreatedAt < sevenDaysAgo
+      ) {
+        await this.prisma.subscribers.update({
+          where: {
+            walletAddress: user.walletAddress,
+          },
+          data: {
+            subscriptionLevel: 'NONE',
+          },
+        });
+
+        return `Your trial period has already expired`;
+      }
 
       if (
         user.subscriptionLevel !== 'PLAN 1' &&
