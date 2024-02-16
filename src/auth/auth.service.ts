@@ -206,6 +206,8 @@ export class AuthService {
         // Установка cookie с accessToken
         res.cookie('accessToken', accessToken, {
           httpOnly: true,
+          secure: true,
+          sameSite: 'none',
           maxAge: 600000, // 10 минут в миллисекундах
         });
 
