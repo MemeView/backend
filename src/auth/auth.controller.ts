@@ -68,6 +68,41 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/check-plan')
+  async currentSubscription(@Req() request: Request) {
+    try {
+      const accessToken = request.cookies['accessToken'];
+
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
+      const user = await this.prisma.subscribers.findUnique({
+        where: {
+          walletAddress: walletAddress,
+        },
+      });
+
+      if (
+        !user ||
+        (user.subscriptionLevel !== 'TRIAL' &&
+          user.subscriptionLevel !== 'PLAN 1' &&
+          user.subscriptionLevel !== 'PLAN 2')
+      ) {
+        return null;
+      }
+
+      return user.subscriptionLevel;
+    } catch (error) {
+      return { error: error.message };
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post('/choose-subscription')
   async calculateSubscriptionLevel(
     @Body('plan') plan: string,
