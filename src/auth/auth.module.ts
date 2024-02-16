@@ -20,6 +20,8 @@ import { RefreshMiddleware } from './refresh-jwt.middleware';
 })
 export class AuthModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RefreshMiddleware).forRoutes('api/choose-subscription');
+    consumer
+      .apply(RefreshMiddleware)
+      .forRoutes('api/choose-subscription', 'api/check-plan');
   }
 }
