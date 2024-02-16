@@ -23,6 +23,7 @@ async function bootstrap() {
   app.enableCors({
     origin: true,
     credentials: true,
+    preflightContinue: false,
     methods: ['GET', 'POST', 'PUT', 'HEAD', 'PATCH', 'DELETE'],
   });
   await app.listen(3000);
