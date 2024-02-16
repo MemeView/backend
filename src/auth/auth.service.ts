@@ -208,6 +208,7 @@ export class AuthService {
           httpOnly: true,
           secure: true,
           sameSite: 'none',
+          domain: 'api.tokenwatch.ai',
           maxAge: 600000, // 10 минут в миллисекундах
         });
 
