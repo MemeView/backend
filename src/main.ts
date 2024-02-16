@@ -12,15 +12,16 @@ const httpsOptions = {
 
 const isDev = process.env.NODE_ENV === 'development';
 
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    ...(isDev ? { httpsOptions } : {}),
+    ...(isDev ? {httpsOptions} : {})
   });
 
   app.use(cookieParser());
 
   app.enableCors({
-    origin: '*',
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'HEAD', 'PATCH', 'DELETE'],
   });
