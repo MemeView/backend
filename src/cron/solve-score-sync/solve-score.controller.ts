@@ -158,13 +158,13 @@ export class SolveScoreController {
   @Get('/ttms-by-hours')
   @UseGuards(JwtAuthGuard)
   async ttmsByHours(
-    @Query('hour') hour: number,
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
     try {
       let scoreQuery = ``;
       const utcDate = new UTCDate();
+      const hour = utcDate.getHours();
       const sevenDaysAgo = subDays(utcDate, 7);
 
       const accessToken = request.cookies['accessToken'];
@@ -200,7 +200,8 @@ export class SolveScoreController {
 
       if (
         user.subscriptionLevel !== 'PLAN 1' &&
-        user.subscriptionLevel !== 'PLAN 2'
+        user.subscriptionLevel !== 'PLAN 2' &&
+        user.subscriptionLevel !== 'TRIAL'
       ) {
         return `You dont have permission to tokens score`;
       }
@@ -210,7 +211,10 @@ export class SolveScoreController {
       }
 
       if (hour >= 3 && hour < 9) {
-        if (user.subscriptionLevel === 'PLAN 1') {
+        if (
+          user.subscriptionLevel === 'PLAN 1' ||
+          user.subscriptionLevel === 'TRIAL'
+        ) {
           scoreQuery = `score9pm`;
         } else {
           scoreQuery = `score3am`;
@@ -222,7 +226,10 @@ export class SolveScoreController {
       }
 
       if (hour >= 15 && hour < 21) {
-        if (user.subscriptionLevel === 'PLAN 1') {
+        if (
+          user.subscriptionLevel === 'PLAN 1' ||
+          user.subscriptionLevel === 'TRIAL'
+        ) {
           scoreQuery = `score9am`;
         } else {
           scoreQuery = `score3pm`;
