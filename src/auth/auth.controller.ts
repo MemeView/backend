@@ -96,7 +96,11 @@ export class AuthController {
         return null;
       }
 
-      return user.subscriptionLevel;
+      const subscriptionLevel = JSON.stringify({
+        plan: user.subscriptionLevel,
+      });
+
+      return JSON.parse(subscriptionLevel);
     } catch (error) {
       return { error: error.message };
     }
