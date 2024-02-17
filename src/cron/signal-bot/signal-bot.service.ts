@@ -141,4 +141,20 @@ export class SignalBotService {
       }
     });
   }
+  async checkSubscriptionByUsername(
+    username: string,
+    channelId: string,
+  ): Promise<boolean> {
+    try {
+      const chat = await this.bot.getChatMember(channelId, `@${username}`);
+      return (
+        chat.status === 'member' ||
+        chat.status === 'creator' ||
+        chat.status === 'administrator'
+      );
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
 }

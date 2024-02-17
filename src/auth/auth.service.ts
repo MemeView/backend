@@ -1,4 +1,10 @@
-import { Injectable, UnauthorizedException, Res } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  Res,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { isAddress } from 'ethers';
@@ -46,7 +52,7 @@ export class AuthService {
       const isValidAddress = isAddress(walletAddress);
 
       if (!isValidAddress) {
-        throw new UnauthorizedException('Invalid wallet address');
+        throw new HttpException('No such plan exists', HttpStatus.NOT_FOUND);
       }
 
       const user = await this.prisma.users.upsert({
@@ -249,7 +255,7 @@ export class AuthService {
     });
 
     if (!subscription) {
-      return 'no such plan exists';
+      throw new HttpException('No such plan exists', HttpStatus.NOT_FOUND);
     }
 
     const currentTWPrice = await this.prisma.tokens.findFirst({
