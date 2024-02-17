@@ -14,13 +14,21 @@ import {
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
-import { subDays, subHours } from 'date-fns';
+import {
+  getDate,
+  getMonth,
+  getYear,
+  parseISO,
+  subDays,
+  subHours,
+} from 'date-fns';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from 'src/auth/auth.service';
 import { RefreshMiddleware } from 'src/auth/refresh-jwt.middleware';
 import { useMiddleware } from 'graphql-config/typings/helpers';
+import { format } from 'path';
 
 @Controller('api')
 export class SolveScoreController {
@@ -249,10 +257,39 @@ export class SolveScoreController {
         },
         select: {
           [scoreQuery]: true,
+          createdAt: true,
         },
       });
 
-      return result;
+      const dateString = result.createdAt;
+
+      const year = getYear(dateString);
+      const month = getMonth(dateString); // (начинает с 0 для января)
+      const day = getDate(dateString);
+
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+
+      const calculatedOn = `${
+        months[month]
+      } ${day}, ${year} at ${scoreQuery.substring(scoreQuery.length - 3)}`;
+
+      return {
+        calculatedOn: calculatedOn,
+        data: result[scoreQuery],
+      };
     } catch (e) {
       return e;
     }
