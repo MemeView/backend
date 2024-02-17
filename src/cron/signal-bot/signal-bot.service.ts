@@ -146,7 +146,7 @@ export class SignalBotService {
     channelId: string,
   ): Promise<boolean> {
     try {
-      const chat = await this.bot.getChatMember(channelId, `@${username}`);
+      const chat = await this.bot.getChatMember(channelId, username);
       return (
         chat.status === 'member' ||
         chat.status === 'creator' ||

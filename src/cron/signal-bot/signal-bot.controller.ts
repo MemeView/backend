@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Post } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { SignalBotService } from './signal-bot.service';
 
@@ -9,11 +9,11 @@ export class SignalBotController {
     private readonly signalBotService: SignalBotService,
   ) {}
 
-  @Get('/check-subscription-to-channel')
+  @Post('/check-subscription-to-channel')
   async checkSubscriptionToChannel() {
     try {
-      const username = 'BIBO_Baggins';
-      const channelId = '-1001880299449';
+      const username = '1161414429';
+      const channelId = 'TokenWatch_ai';
 
       const result = await this.signalBotService.checkSubscriptionByUsername(
         username,
