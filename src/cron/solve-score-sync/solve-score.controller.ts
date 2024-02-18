@@ -194,16 +194,7 @@ export class SolveScoreController {
         user.subscriptionLevel === 'TRIAL' &&
         user.trialCreatedAt < sevenDaysAgo
       ) {
-        await this.prisma.subscribers.update({
-          where: {
-            walletAddress: user.walletAddress,
-          },
-          data: {
-            subscriptionLevel: 'NONE',
-          },
-        });
-
-        return `Your trial period has already expired`;
+        return new HttpException(`Your trial period has already expired`, 403);
       }
 
       if (

@@ -30,6 +30,9 @@ export class AuthController {
   ) {
     try {
       const result = await this.authService.signUp(walletAddress, res);
+      const TWAmount = await this.authService.getTokenBalance(walletAddress);
+
+      result.user.TWAmount = TWAmount;
 
       return res.status(HttpStatus.OK).json(result);
     } catch (error) {
@@ -49,6 +52,10 @@ export class AuthController {
         telegramId,
         res,
       );
+
+      const TWAmount = await this.authService.getTokenBalance(walletAddress);
+
+      result.user.TWAmount = TWAmount;
 
       return res.status(HttpStatus.OK).json(result);
     } catch (error) {
@@ -114,6 +121,7 @@ export class AuthController {
         plan: user.subscriptionLevel,
       });
 
+      //403 возвращать
       return JSON.parse(subscriptionLevel);
     } catch (error) {
       return { error: error.message };
