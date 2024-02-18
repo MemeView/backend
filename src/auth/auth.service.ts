@@ -62,7 +62,7 @@ export class AuthService {
       });
 
       const accessToken = jwt.sign(
-        { walletAddress: user.walletAddress },
+        { walletAddress: user.walletAddress, telegramId: user.telegramId },
         process.env.JWT_SECRET,
         {
           expiresIn: '10m',
@@ -70,7 +70,7 @@ export class AuthService {
       );
 
       const refreshToken = jwt.sign(
-        { walletAddress: user.walletAddress },
+        { walletAddress: user.walletAddress, telegramId: user.telegramId },
         process.env.JWT_SECRET,
         {
           expiresIn: '7d',
@@ -112,13 +112,13 @@ export class AuthService {
 
         if (user) {
           const accessToken = jwt.sign(
-            { walletAddress: user.walletAddress },
+            { walletAddress: user.walletAddress, telegramId: user.telegramId },
             process.env.JWT_SECRET,
             { expiresIn: '10m' },
           );
 
           const refreshToken = jwt.sign(
-            { walletAddress: user.walletAddress },
+            { walletAddress: user.walletAddress, telegramId: user.telegramId },
             process.env.JWT_SECRET,
             {
               expiresIn: '7d',
@@ -138,7 +138,7 @@ export class AuthService {
 
   async signUpWithTelegram(
     walletAddress: string,
-    telegramId: string,
+    telegramId: number,
     res: Response,
   ) {
     try {
@@ -174,7 +174,10 @@ export class AuthService {
         wallet.telegramId !== null &&
         wallet.telegramId !== telegramId
       ) {
-        return 'You cannot link this telegram account to this wallet, since another telegram account is already linked to it';
+        return new HttpException(
+          'You cannot link this telegram account to this wallet, since another telegram account is already linked to it',
+          400,
+        );
       }
 
       if (wallet && wallet.telegramId === null) {
@@ -186,7 +189,7 @@ export class AuthService {
 
       if (user !== null) {
         const accessToken = jwt.sign(
-          { walletAddress: user.walletAddress },
+          { walletAddress: user.walletAddress, telegramId: user.telegramId },
           process.env.JWT_SECRET,
           {
             expiresIn: '10m',
@@ -194,7 +197,7 @@ export class AuthService {
         );
 
         const refreshToken = jwt.sign(
-          { walletAddress: user.walletAddress },
+          { walletAddress: user.walletAddress, telegramId: user.telegramId },
           process.env.JWT_SECRET,
           {
             expiresIn: '7d',

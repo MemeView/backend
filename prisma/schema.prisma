@@ -26,6 +26,7 @@ model Tokens {
   token       Json?
   cronCount   Int?
   networkId   Int?
+  image       String?
 }
 
 model Blacklist {
@@ -83,7 +84,7 @@ model DailyScore {
 
 model Users {
   walletAddress         String   @id @unique
-  telegramId            String?
+  telegramId            Int?
   votes                 Int      @default(5)
   updatedAt             DateTime @default(now())
   refreshToken          String?
@@ -126,7 +127,7 @@ model Subscriptions {
 
 model Subscribers {
   walletAddress         String @id @unique
-  telegramId            String?
+  telegramId            Int?
   holdingTWAmount       Int
   holdingTWAmountUSDT   Int
   subscriptionLevel     String

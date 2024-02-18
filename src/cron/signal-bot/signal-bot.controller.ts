@@ -1,6 +1,11 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { SignalBotService } from './signal-bot.service';
+import { Response, Request } from 'express';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import * as jwt from 'jsonwebtoken';
+import { UTCDate } from '@date-fns/utc';
+import { subHours } from 'date-fns';
 
 @Controller('/api')
 export class SignalBotController {
@@ -9,18 +14,65 @@ export class SignalBotController {
     private readonly signalBotService: SignalBotService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post('/check-subscription-to-channel')
-  async checkSubscriptionToChannel() {
+  async checkSubscriptionToChannel(@Req() request: Request) {
     try {
-      const username = '1161414429';
-      const channelId = 'TokenWatch_ai';
+      const accessToken = request.cookies['accessToken'];
 
-      const result = await this.signalBotService.checkSubscriptionByUsername(
-        username,
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        telegramId: number;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress, telegramId } = decodedAccessToken;
+
+      const userId = telegramId;
+      const channelId = '-1001844688490';
+
+      const result = await this.signalBotService.checkSubscriptionByUserId(
         channelId,
+        userId,
       );
 
       return result;
+    } catch (e) {
+      return e;
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/check-user-has-voted')
+  async checkUserHasVoted(@Req() request: Request) {
+    try {
+      const accessToken = request.cookies['accessToken'];
+      const utcDate = new UTCDate();
+      const date24hoursAgo = subHours(utcDate, 24);
+
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        telegramId: number;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
+      const userVotes = await this.prisma.votes.findMany({
+        where: {
+          AND: [
+            { date: { gte: date24hoursAgo } },
+            { walletAddress: walletAddress },
+          ],
+        },
+      });
+
+      if (userVotes.length >= 5) {
+        return true;
+      }
+      return false;
     } catch (e) {
       return e;
     }

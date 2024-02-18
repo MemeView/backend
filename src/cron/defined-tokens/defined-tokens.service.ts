@@ -142,6 +142,7 @@ export class DefinedTokensService {
             pairAddress: pair?.address,
             cronCount: outerIteration,
             networkId: networkId,
+            image: token.info.imageLargeUrl,
           }),
         );
 

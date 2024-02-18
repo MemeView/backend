@@ -40,7 +40,7 @@ export class AuthController {
   @Post('/auth-with-telegram')
   async signUpWithTelegram(
     @Body('walletAddress') walletAddress: string,
-    @Body('telegramId') telegramId: string,
+    @Body('telegramId') telegramId: number,
     @Res() res: Response,
   ) {
     try {
@@ -56,12 +56,26 @@ export class AuthController {
     }
   }
 
-  @Get('/TW-balance-check')
-  async tokenBalance(@Query('walletAddress') walletAddress: string) {
+  @UseGuards(JwtAuthGuard)
+  @Post('/TW-balance-check')
+  async tokenBalance(@Req() request: Request) {
     try {
-      const result = await this.authService.getTokenBalance(walletAddress);
+      const accessToken = request.cookies['accessToken'];
 
-      return result;
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
+      const result = await this.authService.getTokenBalance(walletAddress);
+      if (result && result > 0) {
+        return true;
+      }
+
+      return false;
     } catch (error) {
       return { error: error.message };
     }
