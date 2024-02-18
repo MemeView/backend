@@ -30,7 +30,7 @@ export class SignalBotController {
       const { walletAddress, telegramId } = decodedAccessToken;
 
       const userId = telegramId;
-      const channelId = '-1001844688490';
+      const channelId = '-1001880299449';
 
       const result = await this.signalBotService.checkSubscriptionByUserId(
         channelId,
@@ -48,8 +48,6 @@ export class SignalBotController {
   async checkUserHasVoted(@Req() request: Request) {
     try {
       const accessToken = request.cookies['accessToken'];
-      const utcDate = new UTCDate();
-      const date24hoursAgo = subHours(utcDate, 24);
 
       const decodedAccessToken = jwt.decode(accessToken) as {
         walletAddress: string;
@@ -60,19 +58,11 @@ export class SignalBotController {
 
       const { walletAddress } = decodedAccessToken;
 
-      const userVotes = await this.prisma.votes.findMany({
-        where: {
-          AND: [
-            { date: { gte: date24hoursAgo } },
-            { walletAddress: walletAddress },
-          ],
-        },
-      });
+      const userHasVoted = await this.signalBotService.checkUserHasVoted(
+        walletAddress,
+      );
 
-      if (userVotes.length >= 5) {
-        return true;
-      }
-      return false;
+      return userHasVoted;
     } catch (e) {
       return e;
     }

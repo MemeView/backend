@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RefreshMiddleware } from './refresh-jwt.middleware';
+import { SignalBotService } from 'src/cron/signal-bot/signal-bot.service';
 
 @Module({
   imports: [
@@ -16,7 +17,13 @@ import { RefreshMiddleware } from './refresh-jwt.middleware';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtService, JwtStrategy, JwtAuthGuard],
+  providers: [
+    AuthService,
+    JwtService,
+    JwtStrategy,
+    JwtAuthGuard,
+    SignalBotService,
+  ],
 })
 export class AuthModule {
   configure(consumer: MiddlewareConsumer) {
