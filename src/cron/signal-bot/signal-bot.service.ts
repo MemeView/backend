@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
 import * as TelegramBot from 'node-telegram-bot-api';
 
 @Injectable()
@@ -6,13 +7,14 @@ export class SignalBotService {
   private bot: TelegramBot;
   private authorizedUsers: Set<number>; // множество для хранения id авторизованных пользователей
 
-  constructor() {
+  constructor(private readonly prisma: PrismaClient) {
     this.bot = new TelegramBot(process.env.TG_SIGNAL_BOT_TOKEN, {
       polling: true,
     });
     this.authorizedUsers = new Set();
+    let userId = 0;
 
-    this.bot.onText(/\/start/, (msg) => {
+    this.bot.onText(/\/start/, async (msg) => {
       const chatId = msg.chat.id;
 
       const payload = msg.text!.substring(7);
@@ -140,13 +142,23 @@ export class SignalBotService {
         this.bot.sendMessage(chatId, supportMessage);
       }
     });
+
+    this.bot.onText(/\/checkSubscriptionToChannel/, async (msg) => {
+      const chatId = msg.chat.id;
+      userId = msg.from.id;
+
+      const isSubscribedToTheTelegramChannel =
+        await this.checkSubscriptionByUserId('-1001844688490', userId);
+      console.log(isSubscribedToTheTelegramChannel);
+    });
   }
-  async checkSubscriptionByUsername(
-    username: string,
+
+  async checkSubscriptionByUserId(
     channelId: string,
+    userId: number,
   ): Promise<boolean> {
     try {
-      const chat = await this.bot.getChatMember(channelId, username);
+      const chat = await this.bot.getChatMember(channelId, userId);
       return (
         chat.status === 'member' ||
         chat.status === 'creator' ||

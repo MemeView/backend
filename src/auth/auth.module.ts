@@ -22,6 +22,10 @@ export class AuthModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(RefreshMiddleware)
-      .forRoutes('api/choose-subscription', 'api/check-plan');
+      .forRoutes(
+        'api/choose-subscription',
+        'api/check-plan',
+        'api/TW-balance-check',
+      );
   }
 }
