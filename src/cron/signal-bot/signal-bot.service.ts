@@ -1,5 +1,7 @@
+import { UTCDate } from '@date-fns/utc';
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { subHours } from 'date-fns';
 import * as TelegramBot from 'node-telegram-bot-api';
 
 @Injectable()
@@ -168,5 +170,24 @@ export class SignalBotService {
       console.error(error);
       return false;
     }
+  }
+
+  async checkUserHasVoted(walletAddress: string) {
+    const utcDate = new UTCDate();
+    const date24hoursAgo = subHours(utcDate, 24);
+
+    const userVotes = await this.prisma.votes.findMany({
+      where: {
+        AND: [
+          { date: { gte: date24hoursAgo } },
+          { walletAddress: walletAddress },
+        ],
+      },
+    });
+
+    if (userVotes.length >= 5) {
+      return true;
+    }
+    return false;
   }
 }
