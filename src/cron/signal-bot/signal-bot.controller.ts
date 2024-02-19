@@ -45,7 +45,7 @@ export class SignalBotController {
           check: true,
         });
       } else {
-        return response.status(403).json({
+        return response.status(200).json({
           check: false,
         });
       }
@@ -78,7 +78,7 @@ export class SignalBotController {
           check: true,
         });
       } else {
-        return response.status(403).json({
+        return response.status(200).json({
           check: false,
         });
       }
