@@ -863,7 +863,7 @@ export class SolveScoreService {
 
     const ttmsNow = await this.prisma.ttmsByHours.create({
       data: {
-        [scoreByCurrentHour]: result.slice(0, 50),
+        [scoreByCurrentHour]: result.slice(0, 30),
       },
     });
 
