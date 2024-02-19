@@ -158,6 +158,20 @@ export class AuthController {
 
         const twitter = true;
 
+        if (process.env.NODE_ENV === 'development') {
+          return response.status(200).json({
+            plan: user.subscriptionLevel,
+            req: {
+              twitter: true,
+              telegram: true,
+              voted: true,
+              holding: true,
+              trialActive: true,
+              expirationDate: add(user.trialCreatedAt, { days: 7 }),
+            },
+          });
+        }
+
         if (
           isSubscribedOnChanel === true &&
           userHasVoted === true &&
