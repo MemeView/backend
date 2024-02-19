@@ -68,7 +68,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/TW-balance-check')
+  @Post('/tw-balance-check')
   async tokenBalance(@Req() request: Request) {
     try {
       const accessToken = request.cookies['accessToken'];
