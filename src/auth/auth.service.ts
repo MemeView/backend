@@ -282,7 +282,7 @@ export class AuthService {
 
     const holdingTWAmountUSDT = balance * parseFloat(currentTWPrice.priceUSD);
 
-    if (plan === 'TRIAL' && user.freeTrialWasTaken === false) {
+    if (plan === 'trial' && user.freeTrialWasTaken === false) {
       const utcDate = new UTCDate();
 
       const result = await this.prisma.subscribers.upsert({

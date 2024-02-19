@@ -191,16 +191,16 @@ export class SolveScoreController {
       });
 
       if (
-        user.subscriptionLevel === 'TRIAL' &&
+        user.subscriptionLevel === 'trial' &&
         user.trialCreatedAt < sevenDaysAgo
       ) {
         return new HttpException(`Your trial period has already expired`, 403);
       }
 
       if (
-        user.subscriptionLevel !== 'PLAN 1' &&
-        user.subscriptionLevel !== 'PLAN 2' &&
-        user.subscriptionLevel !== 'TRIAL'
+        user.subscriptionLevel !== 'plan1' &&
+        user.subscriptionLevel !== 'plan2' &&
+        user.subscriptionLevel !== 'trial'
       ) {
         return `You dont have permission to tokens score`;
       }
@@ -211,8 +211,8 @@ export class SolveScoreController {
 
       if (hour >= 3 && hour < 9) {
         if (
-          user.subscriptionLevel === 'PLAN 1' ||
-          user.subscriptionLevel === 'TRIAL'
+          user.subscriptionLevel === 'plan1' ||
+          user.subscriptionLevel === 'trial'
         ) {
           scoreQuery = `score9pm`;
         } else {
@@ -226,8 +226,8 @@ export class SolveScoreController {
 
       if (hour >= 15 && hour < 21) {
         if (
-          user.subscriptionLevel === 'PLAN 1' ||
-          user.subscriptionLevel === 'TRIAL'
+          user.subscriptionLevel === 'plan1' ||
+          user.subscriptionLevel === 'trial'
         ) {
           scoreQuery = `score9am`;
         } else {

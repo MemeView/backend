@@ -69,7 +69,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/tw-balance-check')
-  async tokenBalance(@Req() request: Request) {
+  async tokenBalance(@Req() request: Request, @Body('plan') plan: string) {
     try {
       const accessToken = request.cookies['accessToken'];
 
@@ -118,14 +118,14 @@ export class AuthController {
 
       if (
         !user ||
-        (user.subscriptionLevel !== 'TRIAL' &&
-          user.subscriptionLevel !== 'PLAN 1' &&
-          user.subscriptionLevel !== 'PLAN 2')
+        (user.subscriptionLevel !== 'trial' &&
+          user.subscriptionLevel !== 'plan1' &&
+          user.subscriptionLevel !== 'plan2')
       ) {
         return { plan: null };
       }
 
-      if (user && user.subscriptionLevel === 'TRIAL') {
+      if (user && user.subscriptionLevel === 'trial') {
         const utcDate = new UTCDate();
         const sevenDaysAgo = subDays(utcDate, 7);
         let trialActive = true;
@@ -207,8 +207,8 @@ export class AuthController {
 
       if (
         user &&
-        (user.subscriptionLevel === 'PLAN 1' ||
-          user.subscriptionLevel === 'PLAN 2')
+        (user.subscriptionLevel === 'plan1' ||
+          user.subscriptionLevel === 'plan2')
       ) {
         const holdingTWAmount = await this.authService.getTokenBalance(
           walletAddress,
