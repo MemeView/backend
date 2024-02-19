@@ -98,9 +98,8 @@ export class AuthController {
             check: true,
           });
         } else {
-          return response.status(403).json({
+          return response.status(200).json({
             check: false,
-            message: `There are no $TOKENWATCH on linked address.`,
           });
         }
       }
@@ -130,18 +129,21 @@ export class AuthController {
           throw new HttpException('No such plan exists', HttpStatus.NOT_FOUND);
         }
 
-        if (balance && balance >= subscription.holdingTWAmount) {
+        if (
+          holdingTWAmountUSDT &&
+          holdingTWAmountUSDT >= subscription.holdingTWAmount
+        ) {
           return response.status(200).json({
             check: true,
           });
         } else {
           if (plan === 'plan1') {
-            return response.status(403).json({
+            return response.status(200).json({
               check: false,
             });
           }
           if (plan === 'plan2') {
-            return response.status(403).json({
+            return response.status(200).json({
               check: false,
             });
           }
