@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { SignalBotService } from './signal-bot.service';
 import { Response, Request } from 'express';
@@ -16,7 +16,10 @@ export class SignalBotController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/check-subscription-to-channel')
-  async checkSubscriptionToChannel(@Req() request: Request) {
+  async checkSubscriptionToChannel(
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
     try {
       const accessToken = request.cookies['accessToken'];
 
@@ -37,7 +40,15 @@ export class SignalBotController {
         userId,
       );
 
-      return result;
+      if (result === true) {
+        return response.status(200).json({
+          check: true,
+        });
+      } else {
+        return response.status(403).json({
+          check: false,
+        });
+      }
     } catch (e) {
       return e;
     }
@@ -45,7 +56,7 @@ export class SignalBotController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/check-user-has-voted')
-  async checkUserHasVoted(@Req() request: Request) {
+  async checkUserHasVoted(@Req() request: Request, @Res() response: Response) {
     try {
       const accessToken = request.cookies['accessToken'];
 
@@ -62,7 +73,15 @@ export class SignalBotController {
         walletAddress,
       );
 
-      return userHasVoted;
+      if (userHasVoted === true) {
+        return response.status(200).json({
+          check: true,
+        });
+      } else {
+        return response.status(403).json({
+          check: false,
+        });
+      }
     } catch (e) {
       return e;
     }

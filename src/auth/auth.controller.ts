@@ -69,7 +69,11 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/tw-balance-check')
-  async tokenBalance(@Req() request: Request, @Body('plan') plan: string) {
+  async tokenBalance(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Body('plan') plan: string,
+  ) {
     try {
       const accessToken = request.cookies['accessToken'];
 
@@ -81,12 +85,68 @@ export class AuthController {
 
       const { walletAddress } = decodedAccessToken;
 
-      const result = await this.authService.getTokenBalance(walletAddress);
-      if (result && result > 0) {
-        return true;
+      if (!plan) {
+        return response.status(403).json({
+          message: `plan not found`,
+        });
       }
 
-      return false;
+      if (plan === 'trial') {
+        const result = await this.authService.getTokenBalance(walletAddress);
+        if (result && result > 0) {
+          return response.status(200).json({
+            check: true,
+          });
+        } else {
+          return response.status(403).json({
+            check: false,
+            message: `There are no $TOKENWATCH on linked address.`,
+          });
+        }
+      }
+
+      if (plan !== 'trial') {
+        const balance = await this.authService.getTokenBalance(walletAddress);
+
+        const currentTWPrice = await this.prisma.tokens.findFirst({
+          where: {
+            address: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
+          },
+          select: {
+            priceUSD: true,
+          },
+        });
+
+        const holdingTWAmountUSDT =
+          balance * parseFloat(currentTWPrice.priceUSD);
+
+        const subscription = await this.prisma.subscriptions.findFirst({
+          where: {
+            title: plan,
+          },
+        });
+
+        if (!subscription) {
+          throw new HttpException('No such plan exists', HttpStatus.NOT_FOUND);
+        }
+
+        if (balance && balance >= subscription.holdingTWAmount) {
+          return response.status(200).json({
+            check: true,
+          });
+        } else {
+          if (plan === 'plan1') {
+            return response.status(403).json({
+              check: false,
+            });
+          }
+          if (plan === 'plan2') {
+            return response.status(403).json({
+              check: false,
+            });
+          }
+        }
+      }
     } catch (error) {
       return { error: error.message };
     }
@@ -122,7 +182,9 @@ export class AuthController {
           user.subscriptionLevel !== 'plan1' &&
           user.subscriptionLevel !== 'plan2')
       ) {
-        return { plan: null };
+        return response.status(403).json({
+          plan: null,
+        });
       }
 
       if (user && user.subscriptionLevel === 'trial') {
