@@ -20,13 +20,14 @@ export class SignalBotService {
       const chatId = msg.chat.id;
 
       const payload = msg.text!.substring(7);
+      console.log(payload);
 
       const buttons = [
         [
           {
             text: '🚀 Top-30 ToTheMoonScore',
             web_app: {
-              url: 'https://twa.tokenwatch.ai/',
+              url: 'https://twa.tokenwatch.ai?ref=abc12',
             },
           },
         ],
@@ -52,6 +53,9 @@ export class SignalBotService {
         return this.bot.sendMessage(chatId, customMessage, options);
       }
 
+      if (payload.length && payload.slice(0, 3) === 'ref') {
+        console.log(payload.slice(4));
+      }
       const welcomeMessage = `Hi there! 👋
 
   Welcome to the TokenWatch AI bot.
