@@ -128,8 +128,8 @@ model Subscriptions {
 model Subscribers {
   walletAddress         String @id @unique
   telegramId            Int?
-  holdingTWAmount       Int
-  holdingTWAmountUSDT   Int
+  holdingTWAmount       String
+  holdingTWAmountUSDT   String
   subscriptionLevel     String
   trialCreatedAt        DateTime?
 }
@@ -141,6 +141,10 @@ model TtmsByHours {
   score3pm       Json?
   score9pm       Json?
   createdAt      DateTime @default(now())
+}
+
+model TgWhiteList {
+  telegramId    Int @id @unique
 }
 
 

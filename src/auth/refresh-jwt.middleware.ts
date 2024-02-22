@@ -88,7 +88,6 @@ export class RefreshMiddleware implements NestMiddleware {
 
         res.cookie('accessToken', newAccessToken, {
           httpOnly: true,
-          maxAge: 1200000, // 20 минут в миллисекундах
         });
 
         req.cookies['accessToken'] = newAccessToken;

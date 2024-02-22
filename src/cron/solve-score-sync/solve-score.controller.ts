@@ -180,6 +180,7 @@ export class SolveScoreController {
       // Декодируем accessToken, чтобы получить данные пользователя
       const decodedAccessToken = jwt.decode(accessToken) as {
         walletAddress: string;
+        telegramId: number;
         iat: number;
         exp: number;
       };
@@ -188,6 +189,10 @@ export class SolveScoreController {
         where: {
           walletAddress: decodedAccessToken.walletAddress,
         },
+      });
+
+      const userInWhiteList = await this.prisma.tgWhiteList.findUnique({
+        where: { telegramId: decodedAccessToken.telegramId },
       });
 
       if (
@@ -200,7 +205,8 @@ export class SolveScoreController {
       if (
         user.subscriptionLevel !== 'plan1' &&
         user.subscriptionLevel !== 'plan2' &&
-        user.subscriptionLevel !== 'trial'
+        user.subscriptionLevel !== 'trial' &&
+        !userInWhiteList
       ) {
         return `You dont have permission to tokens score`;
       }
@@ -212,7 +218,8 @@ export class SolveScoreController {
       if (hour >= 3 && hour < 9) {
         if (
           user.subscriptionLevel === 'plan1' ||
-          user.subscriptionLevel === 'trial'
+          user.subscriptionLevel === 'trial' ||
+          userInWhiteList
         ) {
           scoreQuery = `score9pm`;
         } else {
@@ -227,7 +234,8 @@ export class SolveScoreController {
       if (hour >= 15 && hour < 21) {
         if (
           user.subscriptionLevel === 'plan1' ||
-          user.subscriptionLevel === 'trial'
+          user.subscriptionLevel === 'trial' ||
+          userInWhiteList
         ) {
           scoreQuery = `score9am`;
         } else {

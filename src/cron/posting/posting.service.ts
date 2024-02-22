@@ -48,7 +48,9 @@ export class PostingService {
   async sendTelegramMessage(message) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     const chatId = process.env.TELEGRAM_CHAT_ID;
-    const bot = new TelegramBot(botToken);
+    const bot = new TelegramBot(botToken, {
+      polling: false,
+    });
 
     try {
       await bot.sendMessage(chatId, message, { parse_mode: 'Markdown' });
@@ -254,6 +256,7 @@ export class PostingService {
           // });
 
           // await this.sendTwitterMessage(twitterMessage);
+          await this.sendTwitterMessage(testMessage);
 
           // Отмечаем токен как разосланный
           await this.prisma.postedTokens.create({

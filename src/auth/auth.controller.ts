@@ -172,6 +172,26 @@ export class AuthController {
 
       const { walletAddress, telegramId } = decodedAccessToken;
 
+      const userInWhiteList = await this.prisma.tgWhiteList.findUnique({
+        where: {
+          telegramId: telegramId,
+        },
+      });
+
+      if (userInWhiteList) {
+        return response.status(200).json({
+          plan: 'plan1',
+          req: {
+            twitter: true,
+            telegram: true,
+            voted: true,
+            holding: true,
+            trialActive: true,
+            expirationDate: null,
+          },
+        });
+      }
+
       const user = await this.prisma.subscribers.findUnique({
         where: {
           walletAddress: walletAddress,
@@ -309,7 +329,33 @@ export class AuthController {
 
       return result;
     } catch (error) {
-      return error;
+      throw new HttpException(error.message, 403);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/tg-white-list')
+  async addToTgWhiteList(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Body('telegramIds') telegramIds: number[],
+  ) {
+    try {
+      const usersToCreate = telegramIds.map((id) => ({ telegramId: id }));
+
+      const { count: deletedCount } =
+        await this.prisma.tgWhiteList.deleteMany();
+
+      const { count: addedCount } = await this.prisma.tgWhiteList.createMany({
+        data: usersToCreate,
+      });
+
+      return response.status(200).json({
+        deleted: deletedCount,
+        added: addedCount,
+      });
+    } catch (error) {
+      throw new HttpException(error.message, 403);
     }
   }
 }
