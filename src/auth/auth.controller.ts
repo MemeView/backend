@@ -355,68 +355,24 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/tg-white-list')
-  async addToTgWhiteList(@Req() request: Request, @Res() response: Response) {
+  async addToTgWhiteList(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Body('telegramIds') telegramIds: number[],
+  ) {
     try {
-      const accessToken = request.cookies['accessToken'];
+      const usersToCreate = telegramIds.map((id) => ({ telegramId: id }));
 
-      const decodedAccessToken = jwt.decode(accessToken) as {
-        walletAddress: string;
-        iat: number;
-        exp: number;
-      };
+      const { count: deletedCount } =
+        await this.prisma.tgWhiteList.deleteMany();
 
-      const { walletAddress } = decodedAccessToken;
-
-      const telegramId = await this.prisma.users.findUnique({
-        where: {
-          walletAddress: walletAddress,
-        },
-      });
-
-      if (!telegramId.telegramId) {
-        return response.status(403).json({
-          message: `There is no telegram account linked to this wallet`,
-        });
-      }
-
-      const whiteListExist = await this.prisma.tgWhiteList.findUnique({
-        where: {
-          telegramId: telegramId.telegramId,
-        },
-      });
-
-      if (whiteListExist) {
-        return response.status(403).json({
-          message: `User is already on the white list`,
-        });
-      }
-
-      const user = await this.prisma.tgWhiteList.create({
-        data: {
-          telegramId: telegramId.telegramId,
-        },
-      });
-
-      const subscription = await this.prisma.subscribers.upsert({
-        where: {
-          walletAddress: walletAddress,
-        },
-        update: {
-          subscriptionLevel: 'plan1',
-          telegramId: telegramId.telegramId,
-        },
-        create: {
-          walletAddress: walletAddress,
-          telegramId: telegramId.telegramId,
-          subscriptionLevel: 'plan1',
-          holdingTWAmount: '99999999999999999999',
-          holdingTWAmountUSDT: '99999999999999999999',
-        },
+      const { count: addedCount } = await this.prisma.tgWhiteList.createMany({
+        data: usersToCreate,
       });
 
       return response.status(200).json({
-        user: user,
-        subscription: subscription,
+        deleted: deletedCount,
+        added: addedCount,
       });
     } catch (error) {
       throw new HttpException(error.message, 403);

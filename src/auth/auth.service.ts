@@ -88,7 +88,6 @@ export class AuthService {
       // Установка cookie с accessToken
       res.cookie('accessToken', accessToken, {
         httpOnly: true,
-        maxAge: 1200000, // 20 минут в миллисекундах
       });
 
       return {
@@ -218,7 +217,6 @@ export class AuthService {
           secure: true,
           sameSite: 'none',
           path: '/',
-          maxAge: 600000, // 10 минут в миллисекундах
         });
 
         return {
