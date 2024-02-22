@@ -27,7 +27,7 @@ export class SignalBotService {
           {
             text: '🚀 Top-30 ToTheMoonScore',
             web_app: {
-              url: 'https://twa.tokenwatch.ai/',
+              url: process.env.SIGNAL_BOT_WEBAPP_URL,
             },
           },
         ],
