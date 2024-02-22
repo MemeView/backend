@@ -7,6 +7,7 @@ import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { RefreshMiddleware } from './refresh-jwt.middleware';
 import { SignalBotService } from 'src/cron/signal-bot/signal-bot.service';
+import { SignalBotModule } from 'src/cron/signal-bot/signal-bot.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { SignalBotService } from 'src/cron/signal-bot/signal-bot.service';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '10m' },
     }),
+    SignalBotModule,
   ],
   controllers: [AuthController],
   providers: [
@@ -22,7 +24,7 @@ import { SignalBotService } from 'src/cron/signal-bot/signal-bot.service';
     JwtService,
     JwtStrategy,
     JwtAuthGuard,
-    SignalBotService,
+    // SignalBotService,
   ],
 })
 export class AuthModule {
@@ -33,6 +35,7 @@ export class AuthModule {
         'api/choose-subscription',
         'api/check-plan',
         'api/TW-balance-check',
+        'api/tg-white-list',
       );
   }
 }

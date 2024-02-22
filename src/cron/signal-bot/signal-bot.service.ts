@@ -6,21 +6,24 @@ import * as TelegramBot from 'node-telegram-bot-api';
 
 @Injectable()
 export class SignalBotService {
-  private bot: TelegramBot;
+  private static bot: TelegramBot;
   private authorizedUsers: Set<number>; // множество для хранения id авторизованных пользователей
 
   constructor(private readonly prisma: PrismaClient) {
-    this.bot = new TelegramBot(process.env.TG_SIGNAL_BOT_TOKEN, {
-      polling: true,
-    });
+    if (!SignalBotService.bot) {
+      SignalBotService.bot = new TelegramBot(process.env.TG_SIGNAL_BOT_TOKEN, {
+        polling: true,
+      });
+    }
+    const telegramBot = SignalBotService.bot;
     this.authorizedUsers = new Set();
     let userId = 0;
 
-    this.bot.onText(/\/start/, async (msg) => {
+    telegramBot.onText(/\/start/, async (msg) => {
       const chatId = msg.chat.id;
 
       const payload = msg.text!.substring(7);
-      console.log(payload);
+      // console.log(payload);
 
       const buttons = [
         [
@@ -47,15 +50,6 @@ export class SignalBotService {
         disable_notification: true,
       };
 
-      if (payload.length && payload === 'custom') {
-        const customMessage = `Custom message`;
-
-        return this.bot.sendMessage(chatId, customMessage, options);
-      }
-
-      if (payload.length && payload.slice(0, 3) === 'ref') {
-        console.log(payload.slice(4));
-      }
       const welcomeMessage = `Hi there! 👋
 
   Welcome to the TokenWatch AI bot.
@@ -72,17 +66,17 @@ export class SignalBotService {
   
   To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonScore”.`;
 
-      this.bot.sendMessage(chatId, welcomeMessage, options);
+      telegramBot.sendMessage(chatId, welcomeMessage, options);
     });
 
-    this.bot.onText(/💰 Referral/, (msg) => {
+    telegramBot.onText(/💰 Referral/, (msg) => {
       const chatId = msg.chat.id;
-      this.bot.sendMessage(chatId, 'Текст для Рефералов');
+      telegramBot.sendMessage(chatId, 'Текст для Рефералов');
     });
 
-    this.bot.onText(/ℹ️ About/, (msg) => {
+    telegramBot.onText(/ℹ️ About/, (msg) => {
       const chatId = msg.chat.id;
-      this.bot.sendMessage(
+      telegramBot.sendMessage(
         chatId,
         `About TokenWatch
 
@@ -111,17 +105,17 @@ export class SignalBotService {
           },
         ],
         [{ text: '🌐 Website', url: 'https://tokenwatch.ai/en' }],
-        [{ text: '🐦 Twitter', url: 'https://t.me/TokenWatch_ai' }],
+        [{ text: '🐦 Twitter', url: 'https://twitter.com/TokenWatch_ai' }],
         [
           {
             text: '📣 Telegram',
-            url: 'https://web.telegram.org/a/#-1001880299449',
+            url: 'https://t.me/TokenWatch_ai',
           },
         ],
         [{ text: '❓ Support', callback_data: 'button6' }],
       ];
 
-      this.bot.sendMessage(
+      telegramBot.sendMessage(
         chatId,
         `ToTheMoonScore
 
@@ -138,18 +132,18 @@ export class SignalBotService {
       );
     });
 
-    this.bot.on('callback_query', (query) => {
+    telegramBot.on('callback_query', (query) => {
       const { data } = query;
       const chatId = query.message.chat.id;
 
       if (data === 'button6') {
         const supportMessage = `In a case of any issues feel free to reach our Support Team at support@tokenwatch.ai\n\nPlease be patient and expect the answer in 72 hours.`;
 
-        this.bot.sendMessage(chatId, supportMessage);
+        telegramBot.sendMessage(chatId, supportMessage);
       }
     });
 
-    this.bot.onText(/\/checkSubscriptionToChannel/, async (msg) => {
+    telegramBot.onText(/\/checkSubscriptionToChannel/, async (msg) => {
       const chatId = msg.chat.id;
       userId = msg.from.id;
 
@@ -164,7 +158,17 @@ export class SignalBotService {
     userId: number,
   ): Promise<boolean> {
     try {
-      const chat = await this.bot.getChatMember(channelId, userId);
+      if (!SignalBotService.bot) {
+        SignalBotService.bot = new TelegramBot(
+          process.env.TG_SIGNAL_BOT_TOKEN,
+          {
+            polling: true,
+          },
+        );
+      }
+      const telegramBot = SignalBotService.bot;
+
+      const chat = await telegramBot.getChatMember(channelId, userId);
       return (
         chat.status === 'member' ||
         chat.status === 'creator' ||

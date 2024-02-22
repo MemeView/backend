@@ -17,8 +17,8 @@ import { UTCDate } from '@date-fns/utc';
 interface subscriber {
   walletAddress: string;
   telegramId: string;
-  holdingTWAmount: number;
-  holdingTWAmountUSDT: number;
+  holdingTWAmount: string;
+  holdingTWAmountUSDT: string;
   subscriptionLevel: string;
 }
 
@@ -291,16 +291,16 @@ export class AuthService {
         },
         update: {
           telegramId: user.telegramId,
-          holdingTWAmount: balance,
-          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          holdingTWAmount: JSON.stringify(balance),
+          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
           subscriptionLevel: subscription.title,
           trialCreatedAt: utcDate,
         },
         create: {
           walletAddress: walletAddress,
           telegramId: user.telegramId,
-          holdingTWAmount: balance,
-          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          holdingTWAmount: JSON.stringify(balance),
+          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
           subscriptionLevel: subscription.title,
           trialCreatedAt: utcDate,
         },
@@ -325,15 +325,15 @@ export class AuthService {
         },
         update: {
           telegramId: user.telegramId,
-          holdingTWAmount: balance,
-          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          holdingTWAmount: JSON.stringify(balance),
+          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
           subscriptionLevel: subscription.title,
         },
         create: {
           walletAddress: walletAddress,
           telegramId: user.telegramId,
-          holdingTWAmount: balance,
-          holdingTWAmountUSDT: holdingTWAmountUSDT,
+          holdingTWAmount: JSON.stringify(balance),
+          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
           subscriptionLevel: subscription.title,
         },
       });

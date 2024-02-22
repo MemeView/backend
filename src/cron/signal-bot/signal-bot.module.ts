@@ -16,6 +16,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
     JwtAuthGuard,
   ],
   controllers: [SignalBotController],
+  exports: [SignalBotService],
 })
 export class SignalBotModule {
   configure(consumer: MiddlewareConsumer) {
