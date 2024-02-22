@@ -12,6 +12,7 @@ import { BlackListModule } from './black-list/black-list.module';
 import { ExcelModule } from './excel/excel.module';
 import { PostingModule } from './cron/posting/posting.module';
 import { AuthModule } from './auth/auth.module';
+import { TwitterModule } from './twitter/twitter.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AuthModule } from './auth/auth.module';
     ExcelModule,
     PostingModule,
     AuthModule,
+    TwitterModule,
   ],
   controllers: [AppController],
   providers: [AppService],
