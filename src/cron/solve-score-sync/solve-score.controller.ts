@@ -195,11 +195,19 @@ export class SolveScoreController {
         where: { telegramId: decodedAccessToken.telegramId },
       });
 
+      if (!user) {
+        return response.status(403).json({
+          message: `There is no subscription`,
+        });
+      }
+
       if (
         user.subscriptionLevel === 'trial' &&
         user.trialCreatedAt < sevenDaysAgo
       ) {
-        return new HttpException(`Your trial period has already expired`, 403);
+        return response.status(403).json({
+          message: `Your trial period has already expired`,
+        });
       }
 
       if (

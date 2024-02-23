@@ -280,6 +280,7 @@ export class AuthService {
 
     const holdingTWAmountUSDT = balance * parseFloat(currentTWPrice.priceUSD);
 
+    // А иначе что? Если user.freeTrialWasTaken === true!
     if (plan === 'trial' && user.freeTrialWasTaken === false) {
       const utcDate = new UTCDate();
 
