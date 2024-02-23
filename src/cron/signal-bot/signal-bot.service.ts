@@ -52,19 +52,19 @@ export class SignalBotService {
 
       const welcomeMessage = `Hi there! 👋
 
-  Welcome to the TokenWatch AI bot.
+Welcome to the TokenWatch AI bot.
   
-  Tap one of the buttons below:
+Tap one of the buttons below:
   
-  🚀 Top-30 ToTheMoonScore - receive up to 4 times a day ToTheMoonScore AI predictions
+🚀 Top-30 ToTheMoonScore - receive up to 4 times a day ToTheMoonScore AI predictions
   
-  💰 Referral - earn $TOKENWATCH tokens for inviting friends
+💰 Referral - earn $TOKENWATCH tokens for inviting friends
+
+ℹ️ About - more info about this bot and links
   
-  ℹ️ About - more info about this bot and links
-  
-  We are here to help your daily tokens investment decisions become smarter 🧠
-  
-  To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonScore”.`;
+We are here to help your daily tokens investment decisions become smarter 🧠
+
+To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonScore”.`;
 
       telegramBot.sendMessage(chatId, welcomeMessage, options);
     });
@@ -80,15 +80,15 @@ export class SignalBotService {
         chatId,
         `About TokenWatch
 
-      TokenWatch.ai bot is your own AI oracle that provides you with best predictions on token’s potential growth right in your Telegram app!
-      
-      With TokenWatch.ai you can:
-      Get access to the most advanced AI that analyses all tokens on the market together with social media activities for you
-      Receive up to 4 times a day Top-30 predictions to help you with your investment decisions
-      Earn $TOKENWATCH tokens for inviting friends
-      
-      We make investments smarter 🧠
-      and more successful to everyone! 💰`,
+TokenWatch.ai bot is your own AI oracle that provides you with best predictions on token’s potential growth right in your Telegram app!
+
+With TokenWatch.ai you can:
+• Get access to the most advanced AI that analyses all tokens on the market together with social media activities for you
+• Receive up to 4 times a day Top-30 predictions to help you with your investment decisions
+• Earn $TOKENWATCH tokens for inviting friends
+
+We make investments smarter 🧠
+and more successful to everyone! 💰`,
       );
 
       const buttons = [
@@ -119,11 +119,11 @@ export class SignalBotService {
         chatId,
         `ToTheMoonScore
 
-      ToTheMoonScore™ is the summarised result of deep Artificial Intelligence analyses of every token.
-      
-      It is the score from 1 to 100 that shows the current growth potential.
-      
-      Start getting your first Top-30 tokens predictions now by clicking  on “🚀 Top-30 ToTheMoonScore“.`,
+ToTheMoonScore™ is the summarised result of deep Artificial Intelligence analyses of every token.
+
+It is the score from 1 to 100 that shows the current growth potential.
+
+Start getting your first Top-30 tokens predictions now by clicking  on “🚀 Top-30 ToTheMoonScore“.`,
         {
           reply_markup: {
             inline_keyboard: buttons,
