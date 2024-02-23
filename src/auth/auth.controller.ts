@@ -204,7 +204,7 @@ export class AuthController {
           user.subscriptionLevel !== 'plan1' &&
           user.subscriptionLevel !== 'plan2')
       ) {
-        return response.status(403).json({
+        return response.status(200).json({
           plan: null,
         });
       }
@@ -248,35 +248,15 @@ export class AuthController {
             req: {
               twitter: true,
               telegram: true,
-              voted: true,
-              holding: true,
+              voted: false,
+              holding: false,
               trialActive: true,
               expirationDate: add(user.trialCreatedAt, { days: 7 }),
             },
           });
         }
 
-        if (
-          isSubscribedOnChanel === true &&
-          userHasVoted === true &&
-          holdingTWAmount === true &&
-          twitter === true &&
-          trialActive === true
-        ) {
-          return response.status(200).json({
-            plan: user.subscriptionLevel,
-            req: {
-              twitter: twitter,
-              telegram: isSubscribedOnChanel,
-              voted: userHasVoted,
-              holding: holdingTWAmount,
-              trialActive: trialActive,
-              expirationDate: add(user.trialCreatedAt, { days: 7 }),
-            },
-          });
-        }
-
-        return response.status(403).json({
+        return response.status(200).json({
           plan: user.subscriptionLevel,
           req: {
             twitter: twitter,
