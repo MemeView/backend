@@ -161,7 +161,11 @@ export class AuthService {
 
       if (!wallet) {
         user = await this.prisma.users.create({
-          data: { walletAddress: walletAddress, telegramId: telegramId },
+          data: {
+            walletAddress: walletAddress,
+            telegramId: telegramId,
+            registrationRefId: registrationRefId,
+          },
         });
         if (user) {
           const refId = await this.generateRefId(user.id);
