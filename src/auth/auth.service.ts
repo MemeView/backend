@@ -46,7 +46,11 @@ export class AuthService {
     return user;
   }
 
-  async signUp(walletAddress: string, res: Response): Promise<any> {
+  async signUp(
+    walletAddress: string,
+    res: Response,
+    registrationRefId?: string,
+  ): Promise<any> {
     try {
       // Проверка, является ли walletAddress действительным адресом кошелька Ethereum
       const isValidAddress = isAddress(walletAddress);
@@ -55,11 +59,27 @@ export class AuthService {
         throw new HttpException('No such plan exists', HttpStatus.NOT_FOUND);
       }
 
-      const user = await this.prisma.users.upsert({
+      if (!registrationRefId) {
+        registrationRefId = null;
+      }
+
+      let user = await this.prisma.users.upsert({
         where: { walletAddress },
         update: {},
-        create: { walletAddress },
+        create: { walletAddress, registrationRefId },
       });
+
+      if (user && (!user.ownRefId || user.ownRefId.length < 6)) {
+        const refId = await this.generateRefId(user.id);
+        user = await this.prisma.users.update({
+          where: {
+            walletAddress: user.walletAddress,
+          },
+          data: {
+            ownRefId: refId,
+          },
+        });
+      }
 
       const accessToken = jwt.sign(
         { walletAddress: user.walletAddress, telegramId: user.telegramId },
@@ -187,7 +207,7 @@ export class AuthService {
       ) {
         user = wallet;
 
-        if (!user.ownRefId || user.ownRefId.length < 5) {
+        if (!user.ownRefId || user.ownRefId.length < 6) {
           const refId = await this.generateRefId(user.id);
           user = await this.prisma.users.update({
             where: {

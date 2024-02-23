@@ -31,9 +31,14 @@ export class AuthController {
   async signUp(
     @Body('walletAddress') walletAddress: string,
     @Res() res: Response,
+    @Body('registrationRefId') registrationRefId?: string,
   ) {
     try {
-      const result = await this.authService.signUp(walletAddress, res);
+      const result = await this.authService.signUp(
+        walletAddress,
+        res,
+        registrationRefId,
+      );
       const TWAmount = await this.authService.getTokenBalance(walletAddress);
 
       result.user.TWAmount = TWAmount;
