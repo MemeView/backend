@@ -139,8 +139,13 @@ export class AuthService {
     walletAddress: string,
     telegramId: number,
     res: Response,
+    registrationRefId?: string,
   ) {
     try {
+      if (!registrationRefId) {
+        registrationRefId = null;
+      }
+
       // Проверка, является ли walletAddress действительным адресом кошелька Ethereum
       const isValidAddress = isAddress(walletAddress);
 
@@ -158,6 +163,17 @@ export class AuthService {
         user = await this.prisma.users.create({
           data: { walletAddress: walletAddress, telegramId: telegramId },
         });
+        if (user) {
+          const refId = await this.generateRefId(user.id);
+          user = await this.prisma.users.update({
+            where: {
+              walletAddress: user.walletAddress,
+            },
+            data: {
+              ownRefId: refId,
+            },
+          });
+        }
       }
 
       if (
@@ -166,6 +182,18 @@ export class AuthService {
         wallet.telegramId === telegramId
       ) {
         user = wallet;
+
+        if (!user.ownRefId || user.ownRefId.length < 5) {
+          const refId = await this.generateRefId(user.id);
+          user = await this.prisma.users.update({
+            where: {
+              walletAddress: user.walletAddress,
+            },
+            data: {
+              ownRefId: refId,
+            },
+          });
+        }
       }
 
       if (
@@ -180,9 +208,14 @@ export class AuthService {
       }
 
       if (wallet && wallet.telegramId === null) {
+        const refId = await this.generateRefId(wallet.id);
         user = await this.prisma.users.update({
           where: { walletAddress: walletAddress },
-          data: { telegramId: telegramId },
+          data: {
+            telegramId: telegramId,
+            ownRefId: refId,
+            registrationRefId: registrationRefId,
+          },
         });
       }
 
@@ -340,5 +373,23 @@ export class AuthService {
     }
 
     return `To take this plan you must have TokenWatch on ${subscription.holdingTWAmount} USDT, but you have on ${holdingTWAmountUSDT}`;
+  }
+
+  async generateRefId(id: number): Promise<string> {
+    const characters =
+      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    // Преобразуем id в уникальную строку из 6 символов
+    let uniqueString = '';
+    while (id > 0) {
+      uniqueString = characters[id % characters.length] + uniqueString;
+      id = Math.floor(id / characters.length);
+    }
+
+    // Дополняем уникальную строку до 6 символов, если она короче
+    while (uniqueString.length < 6) {
+      uniqueString = characters[0] + uniqueString;
+    }
+
+    return uniqueString;
   }
 }
