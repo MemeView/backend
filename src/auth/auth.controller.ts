@@ -31,9 +31,14 @@ export class AuthController {
   async signUp(
     @Body('walletAddress') walletAddress: string,
     @Res() res: Response,
+    @Body('registrationRefId') registrationRefId?: string,
   ) {
     try {
-      const result = await this.authService.signUp(walletAddress, res);
+      const result = await this.authService.signUp(
+        walletAddress,
+        res,
+        registrationRefId,
+      );
       const TWAmount = await this.authService.getTokenBalance(walletAddress);
 
       result.user.TWAmount = TWAmount;
@@ -44,17 +49,36 @@ export class AuthController {
     }
   }
 
+  @Post('/ref-gen')
+  async refGen(@Body('id') id: number) {
+    try {
+      const uniqueStrings: string[] = [];
+
+      const result = await this.authService.generateRefId(id);
+
+      return result;
+    } catch (error) {
+      return error.message;
+    }
+  }
+
   @Post('/auth-with-telegram')
   async signUpWithTelegram(
     @Body('walletAddress') walletAddress: string,
     @Body('telegramId') telegramId: number,
     @Res() res: Response,
+    @Body('registrationRefId') registrationRefId?: string,
   ) {
     try {
+      if (!registrationRefId) {
+        registrationRefId = null;
+      }
+
       const result = await this.authService.signUpWithTelegram(
         walletAddress,
         telegramId,
         res,
+        registrationRefId,
       );
 
       const TWAmount = await this.authService.getTokenBalance(walletAddress);
