@@ -204,7 +204,7 @@ export class AuthController {
           user.subscriptionLevel !== 'plan1' &&
           user.subscriptionLevel !== 'plan2')
       ) {
-        return response.status(403).json({
+        return response.status(200).json({
           plan: null,
         });
       }
