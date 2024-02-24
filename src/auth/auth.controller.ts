@@ -94,6 +94,19 @@ export class AuthController {
     }
   }
 
+  @Post('/balance')
+  async rawfaw(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Body('walletAddress') walletAddress: string,
+  ) {
+    const result = await this.authService.getTokenBalance(walletAddress);
+
+    return response.status(200).json({
+      balance: result,
+    });
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post('/tw-balance-check')
   async tokenBalance(
