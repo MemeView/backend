@@ -170,7 +170,7 @@ export class AuthService {
       const isValidAddress = isAddress(walletAddress);
 
       if (!isValidAddress) {
-        throw new UnauthorizedException('Invalid wallet address');
+        new UnauthorizedException('Invalid wallet address');
       }
 
       const wallet = await this.prisma.users.findUnique({
@@ -287,6 +287,7 @@ export class AuthService {
   }
 
   async getTokenBalance(walletAddress: string): Promise<number> {
+    console.log('walletAddress', walletAddress);
     const web3 = new Web3(process.env.INFURA_URL);
 
     // Получаем баланс токенов из криптокошелька
@@ -296,6 +297,8 @@ export class AuthService {
         web3.eth.abi.encodeFunctionSignature('balanceOf(address)') +
         web3.eth.abi.encodeParameters(['address'], [walletAddress]).substr(2),
     });
+
+    console.log('balance', balance);
 
     return parseFloat(balance);
   }

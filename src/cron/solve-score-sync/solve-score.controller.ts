@@ -202,6 +202,7 @@ export class SolveScoreController {
       }
 
       if (
+        user &&
         user.subscriptionLevel === 'trial' &&
         user.trialCreatedAt < sevenDaysAgo
       ) {
@@ -211,12 +212,15 @@ export class SolveScoreController {
       }
 
       if (
+        user &&
         user.subscriptionLevel !== 'plan1' &&
         user.subscriptionLevel !== 'plan2' &&
         user.subscriptionLevel !== 'trial' &&
         !userInWhiteList
       ) {
-        return `You dont have permission to tokens score`;
+        return response.status(403).json({
+          message: `You dont have permission to tokens score`,
+        });
       }
 
       if (hour < 3) {
@@ -225,9 +229,7 @@ export class SolveScoreController {
 
       if (hour >= 3 && hour < 9) {
         if (
-          user.subscriptionLevel === 'plan1' ||
-          user.subscriptionLevel === 'trial' ||
-          userInWhiteList
+          (user && (user.subscriptionLevel === 'plan1' || user.subscriptionLevel === 'trial')) || userInWhiteList
         ) {
           scoreQuery = `score9pm`;
         } else {
@@ -241,8 +243,8 @@ export class SolveScoreController {
 
       if (hour >= 15 && hour < 21) {
         if (
-          user.subscriptionLevel === 'plan1' ||
-          user.subscriptionLevel === 'trial' ||
+          (user && (user.subscriptionLevel === 'plan1' ||
+          user.subscriptionLevel === 'trial')) ||
           userInWhiteList
         ) {
           scoreQuery = `score9am`;
@@ -267,6 +269,8 @@ export class SolveScoreController {
           createdAt: true,
         },
       });
+
+      console.log('result', result);
 
       const dateString = result.createdAt;
 
