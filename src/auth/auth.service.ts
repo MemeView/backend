@@ -1,18 +1,13 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  Res,
-  HttpException,
-  HttpStatus,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException, } from '@nestjs/common';
 import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { isAddress } from 'ethers';
-import { ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
+import { ExtractJwt } from 'passport-jwt';
 import { PrismaClient } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import Web3 from 'web3';
 import { UTCDate } from '@date-fns/utc';
+import { contractABI } from './contractABI';
 
 interface subscriber {
   walletAddress: string;
@@ -287,20 +282,21 @@ export class AuthService {
   }
 
   async getTokenBalance(walletAddress: string): Promise<number> {
-    console.log('walletAddress', walletAddress);
+    const tokenAddress = '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3';
+
     const web3 = new Web3(process.env.INFURA_URL);
 
-    // Получаем баланс токенов из криптокошелька
-    const balance = await web3.eth.call({
-      to: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
-      data:
-        web3.eth.abi.encodeFunctionSignature('balanceOf(address)') +
-        web3.eth.abi.encodeParameters(['address'], [walletAddress]).substr(2),
-    });
+    const contract = new web3.eth.Contract(contractABI, tokenAddress);
 
-    console.log('balance', balance);
+    try {
+      const balance = await contract.methods.balanceOf(walletAddress).call();
 
-    return parseFloat(balance);
+      const decimals = 18;
+      return parseFloat(balance as unknown as string) / Math.pow(10, decimals);
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   }
 
   async calculateSubscriptionLevel(
