@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException, } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { isAddress } from 'ethers';
@@ -109,6 +114,24 @@ export class AuthService {
         user,
         accessToken,
       };
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async logOut(walletAddress: string, res: Response): Promise<any> {
+    try {
+      await this.prisma.users.update({
+        where: { walletAddress },
+        data: {
+          refreshToken: null,
+          refreshTokenCreatedAt: null,
+        },
+      });
+
+      res.clearCookie('accessToken');
+
+      return { message: 'Logged out successfully' };
     } catch (error) {
       return error;
     }

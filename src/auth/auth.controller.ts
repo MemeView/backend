@@ -49,6 +49,30 @@ export class AuthController {
     }
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post('/logout')
+  async logout(@Req() request: Request, @Res() response: Response) {
+    try {
+      const accessToken = request.cookies['accessToken'];
+
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
+      const result = await this.authService.logOut(walletAddress, response);
+
+      return response.status(HttpStatus.OK).json(result);
+    } catch (error) {
+      return response
+        .status(HttpStatus.UNAUTHORIZED)
+        .json({ error: error.message });
+    }
+  }
+
   @Post('/ref-gen')
   async refGen(@Body('id') id: number) {
     try {

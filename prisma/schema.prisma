@@ -88,7 +88,7 @@ model Users {
   votes                 Int      @default(5)
   updatedAt             DateTime @default(now())
   refreshToken          String?
-  refreshTokenCreatedAt DateTime @default(now())
+  refreshTokenCreatedAt DateTime? @default(now())
   freeTrialWasTaken     Boolean  @default(false)
   id                    Int      @unique @default(autoincrement())
   ownRefId              String?  @unique
