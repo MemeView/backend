@@ -195,7 +195,7 @@ export class SolveScoreController {
         where: { telegramId: decodedAccessToken.telegramId },
       });
 
-      if (!user) {
+      if (!user && !userInWhiteList) {
         return response.status(403).json({
           message: `There is no subscription`,
         });
