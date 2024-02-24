@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { SignalBotService } from './signal-bot.service';
 import { Response, Request } from 'express';
@@ -19,19 +19,9 @@ export class SignalBotController {
   async checkSubscriptionToChannel(
     @Req() request: Request,
     @Res() response: Response,
+    @Body('telegramId') telegramId: number,
   ) {
     try {
-      const accessToken = request.cookies['accessToken'];
-
-      const decodedAccessToken = jwt.decode(accessToken) as {
-        walletAddress: string;
-        telegramId: number;
-        iat: number;
-        exp: number;
-      };
-
-      const { walletAddress, telegramId } = decodedAccessToken;
-
       const userId = telegramId;
       const channelId = '-1001880299449';
 
