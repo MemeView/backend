@@ -73,6 +73,7 @@ export class AuthController {
       if (!registrationRefId) {
         registrationRefId = null;
       }
+      const TWAmount = await this.authService.getTokenBalance(walletAddress);
 
       const result = await this.authService.signUpWithTelegram(
         walletAddress,
@@ -81,7 +82,9 @@ export class AuthController {
         registrationRefId,
       );
 
-      const TWAmount = await this.authService.getTokenBalance(walletAddress);
+      if (result.status === 400) {
+        return res.status(400).json(result);
+      }
 
       result.user.TWAmount = TWAmount;
 

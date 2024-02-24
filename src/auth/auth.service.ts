@@ -337,6 +337,10 @@ export class AuthService {
 
     const holdingTWAmountUSDT = balance * parseFloat(currentTWPrice.priceUSD);
 
+    if (plan === 'trial' && user.freeTrialWasTaken === true) {
+      return new HttpException('you have already taken a trial period', 400);
+    }
+
     // А иначе что? Если user.freeTrialWasTaken === true!
     if (plan === 'trial' && user.freeTrialWasTaken === false) {
       const utcDate = new UTCDate();
