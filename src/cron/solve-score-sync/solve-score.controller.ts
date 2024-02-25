@@ -185,7 +185,7 @@ export class SolveScoreController {
         exp: number;
       };
 
-      const user = await this.prisma.subscribers.findUnique({
+      const user = await this.prisma.users.findUnique({
         where: {
           walletAddress: decodedAccessToken.walletAddress,
         },
@@ -195,7 +195,7 @@ export class SolveScoreController {
         where: { telegramId: decodedAccessToken.telegramId },
       });
 
-      if (!user && !userInWhiteList) {
+      if ((!user && !userInWhiteList) || !user.subscriptionLevel) {
         return response.status(403).json({
           message: `There is no subscription`,
         });
@@ -229,7 +229,10 @@ export class SolveScoreController {
 
       if (hour >= 3 && hour < 9) {
         if (
-          (user && (user.subscriptionLevel === 'plan1' || user.subscriptionLevel === 'trial')) || userInWhiteList
+          (user &&
+            (user.subscriptionLevel === 'plan1' ||
+              user.subscriptionLevel === 'trial')) ||
+          userInWhiteList
         ) {
           scoreQuery = `score9pm`;
         } else {
@@ -243,8 +246,9 @@ export class SolveScoreController {
 
       if (hour >= 15 && hour < 21) {
         if (
-          (user && (user.subscriptionLevel === 'plan1' ||
-          user.subscriptionLevel === 'trial')) ||
+          (user &&
+            (user.subscriptionLevel === 'plan1' ||
+              user.subscriptionLevel === 'trial')) ||
           userInWhiteList
         ) {
           scoreQuery = `score9am`;
@@ -269,8 +273,6 @@ export class SolveScoreController {
           createdAt: true,
         },
       });
-
-      console.log('result', result);
 
       const dateString = result.createdAt;
 

@@ -28,7 +28,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       request.headers['authorization'] = `Bearer ${accessToken}`;
       return true;
     } catch (error) {
-      console.log(error.message);
       throw new UnauthorizedException();
     }
   }

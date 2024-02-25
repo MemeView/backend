@@ -119,6 +119,40 @@ export class AuthService {
     }
   }
 
+  async checkReferrals(walletAddress: string) {
+    try {
+      const user = await this.prisma.users.findUnique({
+        where: {
+          walletAddress,
+        },
+      });
+
+      if (!user) {
+        throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      }
+      const ownRefId = user.ownRefId;
+
+      const referralsList = await this.prisma.users.findMany({
+        where: {
+          registrationRefId: ownRefId,
+        },
+      });
+
+      let count = 0;
+      for (const referral of referralsList) {
+        if (
+          referral.subscriptionLevel === 'plan1' ||
+          referral.subscriptionLevel === 'plan2'
+        ) {
+          count++;
+        }
+      }
+      return count;
+    } catch (error) {
+      return error;
+    }
+  }
+
   async logOut(walletAddress: string, res: Response): Promise<any> {
     try {
       await this.prisma.users.update({
@@ -367,32 +401,15 @@ export class AuthService {
     if (plan === 'trial' && user.freeTrialWasTaken === false) {
       const utcDate = new UTCDate();
 
-      const result = await this.prisma.subscribers.upsert({
-        where: {
-          walletAddress: walletAddress,
-        },
-        update: {
-          telegramId: user.telegramId,
-          holdingTWAmount: JSON.stringify(balance),
-          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
-          subscriptionLevel: subscription.title,
-          trialCreatedAt: utcDate,
-        },
-        create: {
-          walletAddress: walletAddress,
-          telegramId: user.telegramId,
-          holdingTWAmount: JSON.stringify(balance),
-          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
-          subscriptionLevel: subscription.title,
-          trialCreatedAt: utcDate,
-        },
-      });
-
-      await this.prisma.users.update({
+      const result = await this.prisma.users.update({
         where: {
           walletAddress: walletAddress,
         },
         data: {
+          holdingTWAmount: JSON.stringify(balance),
+          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
+          subscriptionLevel: subscription.title,
+          trialCreatedAt: utcDate,
           freeTrialWasTaken: true,
         },
       });
@@ -401,19 +418,11 @@ export class AuthService {
     }
 
     if (holdingTWAmountUSDT >= subscription.holdingTWAmount) {
-      const result = await this.prisma.subscribers.upsert({
+      const result = await this.prisma.users.update({
         where: {
           walletAddress: walletAddress,
         },
-        update: {
-          telegramId: user.telegramId,
-          holdingTWAmount: JSON.stringify(balance),
-          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
-          subscriptionLevel: subscription.title,
-        },
-        create: {
-          walletAddress: walletAddress,
-          telegramId: user.telegramId,
+        data: {
           holdingTWAmount: JSON.stringify(balance),
           holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
           subscriptionLevel: subscription.title,

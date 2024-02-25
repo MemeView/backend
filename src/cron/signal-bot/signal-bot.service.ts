@@ -21,8 +21,13 @@ export class SignalBotService {
 
     telegramBot.onText(/\/start/, async (msg) => {
       const chatId = msg.chat.id;
-
+      const userId = msg.from.id;
       const payload = msg.text!.substring(7);
+      console.log(payload);
+
+      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+      webAppUrl.searchParams.append('telegramId', userId.toString());
+
       // console.log(payload);
 
       const buttons = [

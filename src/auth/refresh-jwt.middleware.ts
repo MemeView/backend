@@ -93,7 +93,6 @@ export class RefreshMiddleware implements NestMiddleware {
         req.cookies['accessToken'] = newAccessToken;
       }
     } catch (error) {
-      console.log(error.message);
       throw new UnauthorizedException();
     }
 

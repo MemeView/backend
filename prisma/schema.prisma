@@ -93,6 +93,10 @@ model Users {
   id                    Int      @unique @default(autoincrement())
   ownRefId              String?  @unique
   registrationRefId     String?
+  holdingTWAmount       String?
+  holdingTWAmountUSDT   String?
+  subscriptionLevel     String?
+  trialCreatedAt        DateTime?
 }
 
 model Volume {
@@ -126,15 +130,6 @@ model Subscriptions {
   description         String?
   period              String
   holdingTWAmount     Int
-}
-
-model Subscribers {
-  walletAddress         String @id @unique
-  telegramId            Int?
-  holdingTWAmount       String
-  holdingTWAmountUSDT   String
-  subscriptionLevel     String
-  trialCreatedAt        DateTime?
 }
 
 model TtmsByHours {

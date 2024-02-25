@@ -10,7 +10,7 @@ import {
   UseGuards,
   HttpException,
 } from '@nestjs/common';
-import { Response, Request } from 'express';
+import { Response, Request, response } from 'express';
 import { AuthService } from './auth.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
@@ -83,6 +83,40 @@ export class AuthController {
       return result;
     } catch (error) {
       return error.message;
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/referral-code')
+  async takeRefid(@Req() request: Request, @Res() response: Response) {
+    try {
+      const accessToken = request.cookies['accessToken'];
+
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        telegramId: number;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
+      const refId = await this.prisma.users.findUnique({
+        where: {
+          walletAddress: walletAddress,
+        },
+        select: {
+          ownRefId: true,
+        },
+      });
+
+      return response.status(200).json({
+        refId: refId.ownRefId,
+      });
+    } catch (error) {
+      return response.status(403).json({
+        error: error.message,
+      });
     }
   }
 
@@ -245,18 +279,14 @@ export class AuthController {
       if (userInWhiteList) {
         return response.status(200).json({
           plan: 'plan1',
+          isActive: true,
           req: {
-            twitter: true,
-            telegram: true,
-            voted: true,
             holding: true,
-            trialActive: true,
-            expirationDate: null,
           },
         });
       }
 
-      const user = await this.prisma.subscribers.findUnique({
+      const user = await this.prisma.users.findUnique({
         where: {
           walletAddress: walletAddress,
         },
@@ -276,10 +306,10 @@ export class AuthController {
       if (user && user.subscriptionLevel === 'trial') {
         const utcDate = new UTCDate();
         const sevenDaysAgo = subDays(utcDate, 7);
-        let trialActive = true;
+        let isActive = true;
 
         if (user.trialCreatedAt < sevenDaysAgo) {
-          trialActive = false;
+          isActive = false;
         }
 
         const channelId = '-1001880299449';
@@ -322,12 +352,12 @@ export class AuthController {
 
         return response.status(200).json({
           plan: user.subscriptionLevel,
+          isActive: isActive,
           req: {
             twitter: twitter,
             telegram: isSubscribedOnChanel,
             voted: userHasVoted,
             holding: holdingTWAmount,
-            trialActive: trialActive,
             expirationDate: add(user.trialCreatedAt, { days: 7 }),
           },
         });
@@ -351,6 +381,7 @@ export class AuthController {
         if (holdingTWAmount >= plan.holdingTWAmount) {
           return response.status(200).json({
             plan: user.subscriptionLevel,
+            isActive: true,
             req: {
               holding: true,
             },
@@ -359,6 +390,7 @@ export class AuthController {
 
         return response.status(403).json({
           plan: user.subscriptionLevel,
+          isActive: false,
           req: {
             holding: false,
           },
@@ -420,6 +452,37 @@ export class AuthController {
       });
     } catch (error) {
       throw new HttpException(error.message, 403);
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/referrals-count')
+  async calculateReferralsCount(
+    @Req() request: Request,
+    @Res() response: Response,
+  ) {
+    try {
+      const accessToken = request.cookies['accessToken'];
+
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
+      const subscribedReferralsCount = await this.authService.checkReferrals(
+        walletAddress,
+      );
+
+      return response.status(200).json({
+        subscribedReferralsCount: subscribedReferralsCount,
+      });
+    } catch (error) {
+      return response.status(403).json({
+        error: error.message,
+      });
     }
   }
 }
