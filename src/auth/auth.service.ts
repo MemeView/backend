@@ -8,11 +8,12 @@ import { Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { isAddress } from 'ethers';
 import { ExtractJwt } from 'passport-jwt';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient, Users } from '@prisma/client';
 import { JwtService } from '@nestjs/jwt';
 import Web3 from 'web3';
 import { UTCDate } from '@date-fns/utc';
 import { contractABI } from './contractABI';
+import { User } from '@apollo/server/src/plugin/schemaReporting/generated/operations';
 
 interface subscriber {
   walletAddress: string;
@@ -21,11 +22,6 @@ interface subscriber {
   holdingTWAmountUSDT: string;
   subscriptionLevel: string;
 }
-
-const jwtOptions = {
-  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET,
-};
 
 @Injectable()
 export class AuthService {
@@ -50,13 +46,12 @@ export class AuthService {
     walletAddress: string,
     res: Response,
     registrationRefId?: string,
-  ): Promise<any> {
-    try {
+  ): Promise<{user: Users, accessToken: string}> {
       // Проверка, является ли walletAddress действительным адресом кошелька Ethereum
       const isValidAddress = isAddress(walletAddress);
 
       if (!isValidAddress) {
-        throw new HttpException('No such plan exists', HttpStatus.NOT_FOUND);
+        throw new HttpException('Address not valid', HttpStatus.BAD_REQUEST);
       }
 
       if (!registrationRefId) {
@@ -68,6 +63,7 @@ export class AuthService {
         update: {},
         create: { walletAddress, registrationRefId },
       });
+
 
       if (user && (!user.ownRefId || user.ownRefId.length < 6)) {
         const refId = await this.generateRefId(user.id);
@@ -114,9 +110,6 @@ export class AuthService {
         user,
         accessToken,
       };
-    } catch (error) {
-      return error;
-    }
   }
 
   async checkReferrals(walletAddress: string) {
@@ -164,7 +157,7 @@ export class AuthService {
         },
       });
 
-      res.clearCookie('accessToken');
+      res.clearCookie('accessToken', { httpOnly: true, secure: true, sameSite: 'none', expires: new Date(0) });
 
       return { message: 'Logged out successfully' };
     } catch (error) {
@@ -339,7 +332,7 @@ export class AuthService {
     }
   }
 
-  async getTokenBalance(walletAddress: string): Promise<number> {
+  async getTokenBalance(walletAddress: string): Promise<number | null> {
     const tokenAddress = '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3';
 
     const web3 = new Web3(process.env.INFURA_URL);

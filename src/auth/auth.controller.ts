@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { Response, Request, response } from 'express';
 import { AuthService } from './auth.service';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Users } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
 import * as jwt from 'jsonwebtoken';
 import { JwtAuthGuard } from './jwt-auth.guard';
@@ -34,18 +34,17 @@ export class AuthController {
     @Body('registrationRefId') registrationRefId?: string,
   ) {
     try {
-      const result = await this.authService.signUp(
+      const { user, accessToken } = await this.authService.signUp(
         walletAddress,
         res,
         registrationRefId,
       );
+
       const TWAmount = await this.authService.getTokenBalance(walletAddress);
 
-      result.user.TWAmount = TWAmount;
-
-      return res.status(HttpStatus.OK).json(result);
+      return res.status(HttpStatus.OK).json({ ...{...user, TWAmount}, accessToken });
     } catch (error) {
-      return res.status(HttpStatus.UNAUTHORIZED).json({ error: error.message });
+      return res.status(error.status || HttpStatus.UNAUTHORIZED).json({ error: error.message });
     }
   }
 
