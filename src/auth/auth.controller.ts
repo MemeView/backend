@@ -292,11 +292,36 @@ export class AuthController {
         },
       });
 
+      if (user.subscriptionLevel === 'plan3') {
+        const subscribedReferralsCount = await this.authService.checkReferrals(
+          walletAddress,
+        );
+
+        if (subscribedReferralsCount < 3) {
+          return response.status(403).json({
+            plan: user.subscriptionLevel,
+            isActive: false,
+            req: {
+              subscribedReferralsCount: subscribedReferralsCount,
+            },
+          });
+        }
+
+        return response.status(200).json({
+          plan: user.subscriptionLevel,
+          isActive: true,
+          req: {
+            subscribedReferralsCount: subscribedReferralsCount,
+          },
+        });
+      }
+
       if (
         !user ||
         (user.subscriptionLevel !== 'trial' &&
           user.subscriptionLevel !== 'plan1' &&
-          user.subscriptionLevel !== 'plan2')
+          user.subscriptionLevel !== 'plan2' &&
+          user.subscriptionLevel !== 'plan3')
       ) {
         return response.status(200).json({
           plan: null,

@@ -372,6 +372,28 @@ export class AuthService {
       throw new HttpException('No such plan exists', HttpStatus.NOT_FOUND);
     }
 
+    if (subscription.title === 'plan3') {
+      const subscribedReferralsCount = await this.checkReferrals(walletAddress);
+
+      if (subscribedReferralsCount < 3) {
+        throw new HttpException(
+          'You dont have enouth subscribed referrals',
+          403,
+        );
+      }
+
+      const result = await this.prisma.users.update({
+        where: {
+          walletAddress: walletAddress,
+        },
+        data: {
+          subscriptionLevel: subscription.title,
+        },
+      });
+
+      return result;
+    }
+
     const currentTWPrice = await this.prisma.tokens.findFirst({
       where: {
         address: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
@@ -397,7 +419,6 @@ export class AuthService {
       return new HttpException('you have already taken a trial period', 400);
     }
 
-    // А иначе что? Если user.freeTrialWasTaken === true!
     if (plan === 'trial' && user.freeTrialWasTaken === false) {
       const utcDate = new UTCDate();
 
