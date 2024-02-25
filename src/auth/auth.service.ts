@@ -141,8 +141,9 @@ export class AuthService {
       let count = 0;
       for (const referral of referralsList) {
         if (
-          referral.subscriptionLevel === 'plan1' ||
-          referral.subscriptionLevel === 'plan2'
+          (referral.subscriptionLevel === 'plan1' ||
+            referral.subscriptionLevel === 'plan2') &&
+          parseFloat(referral.holdingTWAmountUSDT) >= 2000
         ) {
           count++;
         }
