@@ -23,19 +23,26 @@ export class SignalBotService {
     telegramBot.onText(/\/start/, async (msg) => {
       const chatId = msg.chat.id;
       const userId = msg.from.id;
-      const payload = msg.text!.substring(7);
+      const refId = msg.text.split(' ')[1]?.split('-')[1];
+
+      console.log('refId', refId);
 
       const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+
       webAppUrl.searchParams.append('telegramId', userId.toString());
 
-      // console.log(payload);
+      if (refId) {
+        webAppUrl.searchParams.append('ref', refId);
+      }
+
+      console.log('webAppUrl', webAppUrl.href);
 
       const buttons = [
         [
           {
             text: '🚀 Top-30 ToTheMoonScore',
             web_app: {
-              url: process.env.SIGNAL_BOT_WEBAPP_URL,
+              url: webAppUrl.href,
             },
           },
         ],
