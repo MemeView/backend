@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { subHours } from 'date-fns';
 import * as TelegramBot from 'node-telegram-bot-api';
+import * as initData from '@tma.js/init-data-node';
 
 @Injectable()
 export class SignalBotService {
@@ -23,7 +24,6 @@ export class SignalBotService {
       const chatId = msg.chat.id;
       const userId = msg.from.id;
       const payload = msg.text!.substring(7);
-      console.log(payload);
 
       const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
       webAppUrl.searchParams.append('telegramId', userId.toString());
