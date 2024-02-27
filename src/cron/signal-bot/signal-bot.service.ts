@@ -24,17 +24,20 @@ export class SignalBotService {
       const userId = msg.from.id;
       const refId = msg.text.split(' ')[1]?.split('-')[1];
 
-      console.log('refId', refId);
-
       const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
 
+      const refAppUrl = new URL(`${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`);
+
       webAppUrl.searchParams.append('telegramId', userId.toString());
+      refAppUrl.searchParams.append('telegramId', userId.toString());
 
       if (refId) {
         webAppUrl.searchParams.append('ref', refId);
+        refAppUrl.searchParams.append('ref', refId);
       }
 
       console.log('webAppUrl', webAppUrl.href);
+      console.log('refAppUrl', refAppUrl.href);
 
       const buttons = [
         [
@@ -46,7 +49,12 @@ export class SignalBotService {
           },
         ],
         [
-          { text: '💰 Referral', callback_data: 'referral' },
+          {
+            text: '💰 Referral',
+            web_app: {
+              url: refAppUrl.href,
+            },
+          },
           { text: 'ℹ️ About', callback_data: 'about' },
         ],
       ];
@@ -80,10 +88,6 @@ To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonSco
       telegramBot.sendMessage(chatId, welcomeMessage, options);
     });
 
-    telegramBot.onText(/💰 Referral/, (msg) => {
-      const chatId = msg.chat.id;
-      telegramBot.sendMessage(chatId, 'Текст для Рефералов');
-    });
 
     telegramBot.onText(/ℹ️ About/, (msg) => {
       const chatId = msg.chat.id;
