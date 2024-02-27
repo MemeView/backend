@@ -1682,6 +1682,18 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
+"@tma.js/init-data-node@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@tma.js/init-data-node/-/init-data-node-1.1.5.tgz#6310996ebdc6e05e37ea7c046d90f06202df5d2c"
+  integrity sha512-VVoLVudg5U7IFYeWkTNYVsJU2i7nHSZL57X+dF0d2ri9JPmt17Nd/WYT8dTk00DHiMsuMov/2Qqxk0bXBiJ1qA==
+  dependencies:
+    "@tma.js/sdk" "^1.4.4"
+
+"@tma.js/sdk@^1.4.4":
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/@tma.js/sdk/-/sdk-1.4.4.tgz#1c31d749bc0064a00f2e01c471dcab6eb875964b"
+  integrity sha512-PPmCC1F5wjIf/sULjeOrMbegHRFo6tAJvQQILcMGEofyLklMpa5hNwVnkD2/j7bh9nXyZUA9qyBuZJlih+Qx9w==
+
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
   resolved "https://registry.yarnpkg.com/@tsconfig/node10/-/node10-1.0.9.tgz#df4907fc07a886922637b15e02d4cebc4c0021b2"

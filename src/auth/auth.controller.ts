@@ -42,9 +42,13 @@ export class AuthController {
 
       const TWAmount = await this.authService.getTokenBalance(walletAddress);
 
-      return res.status(HttpStatus.OK).json({ ...{...user, TWAmount}, accessToken });
+      return res
+        .status(HttpStatus.OK)
+        .json({ ...{ ...user, TWAmount }, accessToken });
     } catch (error) {
-      return res.status(error.status || HttpStatus.UNAUTHORIZED).json({ error: error.message });
+      return res
+        .status(error.status || HttpStatus.UNAUTHORIZED)
+        .json({ error: error.message });
     }
   }
 

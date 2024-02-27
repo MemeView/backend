@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { subHours } from 'date-fns';
 import * as TelegramBot from 'node-telegram-bot-api';
+import * as initData from '@tma.js/init-data-node';
 
 @Injectable()
 export class SignalBotService {
