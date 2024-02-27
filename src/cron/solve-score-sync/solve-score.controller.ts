@@ -219,10 +219,44 @@ export class SolveScoreController {
         });
       }
 
+      if (user && user.subscriptionLevel === 'plan3') {
+        const subscribedReferralsCount = await this.authService.checkReferrals(
+          decodedAccessToken.walletAddress,
+        );
+
+        if (subscribedReferralsCount < 3) {
+          return response.status(403).json({
+            message: `You dont have permission to tokens score`,
+          });
+        }
+      }
+
+      if (
+        user &&
+        (user.subscriptionLevel === 'plan1' ||
+          user.subscriptionLevel === 'plan2')
+      ) {
+        const holdingTWAmount = await this.authService.getTokenBalance(
+          decodedAccessToken.walletAddress,
+        );
+
+        const plan = await this.prisma.subscriptions.findFirst({
+          where: {
+            title: user.subscriptionLevel,
+          },
+        });
+
+        if (holdingTWAmount < plan.holdingTWAmount) {
+          return response.status(403).json({
+            message: `You dont have permission to tokens score`,
+          });
+        }
+      }
       if (
         user &&
         user.subscriptionLevel !== 'plan1' &&
         user.subscriptionLevel !== 'plan2' &&
+        user.subscriptionLevel !== 'plan3' &&
         user.subscriptionLevel !== 'trial' &&
         !userInWhiteList
       ) {
@@ -239,7 +273,8 @@ export class SolveScoreController {
         if (
           (user &&
             (user.subscriptionLevel === 'plan1' ||
-              user.subscriptionLevel === 'trial')) ||
+              user.subscriptionLevel === 'trial' ||
+              user.subscriptionLevel === 'plan3')) ||
           userInWhiteList
         ) {
           scoreQuery = `score9pm`;
@@ -256,7 +291,8 @@ export class SolveScoreController {
         if (
           (user &&
             (user.subscriptionLevel === 'plan1' ||
-              user.subscriptionLevel === 'trial')) ||
+              user.subscriptionLevel === 'trial' ||
+              user.subscriptionLevel === 'plan3')) ||
           userInWhiteList
         ) {
           scoreQuery = `score9am`;
