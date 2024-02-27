@@ -17,7 +17,7 @@ import { UTCDate } from '@date-fns/utc';
 import * as jwt from 'jsonwebtoken';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { SignalBotService } from 'src/cron/signal-bot/signal-bot.service';
-import { add, differenceInMilliseconds, subDays } from 'date-fns';
+import { add, differenceInMilliseconds, subDays, subHours } from 'date-fns';
 
 @Controller('api')
 export class AuthController {
@@ -143,15 +143,13 @@ export class AuthController {
         registrationRefId,
       );
 
-      if (result.status === 400) {
-        return res.status(400).json(result);
-      }
-
-      result.user.TWAmount = TWAmount;
-
-      return res.status(HttpStatus.OK).json(result);
+      return res.status(HttpStatus.OK).json({
+        result: { ...{ ...result.user, TWAmount: TWAmount } },
+      });
     } catch (error) {
-      return res.status(HttpStatus.UNAUTHORIZED).json({ error: error.message });
+      return res
+        .status(error.status || HttpStatus.UNAUTHORIZED)
+        .json({ error: error.message });
     }
   }
 

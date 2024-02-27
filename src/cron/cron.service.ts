@@ -56,8 +56,9 @@ export class CronService {
   @Cron('0 * * * *', { disabled: process.env.NODE_ENV === 'development' }) // начало каждого часа
   async tokensCron() {
     const utcDate = new UTCDate();
-
-    const currentHour = utcDate.getHours();
+    const pstDate = subHours(utcDate, 8);
+    const currentHour = utcDate.getUTCHours();
+    const currentPstHour = pstDate.getUTCHours();
 
     await this.handleRetry(async () => {
       let totalDeletedCount = 0;
@@ -148,22 +149,22 @@ export class CronService {
       console.log(`Cron 'posting' job completed`);
     });
 
-    if (currentHour === 3) {
+    if (currentPstHour === 3) {
       await this.solveScoreService.solveTtmsByHours('3am');
       console.log(`Current ttms has beet copied to the column 3am`);
     }
 
-    if (currentHour === 9) {
+    if (currentPstHour === 9) {
       await this.solveScoreService.solveTtmsByHours('9am');
       console.log(`Current ttms has beet copied to the column 9am`);
     }
 
-    if (currentHour === 15) {
+    if (currentPstHour === 15) {
       await this.solveScoreService.solveTtmsByHours('3pm');
       console.log(`Current ttms has beet copied to the column 3pm`);
     }
 
-    if (currentHour === 21) {
+    if (currentPstHour === 21) {
       await this.solveScoreService.solveTtmsByHours('9pm');
       console.log(`Current ttms has beet copied to the column 9pm`);
     }

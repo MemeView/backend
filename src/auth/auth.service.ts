@@ -14,6 +14,7 @@ import Web3 from 'web3';
 import { UTCDate } from '@date-fns/utc';
 import { contractABI } from './contractABI';
 import { User } from '@apollo/server/src/plugin/schemaReporting/generated/operations';
+import { UserWithoutRefreshToken } from './auth-interfaces';
 
 interface subscriber {
   walletAddress: string;
@@ -46,70 +47,75 @@ export class AuthService {
     walletAddress: string,
     res: Response,
     registrationRefId?: string,
-  ): Promise<{user: Users, accessToken: string}> {
-      // Проверка, является ли walletAddress действительным адресом кошелька Ethereum
-      const isValidAddress = isAddress(walletAddress);
+  ): Promise<{ user: UserWithoutRefreshToken; accessToken: string }> {
+    // Проверка, является ли walletAddress действительным адресом кошелька Ethereum
+    const isValidAddress = isAddress(walletAddress);
 
-      if (!isValidAddress) {
-        throw new HttpException('Address not valid', HttpStatus.BAD_REQUEST);
-      }
+    if (!isValidAddress) {
+      throw new HttpException('Address not valid', HttpStatus.BAD_REQUEST);
+    }
 
-      if (!registrationRefId) {
-        registrationRefId = null;
-      }
+    if (!registrationRefId) {
+      registrationRefId = null;
+    }
 
-      let user = await this.prisma.users.upsert({
-        where: { walletAddress },
-        update: {},
-        create: { walletAddress, registrationRefId },
-      });
+    let user = await this.prisma.users.upsert({
+      where: { walletAddress },
+      update: {},
+      create: { walletAddress, registrationRefId },
+    });
 
-
-      if (user && (!user.ownRefId || user.ownRefId.length < 6)) {
-        const refId = await this.generateRefId(user.id);
-        user = await this.prisma.users.update({
-          where: {
-            walletAddress: user.walletAddress,
-          },
-          data: {
-            ownRefId: refId,
-          },
-        });
-      }
-
-      const accessToken = jwt.sign(
-        { walletAddress: user.walletAddress, telegramId: user.telegramId },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: '10m',
+    if (user && (!user.ownRefId || user.ownRefId.length < 6)) {
+      const refId = await this.generateRefId(user.id);
+      user = await this.prisma.users.update({
+        where: {
+          walletAddress: user.walletAddress,
         },
-      );
-
-      const refreshToken = jwt.sign(
-        { walletAddress: user.walletAddress, telegramId: user.telegramId },
-        process.env.JWT_SECRET,
-        {
-          expiresIn: '7d',
-        },
-      );
-
-      await this.prisma.users.update({
-        where: { walletAddress },
         data: {
-          refreshToken,
-          refreshTokenCreatedAt: new Date(),
+          ownRefId: refId,
         },
       });
+    }
 
-      // Установка cookie с accessToken
-      res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-      });
+    const accessToken = jwt.sign(
+      { walletAddress: user.walletAddress, telegramId: user.telegramId },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '10m',
+      },
+    );
 
-      return {
-        user,
-        accessToken,
-      };
+    const refreshToken = jwt.sign(
+      { walletAddress: user.walletAddress, telegramId: user.telegramId },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '7d',
+      },
+    );
+
+    await this.prisma.users.update({
+      where: { walletAddress },
+      data: {
+        refreshToken,
+        refreshTokenCreatedAt: new Date(),
+      },
+    });
+
+    // Установка cookie с accessToken
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+    });
+
+    const {
+      refreshToken: userRefreshToken,
+      refreshTokenCreatedAt,
+      ...userWithoutRefreshToken
+    } = user;
+
+    return {
+      user: userWithoutRefreshToken,
+      accessToken,
+    };
   }
 
   async checkReferrals(walletAddress: string) {
@@ -157,7 +163,12 @@ export class AuthService {
         },
       });
 
-      res.clearCookie('accessToken', { httpOnly: true, secure: true, sameSite: 'none', expires: new Date(0) });
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        expires: new Date(0),
+      });
 
       return { message: 'Logged out successfully' };
     } catch (error) {
@@ -206,129 +217,132 @@ export class AuthService {
     telegramId: number,
     res: Response,
     registrationRefId?: string,
-  ) {
-    try {
-      if (!registrationRefId) {
-        registrationRefId = null;
+  ): Promise<{ user: UserWithoutRefreshToken; accessToken: string }> {
+    if (!registrationRefId) {
+      registrationRefId = null;
+    }
+
+    // Проверка, является ли walletAddress действительным адресом кошелька Ethereum
+    const isValidAddress = isAddress(walletAddress);
+
+    if (!isValidAddress) {
+      new UnauthorizedException('Invalid wallet address');
+    }
+
+    const wallet = await this.prisma.users.findUnique({
+      where: { walletAddress: walletAddress },
+    });
+
+    let user = null;
+
+    if (!wallet) {
+      user = await this.prisma.users.create({
+        data: {
+          walletAddress: walletAddress,
+          telegramId: telegramId,
+          registrationRefId: registrationRefId,
+        },
+      });
+      if (user) {
+        const refId = await this.generateRefId(user.id);
+        user = await this.prisma.users.update({
+          where: {
+            walletAddress: user.walletAddress,
+          },
+          data: {
+            ownRefId: refId,
+          },
+        });
       }
+    }
 
-      // Проверка, является ли walletAddress действительным адресом кошелька Ethereum
-      const isValidAddress = isAddress(walletAddress);
+    if (
+      wallet &&
+      wallet.telegramId !== null &&
+      wallet.telegramId === telegramId
+    ) {
+      user = wallet;
 
-      if (!isValidAddress) {
-        new UnauthorizedException('Invalid wallet address');
+      if (!user.ownRefId || user.ownRefId.length < 6) {
+        const refId = await this.generateRefId(user.id);
+        user = await this.prisma.users.update({
+          where: {
+            walletAddress: user.walletAddress,
+          },
+          data: {
+            ownRefId: refId,
+          },
+        });
       }
+    }
 
-      const wallet = await this.prisma.users.findUnique({
+    if (
+      wallet &&
+      wallet.telegramId !== null &&
+      wallet.telegramId !== telegramId
+    ) {
+      throw new HttpException(
+        'You cannot link this telegram account to this wallet, since another telegram account is already linked to it',
+        400,
+      );
+    }
+
+    if (wallet && wallet.telegramId === null) {
+      const refId = await this.generateRefId(wallet.id);
+      user = await this.prisma.users.update({
         where: { walletAddress: walletAddress },
+        data: {
+          telegramId: telegramId,
+          ownRefId: refId,
+          registrationRefId: registrationRefId,
+        },
+      });
+    }
+
+    if (user !== null) {
+      const accessToken = jwt.sign(
+        { walletAddress: user.walletAddress, telegramId: user.telegramId },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: '10m',
+        },
+      );
+
+      const refreshToken = jwt.sign(
+        { walletAddress: user.walletAddress, telegramId: user.telegramId },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: '7d',
+        },
+      );
+
+      await this.prisma.users.update({
+        where: { walletAddress },
+        data: {
+          refreshToken,
+          refreshTokenCreatedAt: new Date(),
+        },
       });
 
-      let user = null;
+      // Установка cookie с accessToken
+      res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+      });
 
-      if (!wallet) {
-        user = await this.prisma.users.create({
-          data: {
-            walletAddress: walletAddress,
-            telegramId: telegramId,
-            registrationRefId: registrationRefId,
-          },
-        });
-        if (user) {
-          const refId = await this.generateRefId(user.id);
-          user = await this.prisma.users.update({
-            where: {
-              walletAddress: user.walletAddress,
-            },
-            data: {
-              ownRefId: refId,
-            },
-          });
-        }
-      }
+      const {
+        refreshToken: userRefreshToken,
+        refreshTokenCreatedAt,
+        id,
+        ...userWithoutRefreshToken
+      } = user;
 
-      if (
-        wallet &&
-        wallet.telegramId !== null &&
-        wallet.telegramId === telegramId
-      ) {
-        user = wallet;
-
-        if (!user.ownRefId || user.ownRefId.length < 6) {
-          const refId = await this.generateRefId(user.id);
-          user = await this.prisma.users.update({
-            where: {
-              walletAddress: user.walletAddress,
-            },
-            data: {
-              ownRefId: refId,
-            },
-          });
-        }
-      }
-
-      if (
-        wallet &&
-        wallet.telegramId !== null &&
-        wallet.telegramId !== telegramId
-      ) {
-        return new HttpException(
-          'You cannot link this telegram account to this wallet, since another telegram account is already linked to it',
-          400,
-        );
-      }
-
-      if (wallet && wallet.telegramId === null) {
-        const refId = await this.generateRefId(wallet.id);
-        user = await this.prisma.users.update({
-          where: { walletAddress: walletAddress },
-          data: {
-            telegramId: telegramId,
-            ownRefId: refId,
-            registrationRefId: registrationRefId,
-          },
-        });
-      }
-
-      if (user !== null) {
-        const accessToken = jwt.sign(
-          { walletAddress: user.walletAddress, telegramId: user.telegramId },
-          process.env.JWT_SECRET,
-          {
-            expiresIn: '10m',
-          },
-        );
-
-        const refreshToken = jwt.sign(
-          { walletAddress: user.walletAddress, telegramId: user.telegramId },
-          process.env.JWT_SECRET,
-          {
-            expiresIn: '7d',
-          },
-        );
-
-        await this.prisma.users.update({
-          where: { walletAddress },
-          data: {
-            refreshToken,
-            refreshTokenCreatedAt: new Date(),
-          },
-        });
-
-        // Установка cookie с accessToken
-        res.cookie('accessToken', accessToken, {
-          httpOnly: true,
-          secure: true,
-          sameSite: 'none',
-          path: '/',
-        });
-
-        return {
-          user,
-          accessToken,
-        };
-      }
-    } catch (error) {
-      return error;
+      return {
+        user: userWithoutRefreshToken,
+        accessToken,
+      };
     }
   }
 

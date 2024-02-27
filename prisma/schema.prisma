@@ -144,5 +144,3 @@ model TtmsByHours {
 model TgWhiteList {
   telegramId    Int @id @unique
 }
-
-

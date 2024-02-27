@@ -172,7 +172,8 @@ export class SolveScoreController {
     try {
       let scoreQuery = ``;
       const utcDate = new UTCDate();
-      const hour = utcDate.getHours();
+      const pstDate = subHours(utcDate, 8);
+      const currentPstHour = pstDate.getUTCHours();
       const sevenDaysAgo = subDays(utcDate, 7);
 
       const accessToken = request.cookies['accessToken'];
@@ -191,13 +192,20 @@ export class SolveScoreController {
         },
       });
 
-      const userInWhiteList = await this.prisma.tgWhiteList.findUnique({
-        where: { telegramId: decodedAccessToken.telegramId },
-      });
+      let userInWhiteList = null;
 
-      if ((!user && !userInWhiteList) || !user.subscriptionLevel) {
+      if (decodedAccessToken.telegramId) {
+        userInWhiteList = await this.prisma.tgWhiteList.findUnique({
+          where: { telegramId: decodedAccessToken.telegramId },
+        });
+      }
+
+      if (
+        (!user && !userInWhiteList) ||
+        (user && !userInWhiteList && !user.subscriptionLevel)
+      ) {
         return response.status(403).json({
-          message: `There is no subscription`,
+          message: 'There is no subscription',
         });
       }
 
@@ -223,11 +231,11 @@ export class SolveScoreController {
         });
       }
 
-      if (hour < 3) {
+      if (currentPstHour < 3) {
         scoreQuery = `score9pm`;
       }
 
-      if (hour >= 3 && hour < 9) {
+      if (currentPstHour >= 3 && currentPstHour < 9) {
         if (
           (user &&
             (user.subscriptionLevel === 'plan1' ||
@@ -240,11 +248,11 @@ export class SolveScoreController {
         }
       }
 
-      if (hour >= 9 && hour < 15) {
+      if (currentPstHour >= 9 && currentPstHour < 15) {
         scoreQuery = `score9am`;
       }
 
-      if (hour >= 15 && hour < 21) {
+      if (currentPstHour >= 15 && currentPstHour < 21) {
         if (
           (user &&
             (user.subscriptionLevel === 'plan1' ||
@@ -257,7 +265,7 @@ export class SolveScoreController {
         }
       }
 
-      if (hour >= 21) {
+      if (currentPstHour >= 21) {
         scoreQuery = `score9pm`;
       }
 
