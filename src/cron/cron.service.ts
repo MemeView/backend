@@ -11,6 +11,7 @@ import { startOfHour, subHours } from 'date-fns';
 import { VotesService } from './votes-sync/votes.service';
 import { UTCDate } from '@date-fns/utc';
 import { AuthService } from 'src/auth/auth.service';
+import { SignalBotService } from './signal-bot/signal-bot.service';
 
 @Injectable()
 export class CronService {
@@ -25,6 +26,7 @@ export class CronService {
     private readonly holdersService: HoldersService,
     private readonly votesService: VotesService,
     private readonly authService: AuthService,
+    private readonly signalBotService: SignalBotService,
     private prisma: PrismaClient,
   ) {}
 
@@ -152,21 +154,33 @@ export class CronService {
     if (currentPstHour === 3) {
       await this.solveScoreService.solveTtmsByHours('3am');
       console.log(`Current ttms has beet copied to the column 3am`);
+      const sendedMessagesCount =
+        await this.signalBotService.sendMessageToAllUsers();
+      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
     }
 
     if (currentPstHour === 9) {
       await this.solveScoreService.solveTtmsByHours('9am');
       console.log(`Current ttms has beet copied to the column 9am`);
+      const sendedMessagesCount =
+        await this.signalBotService.sendMessageToAllUsers();
+      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
     }
 
     if (currentPstHour === 15) {
       await this.solveScoreService.solveTtmsByHours('3pm');
       console.log(`Current ttms has beet copied to the column 3pm`);
+      const sendedMessagesCount =
+        await this.signalBotService.sendMessageToAllUsers();
+      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
     }
 
     if (currentPstHour === 21) {
       await this.solveScoreService.solveTtmsByHours('9pm');
       console.log(`Current ttms has beet copied to the column 9pm`);
+      const sendedMessagesCount =
+        await this.signalBotService.sendMessageToAllUsers();
+      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
     }
   }
 

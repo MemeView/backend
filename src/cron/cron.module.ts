@@ -16,6 +16,7 @@ import { SignalBotModule } from './signal-bot/signal-bot.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
+import { SignalBotService } from './signal-bot/signal-bot.service';
 
 @Module({
   imports: [

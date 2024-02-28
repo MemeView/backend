@@ -1,14 +1,16 @@
 import { UTCDate } from '@date-fns/utc';
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { subHours } from 'date-fns';
+import { subDays, subHours } from 'date-fns';
 import * as TelegramBot from 'node-telegram-bot-api';
 import * as initData from '@tma.js/init-data-node';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class SignalBotService {
   private static bot: TelegramBot;
   private authorizedUsers: Set<number>; // множество для хранения id авторизованных пользователей
+  private readonly authService: AuthService;
 
   constructor(private readonly prisma: PrismaClient) {
     if (!SignalBotService.bot) {
@@ -27,7 +29,9 @@ export class SignalBotService {
 
       const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
 
-      const refAppUrl = new URL(`${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`);
+      const refAppUrl = new URL(
+        `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
+      );
 
       webAppUrl.searchParams.append('telegramId', userId.toString());
       refAppUrl.searchParams.append('telegramId', userId.toString());
@@ -88,7 +92,6 @@ To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonSco
 
       telegramBot.sendMessage(chatId, welcomeMessage, options);
     });
-
 
     telegramBot.onText(/ℹ️ About/, (msg) => {
       const chatId = msg.chat.id;
@@ -213,5 +216,139 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 T
       return true;
     }
     return false;
+  }
+
+  async sendMessageToAllUsers(): Promise<number> {
+    try {
+      if (!SignalBotService.bot) {
+        SignalBotService.bot = new TelegramBot(
+          process.env.TG_SIGNAL_BOT_TOKEN,
+          {
+            polling: true,
+          },
+        );
+      }
+      const telegramBot = SignalBotService.bot;
+
+      const utcDate = new UTCDate();
+      const sevenDaysAgo = subDays(utcDate, 7);
+      const pstDate = subHours(utcDate, 8);
+      const currentPstHour = pstDate.getUTCHours();
+
+      let allSubscriptions = null;
+
+      if (currentPstHour === 3 || currentPstHour === 15) {
+        allSubscriptions = await this.prisma.subscriptions.findFirst({
+          where: {
+            title: 'plan2',
+          },
+        });
+      } else {
+        allSubscriptions = await this.prisma.subscriptions.findMany();
+      }
+
+      const allUsers = await this.prisma.users.findMany({
+        where: {
+          telegramId: { gt: 0 },
+        },
+      });
+
+      let sendedMessagesCount = 0;
+
+      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+
+      const message = `🌟 ToTheMoonScore Top-30 Portfolio Update! 🌟
+
+The Top-30 list of tokens has just been updated and available in the Bot.
+      
+Check it by clicking the button below 👇`;
+
+      const photoPath =
+        'https://twa.tokenwatch.ai/tokenwatch_signalbot_autopost.png';
+
+      for (const user of allUsers) {
+        const chatId = user.telegramId;
+
+        const subscription = allSubscriptions.find(
+          (subscription) => subscription.title === user.subscriptionLevel,
+        );
+
+        // проверяю активность подписок plan1 или plan2
+        if (
+          subscription &&
+          (subscription.title === 'plan1' || subscription.title === 'plan2') &&
+          parseFloat(user.holdingTWAmountUSDT) >= subscription.holdingTWAmount
+        ) {
+          await telegramBot.sendPhoto(chatId, photoPath, {
+            caption: message,
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: 'Get your free Top-30 list',
+                    web_app: {
+                      url: webAppUrl.href,
+                    },
+                  },
+                ],
+              ],
+            },
+          });
+          sendedMessagesCount++;
+        }
+
+        // проверяю активность триала
+        if (
+          subscription &&
+          subscription.title === 'trial' &&
+          user.trialCreatedAt > sevenDaysAgo
+        ) {
+          await telegramBot.sendPhoto(chatId, photoPath, {
+            caption: message,
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: 'Get your free Top-30 list',
+                    web_app: {
+                      url: webAppUrl.href,
+                    },
+                  },
+                ],
+              ],
+            },
+          });
+          sendedMessagesCount++;
+        }
+
+        // проверяю активность реферальной подписки
+        if (subscription && subscription.title === 'plan3') {
+          const subscribedReferralsCount =
+            await this.authService.checkReferrals(user.walletAddress);
+
+          if (subscribedReferralsCount >= 3) {
+            await telegramBot.sendPhoto(chatId, photoPath, {
+              caption: message,
+              reply_markup: {
+                inline_keyboard: [
+                  [
+                    {
+                      text: 'Get your free Top-30 list',
+                      web_app: {
+                        url: webAppUrl.href,
+                      },
+                    },
+                  ],
+                ],
+              },
+            });
+            sendedMessagesCount++;
+          }
+        }
+      }
+      return sendedMessagesCount;
+    } catch (error) {
+      return error;
+    }
   }
 }

@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { SignalBotService } from './signal-bot.service';
 import { Response, Request } from 'express';
@@ -72,6 +80,17 @@ export class SignalBotController {
           check: false,
         });
       }
+    } catch (e) {
+      return e;
+    }
+  }
+
+  @Post('/send-message-to-all-users')
+  async sendMessageToAllUsers() {
+    try {
+      const result = await this.signalBotService.sendMessageToAllUsers();
+
+      return result;
     } catch (e) {
       return e;
     }
