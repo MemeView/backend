@@ -233,6 +233,21 @@ export class PostingService {
             `#Signals\n\n` +
             `by @TokenWatch\\_ai`;
 
+          const twitterTestMessage =
+            `$${token.symbol.toUpperCase()}\n\n` +
+            `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
+            `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
+              parseFloat(token.averageScoreToday),
+            )}\n\n` +
+            `🌐 https://tokenwatch.ai/en/tokens/${network}/${token.pairAddress}?quoteToken=${token.quoteToken} \n\n` +
+            `#${token.symbol.toUpperCase()} ` +
+            `#${token.symbol.toUpperCase()}growth ` +
+            `#TokenWatch ` +
+            `#CryptoCurrency ` +
+            `#CryptoMarket ` +
+            `#Signals\n\n` +
+            `by @TokenWatch_ai`;
+
           const twitterMessage =
             `$${token.symbol.toUpperCase()}\n\n` +
             `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
@@ -256,7 +271,7 @@ export class PostingService {
           // });
 
           // await this.sendTwitterMessage(twitterMessage);
-          await this.sendTwitterMessage(testMessage);
+          await this.sendTwitterMessage(twitterTestMessage);
 
           // Отмечаем токен как разосланный
           await this.prisma.postedTokens.create({

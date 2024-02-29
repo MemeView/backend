@@ -17,6 +17,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignalBotService } from './signal-bot/signal-bot.service';
+import { TtmsPortfolioModule } from './ttms-portfolio/ttms-portfolio.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { SignalBotService } from './signal-bot/signal-bot.service';
     VotesModule,
     SignalBotModule,
     AuthModule,
+    TtmsPortfolioModule,
   ],
   providers: [
     DefinedTokensService,

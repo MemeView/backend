@@ -144,3 +144,13 @@ model TtmsByHours {
 model TgWhiteList {
   telegramId    Int @id @unique
 }
+
+model TtmsPortfolio {
+  id                    Int @id @default(autoincrement())
+  tokenAddress          String
+  priceUSD              String
+  startedAt             String
+  ATH                   String?
+  ATL                   String?
+  dailyPriceChange095   String?
+}

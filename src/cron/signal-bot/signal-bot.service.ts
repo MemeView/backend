@@ -10,9 +10,11 @@ import { AuthService } from 'src/auth/auth.service';
 export class SignalBotService {
   private static bot: TelegramBot;
   private authorizedUsers: Set<number>; // множество для хранения id авторизованных пользователей
-  private readonly authService: AuthService;
 
-  constructor(private readonly prisma: PrismaClient) {
+  constructor(
+    private readonly prisma: PrismaClient,
+    private readonly authService: AuthService,
+  ) {
     if (!SignalBotService.bot) {
       SignalBotService.bot = new TelegramBot(process.env.TG_SIGNAL_BOT_TOKEN, {
         polling: true,
