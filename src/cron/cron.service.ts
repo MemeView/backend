@@ -12,6 +12,7 @@ import { VotesService } from './votes-sync/votes.service';
 import { UTCDate } from '@date-fns/utc';
 import { AuthService } from 'src/auth/auth.service';
 import { SignalBotService } from './signal-bot/signal-bot.service';
+import { TtmsPortfolioService } from './ttms-portfolio/ttms-portfolio.service';
 
 @Injectable()
 export class CronService {
@@ -27,6 +28,7 @@ export class CronService {
     private readonly votesService: VotesService,
     private readonly authService: AuthService,
     private readonly signalBotService: SignalBotService,
+    private readonly ttmsPortfolioService: TtmsPortfolioService,
     private prisma: PrismaClient,
   ) {}
 
@@ -182,6 +184,7 @@ export class CronService {
         await this.signalBotService.sendMessageToAllUsers();
       console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
     }
+    await this.ttmsPortfolioService.handleTtmsPortfolio(currentPstHour);
   }
 
   async volumeCron() {

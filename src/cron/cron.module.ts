@@ -18,6 +18,7 @@ import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignalBotService } from './signal-bot/signal-bot.service';
 import { TtmsPortfolioModule } from './ttms-portfolio/ttms-portfolio.module';
+import { TtmsPortfolioService } from './ttms-portfolio/ttms-portfolio.service';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TtmsPortfolioModule } from './ttms-portfolio/ttms-portfolio.module';
     VotesService,
     JwtService,
     AuthService,
+    TtmsPortfolioService,
   ],
   controllers: [CronController],
 })

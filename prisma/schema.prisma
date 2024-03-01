@@ -153,4 +153,19 @@ model TtmsPortfolio {
   ATH                   String?
   ATL                   String?
   dailyPriceChange095   String?
+  currentPrice          String?
+}
+
+model Last24SolvedTtmsPortfolio {
+  id               Int @id @default(autoincrement())
+  portfolio        Json
+  startedAt        String
+  createdAt        DateTime @default(now())
+}
+
+model AverageTtmsPortfolioResults {
+  id                  Int @id @default(autoincrement())
+  average24Result     String
+  startedAt           String
+  createdAt           DateTime @default(now())
 }
