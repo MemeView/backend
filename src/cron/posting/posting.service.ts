@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as TelegramBot from 'node-telegram-bot-api';
 import { PrismaClient } from '@prisma/client';
-import axios from 'axios';
 import { subHours } from 'date-fns';
 import { TwitterApi } from 'twitter-api-v2';
 import * as nodemailer from 'nodemailer';
@@ -33,7 +32,7 @@ export class PostingService {
     return absoluteScore.toFixed(1).toString();
   }
 
-  async sendTwitterMessage(message) {
+  async sendTwitterMessage(message: string) {
     try {
       const tweet = await twitterClient.v2.tweet(message);
       console.log('Twitter message sent successfully!', tweet);
