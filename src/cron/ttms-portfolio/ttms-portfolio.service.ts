@@ -1,7 +1,7 @@
 import { UTCDate } from '@date-fns/utc';
 import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { startOfDay, subDays } from 'date-fns';
+import { getDate, getMonth, getYear, startOfDay, subDays } from 'date-fns';
 
 @Injectable()
 export class TtmsPortfolioService {
@@ -12,6 +12,23 @@ export class TtmsPortfolioService {
       const utcDate = new UTCDate();
       const todayStartOfDay = startOfDay(utcDate);
       const monthAgo = subDays(utcDate, 30);
+      const yesterday = subDays(utcDate, 1);
+
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+
       if (hour === 9) {
         const oldPortfolio = await this.prisma.ttmsPortfolio.findMany({
           where: {

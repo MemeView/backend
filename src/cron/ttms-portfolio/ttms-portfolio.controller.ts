@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { TtmsPortfolioService } from './ttms-portfolio.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
-import { startOfDay, subDays } from 'date-fns';
+import { getDate, getMonth, getYear, startOfDay, subDays } from 'date-fns';
 
 @Controller('/api')
 export class TtmsPortfolioController {
@@ -33,7 +33,53 @@ export class TtmsPortfolioController {
         },
       });
 
-      return result;
+      const utcDate = new UTCDate();
+      const todayStartOfDay = startOfDay(utcDate);
+      const monthAgo = subDays(utcDate, 30);
+      const yesterday = subDays(utcDate, 1);
+      const currentDayNumber = getDate(utcDate);
+      const yesterdayDayNumber = getDate(yesterday);
+      const currentMonth = getMonth(utcDate);
+      const yesterdayMonth = getMonth(yesterday);
+      const currentYear = getYear(utcDate);
+      const yesterdayYear = getYear(yesterday);
+
+      const months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ];
+
+      if (result.startedAt === '9am') {
+        const cycleStart = `${yesterdayDayNumber} ${months[yesterdayMonth]} ${yesterdayYear}, 9am PST`;
+        const cycleEnd = `${currentDayNumber} ${months[currentMonth]} ${currentYear}, 9am PST`;
+
+        return {
+          portfolio: result.portfolio,
+          cycleStart: cycleStart,
+          cycleEnd: cycleEnd,
+        };
+      }
+
+      if (result.startedAt === '9pm') {
+        const cycleStart = `${yesterdayDayNumber} ${months[yesterdayMonth]} ${yesterdayYear}, 9pm PST`;
+        const cycleEnd = `${currentDayNumber} ${months[currentMonth]} ${currentYear}, 9pm PST`;
+
+        return {
+          portfolio: result.portfolio,
+          cycleStart: cycleStart,
+          cycleEnd: cycleEnd,
+        };
+      }
     } catch (e) {
       return e;
     }
