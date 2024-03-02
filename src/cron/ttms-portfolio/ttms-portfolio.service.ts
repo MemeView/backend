@@ -32,7 +32,7 @@ export class TtmsPortfolioService {
                 parseFloat(portfolio.priceUSD)) /
               (parseFloat(portfolio.priceUSD) / 100);
 
-            portfolio.dailyPriceChange095 = `${priceRatio}%`;
+            portfolio.dailyPriceChange095 = priceRatio;
             portfolio.exitPrice = portfolio.currentPrice;
           }
         });
@@ -52,7 +52,7 @@ export class TtmsPortfolioService {
 
         const totalDailyPriceChange095 = JSON.stringify(
           oldPortfolio.reduce((acc, portfolio) => {
-            return acc + parseFloat(portfolio.dailyPriceChange095);
+            return acc + portfolio.dailyPriceChange095;
           }, 0) / oldPortfolio.length,
         );
 
@@ -132,7 +132,7 @@ export class TtmsPortfolioService {
                 parseFloat(portfolio.priceUSD)) /
               (parseFloat(portfolio.priceUSD) / 100);
 
-            portfolio.dailyPriceChange095 = `${priceRatio}%`;
+            portfolio.dailyPriceChange095 = priceRatio;
             portfolio.exitPrice = portfolio.currentPrice;
           }
         });
@@ -152,7 +152,7 @@ export class TtmsPortfolioService {
 
         const totalDailyPriceChange095 = JSON.stringify(
           oldPortfolio.reduce((acc, portfolio) => {
-            return acc + parseFloat(portfolio.dailyPriceChange095);
+            return acc + portfolio.dailyPriceChange095;
           }, 0) / oldPortfolio.length,
         );
 
@@ -255,7 +255,7 @@ export class TtmsPortfolioService {
                     parseFloat(portfolio.priceUSD)) /
                     (parseFloat(portfolio.priceUSD) / 100),
                 );
-                portfolio.dailyPriceChange095 = `+${dailyPercentage}%`;
+                portfolio.dailyPriceChange095 = parseFloat(dailyPercentage);
                 portfolio.exitPrice = JSON.stringify(
                   parseFloat(portfolio.ATH) * 0.95,
                 );
@@ -273,7 +273,7 @@ export class TtmsPortfolioService {
                   parseFloat(portfolio.priceUSD) * 0.95,
                 );
               }
-              portfolio.dailyPriceChange095 = '-5%';
+              portfolio.dailyPriceChange095 = -5;
               portfolio.exitPrice = JSON.stringify(
                 parseFloat(portfolio.priceUSD) * 0.95,
               );
