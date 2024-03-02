@@ -159,6 +159,7 @@ model TtmsPortfolio {
   quoteToken            String?
   pairAddress           String?
   networkId             Int?
+  image                 String?
 }
 
 model Last24SolvedTtmsPortfolio {

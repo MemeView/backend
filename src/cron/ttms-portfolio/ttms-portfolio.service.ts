@@ -106,6 +106,7 @@ export class TtmsPortfolioService {
           ATL: value.priceUSD,
           currentPrice: value.currentPrice,
           networkId: value.networkId,
+          image: value.image,
           startedAt: '9am',
         }));
 
@@ -206,6 +207,7 @@ export class TtmsPortfolioService {
           ATL: value.priceUSD,
           currentPrice: value.currentPrice,
           networkId: value.networkId,
+          image: value.image,
           startedAt: '9pm',
         }));
 
