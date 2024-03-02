@@ -31,8 +31,14 @@ export class TtmsPortfolioService {
               parseFloat(portfolio.currentPrice)
             ) {
               portfolio.dailyPriceChange095 = `+${priceRatio}`;
+              portfolio.exitPrice = JSON.stringify(
+                parseFloat(portfolio.currentPrice) * 0.95,
+              );
             } else {
               portfolio.dailyPriceChange095 = `-${priceRatio}`;
+              portfolio.exitPrice = JSON.stringify(
+                parseFloat(portfolio.priceUSD) * 0.95,
+              );
             }
           }
         });
@@ -237,7 +243,6 @@ export class TtmsPortfolioService {
           ) {
             // Новая цена Больше ATH ?
             if (parseFloat(freshToken.priceUSD) > parseFloat(portfolio.ATH)) {
-              console.log(1);
               portfolio.ATH = freshToken.priceUSD;
             } else {
               // Новая цена меньше, чем ATH * 0,95 ?
@@ -251,6 +256,9 @@ export class TtmsPortfolioService {
                     (parseFloat(portfolio.priceUSD) / 100),
                 );
                 portfolio.dailyPriceChange095 = `+${dailyPercentage}%`;
+                portfolio.exitPrice = JSON.stringify(
+                  parseFloat(portfolio.ATH) * 0.95,
+                );
                 // мы вышли
               }
             }
@@ -266,6 +274,9 @@ export class TtmsPortfolioService {
                 );
               }
               portfolio.dailyPriceChange095 = '-5%';
+              portfolio.exitPrice = JSON.stringify(
+                parseFloat(portfolio.priceUSD) * 0.95,
+              );
               // мы вышли
             } else {
               if (parseFloat(freshToken.priceUSD) < parseFloat(portfolio.ATL)) {

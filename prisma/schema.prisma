@@ -154,6 +154,7 @@ model TtmsPortfolio {
   ATL                   String?
   dailyPriceChange095   String?
   currentPrice          String?
+  exitPrice             String?
 }
 
 model Last24SolvedTtmsPortfolio {
