@@ -10,7 +10,13 @@ async function bootstrap() {
   app.use(cookieParser());
 
   app.enableCors({
-    origin: ['https://localhost:3003', 'https://twa.tokenwatch.ai', 'https://tw-telegram-mini-app.ngrok.app'],
+    origin: [
+      'https://localhost:3003',
+      'http://localhost:8004',
+      'https://twa.tokenwatch.ai',
+      'https://tw-telegram-mini-app.ngrok.app',
+      'https://tokenwatch.ai'
+    ],
     credentials: true,
     preflightContinue: false,
     methods: ['GET', 'POST', 'PUT', 'HEAD', 'PATCH', 'DELETE'],
