@@ -98,6 +98,7 @@ export class TtmsPortfolioService {
           ttmsTop30At9am.score9am,
         ).map(([key, value]) => ({
           tokenAddress: value.address,
+          symbol: value.symbol,
           priceUSD: value.priceUSD,
           ATH: value.priceUSD,
           ATL: value.priceUSD,
@@ -194,6 +195,7 @@ export class TtmsPortfolioService {
           ttmsTop30At9pm.score9pm,
         ).map(([key, value]) => ({
           tokenAddress: value.address,
+          symbol: value.symbol,
           priceUSD: value.priceUSD,
           ATH: value.priceUSD,
           ATL: value.priceUSD,

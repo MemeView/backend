@@ -148,6 +148,7 @@ model TgWhiteList {
 model TtmsPortfolio {
   id                    Int @id @default(autoincrement())
   tokenAddress          String
+  symbol                String
   priceUSD              String
   startedAt             String
   ATH                   String?
