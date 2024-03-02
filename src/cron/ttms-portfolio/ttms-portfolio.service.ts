@@ -99,10 +99,13 @@ export class TtmsPortfolioService {
         ).map(([key, value]) => ({
           tokenAddress: value.address,
           symbol: value.symbol,
+          pairAddress: value.pairAddress,
+          quoteToken: value.quoteToken,
           priceUSD: value.priceUSD,
           ATH: value.priceUSD,
           ATL: value.priceUSD,
           currentPrice: value.currentPrice,
+          networkId: value.networkId,
           startedAt: '9am',
         }));
 
@@ -196,10 +199,13 @@ export class TtmsPortfolioService {
         ).map(([key, value]) => ({
           tokenAddress: value.address,
           symbol: value.symbol,
+          pairAddress: value.pairAddress,
+          quoteToken: value.quoteToken,
           priceUSD: value.priceUSD,
           ATH: value.priceUSD,
           ATL: value.priceUSD,
           currentPrice: value.currentPrice,
+          networkId: value.networkId,
           startedAt: '9pm',
         }));
 

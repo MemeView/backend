@@ -156,6 +156,9 @@ model TtmsPortfolio {
   dailyPriceChange095   String?
   currentPrice          String?
   exitPrice             String?
+  quoteToken            String?
+  pairAddress           String?
+  networkId             Int?
 }
 
 model Last24SolvedTtmsPortfolio {
