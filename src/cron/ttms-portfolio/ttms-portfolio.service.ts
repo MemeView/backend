@@ -20,22 +20,26 @@ export class TtmsPortfolioService {
         });
 
         oldPortfolio.forEach((portfolio) => {
+          if (!portfolio.currentPrice) {
+            portfolio.currentPrice = portfolio.priceUSD;
+          }
+
           if (portfolio.dailyPriceChange095 === null) {
             const priceRatio =
-              (parseFloat(portfolio.priceUSD) -
-                parseFloat(portfolio.currentPrice) * 0.95) /
+              (parseFloat(portfolio.currentPrice) * 0.95 -
+                parseFloat(portfolio.priceUSD)) /
               (parseFloat(portfolio.priceUSD) / 100);
 
             if (
               parseFloat(portfolio.priceUSD) >=
               parseFloat(portfolio.currentPrice)
             ) {
-              portfolio.dailyPriceChange095 = `+${priceRatio}`;
+              portfolio.dailyPriceChange095 = `${priceRatio}%`;
               portfolio.exitPrice = JSON.stringify(
                 parseFloat(portfolio.currentPrice) * 0.95,
               );
             } else {
-              portfolio.dailyPriceChange095 = `-${priceRatio}`;
+              portfolio.dailyPriceChange095 = `${priceRatio}%`;
               portfolio.exitPrice = JSON.stringify(
                 parseFloat(portfolio.priceUSD) * 0.95,
               );
@@ -124,19 +128,23 @@ export class TtmsPortfolioService {
         });
 
         oldPortfolio.forEach((portfolio) => {
+          if (!portfolio.currentPrice) {
+            portfolio.currentPrice = portfolio.priceUSD;
+          }
+
           if (portfolio.dailyPriceChange095 === null) {
             const priceRatio =
-              (parseFloat(portfolio.priceUSD) -
-                parseFloat(portfolio.currentPrice) * 0.95) /
+              (parseFloat(portfolio.currentPrice) * 0.95 -
+                parseFloat(portfolio.priceUSD)) /
               (parseFloat(portfolio.priceUSD) / 100);
 
             if (
               parseFloat(portfolio.priceUSD) >=
               parseFloat(portfolio.currentPrice)
             ) {
-              portfolio.dailyPriceChange095 = `+${priceRatio}`;
+              portfolio.dailyPriceChange095 = `${priceRatio}%`;
             } else {
-              portfolio.dailyPriceChange095 = `-${priceRatio}`;
+              portfolio.dailyPriceChange095 = `${priceRatio}%`;
             }
           }
         });
