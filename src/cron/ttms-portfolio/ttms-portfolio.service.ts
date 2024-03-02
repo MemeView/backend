@@ -14,21 +14,6 @@ export class TtmsPortfolioService {
       const monthAgo = subDays(utcDate, 30);
       const yesterday = subDays(utcDate, 1);
 
-      const months = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December',
-      ];
-
       if (hour === 9) {
         const oldPortfolio = await this.prisma.ttmsPortfolio.findMany({
           where: {
@@ -43,24 +28,12 @@ export class TtmsPortfolioService {
 
           if (portfolio.dailyPriceChange095 === null) {
             const priceRatio =
-              (parseFloat(portfolio.currentPrice) * 0.95 -
+              (parseFloat(portfolio.currentPrice) -
                 parseFloat(portfolio.priceUSD)) /
               (parseFloat(portfolio.priceUSD) / 100);
 
-            if (
-              parseFloat(portfolio.priceUSD) >=
-              parseFloat(portfolio.currentPrice)
-            ) {
-              portfolio.dailyPriceChange095 = `${priceRatio}%`;
-              portfolio.exitPrice = JSON.stringify(
-                parseFloat(portfolio.currentPrice) * 0.95,
-              );
-            } else {
-              portfolio.dailyPriceChange095 = `${priceRatio}%`;
-              portfolio.exitPrice = JSON.stringify(
-                parseFloat(portfolio.priceUSD) * 0.95,
-              );
-            }
+            portfolio.dailyPriceChange095 = `${priceRatio}%`;
+            portfolio.exitPrice = portfolio.currentPrice;
           }
         });
 
@@ -151,18 +124,12 @@ export class TtmsPortfolioService {
 
           if (portfolio.dailyPriceChange095 === null) {
             const priceRatio =
-              (parseFloat(portfolio.currentPrice) * 0.95 -
+              (parseFloat(portfolio.currentPrice) -
                 parseFloat(portfolio.priceUSD)) /
               (parseFloat(portfolio.priceUSD) / 100);
 
-            if (
-              parseFloat(portfolio.priceUSD) >=
-              parseFloat(portfolio.currentPrice)
-            ) {
-              portfolio.dailyPriceChange095 = `${priceRatio}%`;
-            } else {
-              portfolio.dailyPriceChange095 = `${priceRatio}%`;
-            }
+            portfolio.dailyPriceChange095 = `${priceRatio}%`;
+            portfolio.exitPrice = portfolio.currentPrice;
           }
         });
 
