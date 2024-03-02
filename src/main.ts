@@ -12,7 +12,7 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://localhost:3003',
-      'http://localhost:8004',
+      'https://localhost:8004',
       'https://twa.tokenwatch.ai',
       'https://tw-telegram-mini-app.ngrok.app',
       'https://tokenwatch.ai'
