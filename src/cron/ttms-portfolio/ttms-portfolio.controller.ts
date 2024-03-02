@@ -2,7 +2,14 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { TtmsPortfolioService } from './ttms-portfolio.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
-import { getDate, getMonth, getYear, startOfDay, subDays } from 'date-fns';
+import {
+  getDate,
+  getMonth,
+  getYear,
+  startOfDay,
+  subDays,
+  subHours,
+} from 'date-fns';
 
 @Controller('/api')
 export class TtmsPortfolioController {
@@ -34,14 +41,15 @@ export class TtmsPortfolioController {
       });
 
       const utcDate = new UTCDate();
+      const pstDate = subHours(utcDate, 8);
       const todayStartOfDay = startOfDay(utcDate);
       const monthAgo = subDays(utcDate, 30);
-      const yesterday = subDays(utcDate, 1);
-      const currentDayNumber = getDate(utcDate);
+      const yesterday = subDays(pstDate, 1);
+      const currentDayNumber = getDate(pstDate);
       const yesterdayDayNumber = getDate(yesterday);
-      const currentMonth = getMonth(utcDate);
+      const currentMonth = getMonth(pstDate);
       const yesterdayMonth = getMonth(yesterday);
-      const currentYear = getYear(utcDate);
+      const currentYear = getYear(pstDate);
       const yesterdayYear = getYear(yesterday);
 
       const months = [
