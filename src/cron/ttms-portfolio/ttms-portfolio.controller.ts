@@ -23,8 +23,6 @@ export class TtmsPortfolioController {
     try {
       const result = await this.ttmsPortfolioService.handleTtmsPortfolio(hour);
 
-      // console.log(parseFloat('-5%'));
-
       return result;
     } catch (e) {
       return e;
@@ -59,8 +57,6 @@ export class TtmsPortfolioController {
       const endMonth = portfolioCalculationEndedAtUtc.getUTCMonth();
       const startYear = portfolioCalculationStartedAtUtc.getUTCFullYear();
       const endYear = portfolioCalculationEndedAtUtc.getUTCFullYear();
-
-      console.log(parseFloat(null));
 
       const months = [
         'January',
