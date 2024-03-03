@@ -39,18 +39,26 @@ export class TtmsPortfolioController {
           createdAt: 'desc',
         },
       });
+      const portfolioCalculatedAt = result.createdAt;
+      const portfolioCalculatedAtPst = subHours(portfolioCalculatedAt, 8);
+      const portfolioCalculationStartedAt = subHours(
+        portfolioCalculatedAtPst,
+        24,
+      );
 
-      const utcDate = new UTCDate();
-      const pstDate = subHours(utcDate, 8);
-      const todayStartOfDay = startOfDay(utcDate);
-      const monthAgo = subDays(utcDate, 30);
-      const yesterday = subDays(pstDate, 1);
-      const currentDayNumber = getDate(pstDate);
-      const yesterdayDayNumber = getDate(yesterday);
-      const currentMonth = getMonth(pstDate);
-      const yesterdayMonth = getMonth(yesterday);
-      const currentYear = getYear(pstDate);
-      const yesterdayYear = getYear(yesterday);
+      const portfolioCalculationStartedAtUtc = new Date(
+        portfolioCalculationStartedAt,
+      );
+      const portfolioCalculationEndedAtUtc = new Date(portfolioCalculatedAtPst);
+
+      const portfolioCalculationStartedDay =
+        portfolioCalculationStartedAtUtc.getUTCDate();
+      const portfolioCalculationEndedDay =
+        portfolioCalculationEndedAtUtc.getUTCDate();
+      const startMonth = portfolioCalculationStartedAtUtc.getUTCMonth();
+      const endMonth = portfolioCalculationEndedAtUtc.getUTCMonth();
+      const startYear = portfolioCalculationStartedAtUtc.getUTCFullYear();
+      const endYear = portfolioCalculationEndedAtUtc.getUTCFullYear();
 
       const months = [
         'January',
@@ -68,8 +76,8 @@ export class TtmsPortfolioController {
       ];
 
       if (result.startedAt === '9am') {
-        const cycleStart = `${yesterdayDayNumber} ${months[yesterdayMonth]} ${yesterdayYear}, 9am PST`;
-        const cycleEnd = `${currentDayNumber} ${months[currentMonth]} ${currentYear}, 9am PST`;
+        const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]} ${startYear}, 9am PST`;
+        const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]} ${endYear}, 9am PST`;
 
         return {
           portfolio: result.portfolio,
@@ -79,8 +87,8 @@ export class TtmsPortfolioController {
       }
 
       if (result.startedAt === '9pm') {
-        const cycleStart = `${yesterdayDayNumber} ${months[yesterdayMonth]} ${yesterdayYear}, 9pm PST`;
-        const cycleEnd = `${currentDayNumber} ${months[currentMonth]} ${currentYear}, 9pm PST`;
+        const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]} ${startYear}, 9pm PST`;
+        const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]} ${endYear}, 9pm PST`;
 
         return {
           portfolio: result.portfolio,

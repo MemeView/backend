@@ -21,63 +21,65 @@ export class TtmsPortfolioService {
           },
         });
 
-        oldPortfolio.forEach((portfolio) => {
-          if (!portfolio.currentPrice) {
-            portfolio.currentPrice = portfolio.priceUSD;
-          }
+        if (oldPortfolio) {
+          oldPortfolio.forEach((portfolio) => {
+            if (!portfolio.currentPrice) {
+              portfolio.currentPrice = portfolio.priceUSD;
+            }
 
-          if (portfolio.dailyPriceChange095 === null) {
-            const priceRatio =
-              (parseFloat(portfolio.currentPrice) -
-                parseFloat(portfolio.priceUSD)) /
-              (parseFloat(portfolio.priceUSD) / 100);
+            if (portfolio.dailyPriceChange095 === null) {
+              const priceRatio =
+                (parseFloat(portfolio.currentPrice) -
+                  parseFloat(portfolio.priceUSD)) /
+                (parseFloat(portfolio.priceUSD) / 100);
 
-            portfolio.dailyPriceChange095 = priceRatio;
-            portfolio.exitPrice = portfolio.currentPrice;
-          }
-        });
+              portfolio.dailyPriceChange095 = priceRatio;
+              portfolio.exitPrice = portfolio.currentPrice;
+            }
+          });
 
-        await this.prisma.last24SolvedTtmsPortfolio.deleteMany({
-          where: {
-            startedAt: '9am',
-          },
-        });
+          await this.prisma.last24SolvedTtmsPortfolio.deleteMany({
+            where: {
+              startedAt: '9am',
+            },
+          });
 
-        await this.prisma.last24SolvedTtmsPortfolio.create({
-          data: {
-            portfolio: oldPortfolio,
-            startedAt: '9am',
-          },
-        });
+          await this.prisma.last24SolvedTtmsPortfolio.create({
+            data: {
+              portfolio: oldPortfolio,
+              startedAt: '9am',
+            },
+          });
 
-        const totalDailyPriceChange095 = JSON.stringify(
-          oldPortfolio.reduce((acc, portfolio) => {
-            return acc + portfolio.dailyPriceChange095;
-          }, 0) / oldPortfolio.length,
-        );
+          const totalDailyPriceChange095 = JSON.stringify(
+            oldPortfolio.reduce((acc, portfolio) => {
+              return acc + portfolio.dailyPriceChange095;
+            }, 0) / oldPortfolio.length,
+          );
 
-        await this.prisma.averageTtmsPortfolioResults.deleteMany({
-          where: {
-            AND: [
-              {
-                OR: [
-                  { createdAt: { gte: todayStartOfDay } },
-                  { createdAt: { lt: monthAgo } },
-                ],
-              },
-              {
-                startedAt: '9am',
-              },
-            ],
-          },
-        });
+          await this.prisma.averageTtmsPortfolioResults.deleteMany({
+            where: {
+              AND: [
+                {
+                  OR: [
+                    { createdAt: { gte: todayStartOfDay } },
+                    { createdAt: { lt: monthAgo } },
+                  ],
+                },
+                {
+                  startedAt: '9am',
+                },
+              ],
+            },
+          });
 
-        await this.prisma.averageTtmsPortfolioResults.create({
-          data: {
-            average24Result: totalDailyPriceChange095,
-            startedAt: '9am',
-          },
-        });
+          await this.prisma.averageTtmsPortfolioResults.create({
+            data: {
+              average24Result: totalDailyPriceChange095,
+              startedAt: '9am',
+            },
+          });
+        }
 
         await this.prisma.ttmsPortfolio.deleteMany({
           where: {
@@ -122,63 +124,65 @@ export class TtmsPortfolioService {
           },
         });
 
-        oldPortfolio.forEach((portfolio) => {
-          if (!portfolio.currentPrice) {
-            portfolio.currentPrice = portfolio.priceUSD;
-          }
+        if (oldPortfolio) {
+          oldPortfolio.forEach((portfolio) => {
+            if (!portfolio.currentPrice) {
+              portfolio.currentPrice = portfolio.priceUSD;
+            }
 
-          if (portfolio.dailyPriceChange095 === null) {
-            const priceRatio =
-              (parseFloat(portfolio.currentPrice) -
-                parseFloat(portfolio.priceUSD)) /
-              (parseFloat(portfolio.priceUSD) / 100);
+            if (portfolio.dailyPriceChange095 === null) {
+              const priceRatio =
+                (parseFloat(portfolio.currentPrice) -
+                  parseFloat(portfolio.priceUSD)) /
+                (parseFloat(portfolio.priceUSD) / 100);
 
-            portfolio.dailyPriceChange095 = priceRatio;
-            portfolio.exitPrice = portfolio.currentPrice;
-          }
-        });
+              portfolio.dailyPriceChange095 = priceRatio;
+              portfolio.exitPrice = portfolio.currentPrice;
+            }
+          });
 
-        await this.prisma.last24SolvedTtmsPortfolio.deleteMany({
-          where: {
-            startedAt: '9pm',
-          },
-        });
+          await this.prisma.last24SolvedTtmsPortfolio.deleteMany({
+            where: {
+              startedAt: '9pm',
+            },
+          });
 
-        await this.prisma.last24SolvedTtmsPortfolio.create({
-          data: {
-            portfolio: oldPortfolio,
-            startedAt: '9pm',
-          },
-        });
+          await this.prisma.last24SolvedTtmsPortfolio.create({
+            data: {
+              portfolio: oldPortfolio,
+              startedAt: '9pm',
+            },
+          });
 
-        const totalDailyPriceChange095 = JSON.stringify(
-          oldPortfolio.reduce((acc, portfolio) => {
-            return acc + portfolio.dailyPriceChange095;
-          }, 0) / oldPortfolio.length,
-        );
+          const totalDailyPriceChange095 = JSON.stringify(
+            oldPortfolio.reduce((acc, portfolio) => {
+              return acc + portfolio.dailyPriceChange095;
+            }, 0) / oldPortfolio.length,
+          );
 
-        await this.prisma.averageTtmsPortfolioResults.deleteMany({
-          where: {
-            AND: [
-              {
-                OR: [
-                  { createdAt: { gte: todayStartOfDay } },
-                  { createdAt: { lt: monthAgo } },
-                ],
-              },
-              {
-                startedAt: '9pm',
-              },
-            ],
-          },
-        });
+          await this.prisma.averageTtmsPortfolioResults.deleteMany({
+            where: {
+              AND: [
+                {
+                  OR: [
+                    { createdAt: { gte: todayStartOfDay } },
+                    { createdAt: { lt: monthAgo } },
+                  ],
+                },
+                {
+                  startedAt: '9pm',
+                },
+              ],
+            },
+          });
 
-        await this.prisma.averageTtmsPortfolioResults.create({
-          data: {
-            average24Result: totalDailyPriceChange095,
-            startedAt: '9pm',
-          },
-        });
+          await this.prisma.averageTtmsPortfolioResults.create({
+            data: {
+              average24Result: totalDailyPriceChange095,
+              startedAt: '9pm',
+            },
+          });
+        }
 
         await this.prisma.ttmsPortfolio.deleteMany({
           where: {
