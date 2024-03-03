@@ -60,6 +60,8 @@ export class TtmsPortfolioController {
       const startYear = portfolioCalculationStartedAtUtc.getUTCFullYear();
       const endYear = portfolioCalculationEndedAtUtc.getUTCFullYear();
 
+      console.log(parseFloat(null));
+
       const months = [
         'January',
         'February',
@@ -109,11 +111,30 @@ export class TtmsPortfolioController {
       const oneWeekAgo = subDays(todayStartOfDay, 7);
       const monthAgo = subDays(todayStartOfDay, 30);
 
-      const result24h = await this.prisma.averageTtmsPortfolioResults.findMany({
-        where: {
-          createdAt: { gte: todayStartOfDay },
-        },
-      });
+      const result24h9am =
+        await this.prisma.averageTtmsPortfolioResults.findFirst({
+          where: {
+            startedAt: '9am',
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+      const result24h9pm =
+        await this.prisma.averageTtmsPortfolioResults.findFirst({
+          where: {
+            startedAt: '9pm',
+          },
+          orderBy: { createdAt: 'desc' },
+        });
+
+      let averagePercentage24h = 0;
+      if (result24h9am.average24Result) {
+        averagePercentage24h += parseFloat(result24h9am.average24Result);
+      }
+
+      if (result24h9pm.average24Result) {
+        averagePercentage24h += parseFloat(result24h9pm.average24Result);
+      }
 
       const resultOneWeek =
         await this.prisma.averageTtmsPortfolioResults.findMany({
@@ -130,9 +151,7 @@ export class TtmsPortfolioController {
         });
 
       return {
-        averagePercentage24h: result24h.reduce((acc, result) => {
-          return acc + parseFloat(result.average24Result);
-        }, 0),
+        averagePercentage24h: averagePercentage24h,
         averagePercentage7d: resultOneWeek.reduce((acc, result) => {
           return acc + parseFloat(result.average24Result);
         }, 0),
