@@ -128,22 +128,36 @@ export class DefinedTokensService {
             volume24,
             createdAt,
             quoteToken,
-          }) => ({
-            change24,
-            volume24,
-            liquidity,
-            priceUSD,
-            createdAt,
-            quoteToken,
-            name: token.name,
-            symbol: token.symbol,
-            address: token.address,
-            token: token,
-            pairAddress: pair?.address,
-            cronCount: outerIteration,
-            networkId: networkId,
-            image: token.info.imageLargeUrl,
-          }),
+          }) => {
+            const liquidityTokenSymbol =
+              quoteToken === 'token0'
+                ? pair.token1Data.symbol
+                : pair.token0Data.symbol;
+
+            const liquidityTokenAddress =
+              quoteToken === 'token0'
+                ? pair.token1Data.address
+                : pair.token0Data.address;
+
+            return {
+              change24,
+              volume24,
+              liquidity,
+              priceUSD,
+              createdAt,
+              quoteToken,
+              name: token.name,
+              symbol: token.symbol,
+              address: token.address,
+              token: token,
+              pairAddress: pair?.address,
+              cronCount: outerIteration,
+              networkId: networkId,
+              image: token.info.imageLargeUrl,
+              liquidityTokenSymbol,
+              liquidityTokenAddress,
+            };
+          },
         );
 
       console.log('=========================================');

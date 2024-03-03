@@ -157,8 +157,6 @@ export class SolveScoreController {
         },
       });
 
-      await this.solveScoreService.solveTtmsByHours('9am');
-
       return result;
     } catch (e) {
       return e;

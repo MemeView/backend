@@ -12,21 +12,23 @@ datasource db {
 }
 
 model Tokens {
-  id          Int     @id @default(autoincrement())
-  address     String? @unique
-  pairAddress String?
-  priceUSD    String?
-  quoteToken  String?
-  createdAt   Int?
-  name        String?
-  symbol      String?
-  change24    String?
-  liquidity   String?
-  volume24    String?
-  token       Json?
-  cronCount   Int?
-  networkId   Int?
-  image       String?
+  id                    Int     @id @default(autoincrement())
+  address               String? @unique
+  pairAddress           String?
+  priceUSD              String?
+  quoteToken            String?
+  createdAt             Int?
+  name                  String?
+  symbol                String?
+  change24              String?
+  liquidity             String?
+  volume24              String?
+  token                 Json?
+  cronCount             Int?
+  networkId             Int?
+  image                 String?
+  liquidityTokenSymbol  String?
+  liquidityTokenAddress String?
 }
 
 model Blacklist {
@@ -160,6 +162,8 @@ model TtmsPortfolio {
   pairAddress           String?
   networkId             Int?
   image                 String?
+  liquidityTokenSymbol  String?
+  liquidityTokenAddress String?
 }
 
 model Last24SolvedTtmsPortfolio {

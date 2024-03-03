@@ -11,6 +11,14 @@ export const GET_FILTER_TOKENS_SHORT = `query ($tokens: [String], $limit: Int, $
         quoteToken
         pair {
           address
+          token0Data{
+            symbol,
+            address,
+          }
+          token1Data{
+            symbol,
+            address,
+          }
         }
         token {
           name

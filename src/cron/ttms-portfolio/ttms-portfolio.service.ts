@@ -94,6 +94,9 @@ export class TtmsPortfolioService {
           select: {
             score9am: true,
           },
+          orderBy: {
+            createdAt: 'desc',
+          },
         });
 
         const ttmsPortfolio9amData = Object.entries(
@@ -109,6 +112,8 @@ export class TtmsPortfolioService {
           currentPrice: value.currentPrice,
           networkId: value.networkId,
           image: value.image,
+          liquidityTokenSymbol: value.liquidityTokenSymbol,
+          liquidityTokenAddress: value.liquidityTokenAddress,
           startedAt: '9am',
         }));
 
@@ -197,6 +202,9 @@ export class TtmsPortfolioService {
           select: {
             score9pm: true,
           },
+          orderBy: {
+            createdAt: 'desc',
+          },
         });
 
         const ttmsPortfolio9pmData = Object.entries(
@@ -212,6 +220,8 @@ export class TtmsPortfolioService {
           currentPrice: value.currentPrice,
           networkId: value.networkId,
           image: value.image,
+          liquidityTokenSymbol: value.liquidityTokenSymbol,
+          liquidityTokenAddress: value.liquidityTokenAddress,
           startedAt: '9pm',
         }));
 
