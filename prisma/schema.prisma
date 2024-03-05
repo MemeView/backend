@@ -99,6 +99,7 @@ model Users {
   holdingTWAmountUSDT   String?
   subscriptionLevel     String?
   trialCreatedAt        DateTime?
+  planWasTakenAt        DateTime?
 }
 
 model Volume {
@@ -178,4 +179,25 @@ model AverageTtmsPortfolioResults {
   average24Result     String
   startedAt           String
   createdAt           DateTime @default(now())
+}
+
+model Airdrops {
+  id                    Int @id @default(autoincrement())
+  airdropName           String @unique
+  usersLimit            Int
+  currentProgress       Int @default(0)
+  status                String @default("ongoing")
+  participants          AirdropsParticipants[]
+}
+
+model AirdropsParticipants {
+  id                  Int @id @default(autoincrement())
+  walletAddress       String
+  telegramId          Int?
+  airdropName         String
+  createdAt           DateTime @default(now())
+  planActivatedAt     DateTime?
+  airdropAchievedAt   DateTime?
+  airdrop             Airdrops @relation(fields: [airdropName], references: [airdropName])
+  @@unique([walletAddress, airdropName])
 }

@@ -481,4 +481,43 @@ export class AuthService {
 
     return uniqueString;
   }
+
+  async checkPlanIsActive(
+    walletAddress: string,
+    plan: string,
+  ): Promise<boolean> {
+    const user = await this.prisma.users.findUnique({
+      where: {
+        walletAddress,
+      },
+    });
+
+    const subscription = await this.prisma.subscriptions.findFirst({
+      where: {
+        title: plan,
+      },
+    });
+
+    const balance = await this.getTokenBalance(walletAddress);
+
+    const currentTWPrice = await this.prisma.tokens.findFirst({
+      where: {
+        address: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
+      },
+      select: {
+        priceUSD: true,
+      },
+    });
+
+    const holdingTWAmountUSDT = balance * parseFloat(currentTWPrice.priceUSD);
+
+    if (
+      holdingTWAmountUSDT &&
+      holdingTWAmountUSDT >= subscription.holdingTWAmount
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

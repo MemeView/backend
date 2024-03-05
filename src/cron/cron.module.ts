@@ -19,6 +19,9 @@ import { JwtService } from '@nestjs/jwt';
 import { SignalBotService } from './signal-bot/signal-bot.service';
 import { TtmsPortfolioModule } from './ttms-portfolio/ttms-portfolio.module';
 import { TtmsPortfolioService } from './ttms-portfolio/ttms-portfolio.service';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { AirdropsModule } from './airdrops/airdrops.module';
+import { AirdropsService } from './airdrops/airdrops.service';
 
 @Module({
   imports: [
@@ -29,6 +32,8 @@ import { TtmsPortfolioService } from './ttms-portfolio/ttms-portfolio.service';
     SignalBotModule,
     AuthModule,
     TtmsPortfolioModule,
+    LeaderboardModule,
+    AirdropsModule,
   ],
   providers: [
     DefinedTokensService,
@@ -42,6 +47,7 @@ import { TtmsPortfolioService } from './ttms-portfolio/ttms-portfolio.service';
     JwtService,
     AuthService,
     TtmsPortfolioService,
+    AirdropsService,
   ],
   controllers: [CronController],
 })

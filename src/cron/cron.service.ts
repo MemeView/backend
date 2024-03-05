@@ -13,6 +13,7 @@ import { UTCDate } from '@date-fns/utc';
 import { AuthService } from 'src/auth/auth.service';
 import { SignalBotService } from './signal-bot/signal-bot.service';
 import { TtmsPortfolioService } from './ttms-portfolio/ttms-portfolio.service';
+import { AirdropsService } from './airdrops/airdrops.service';
 
 @Injectable()
 export class CronService {
@@ -29,6 +30,7 @@ export class CronService {
     private readonly authService: AuthService,
     private readonly signalBotService: SignalBotService,
     private readonly ttmsPortfolioService: TtmsPortfolioService,
+    private readonly airdropsService: AirdropsService,
     private prisma: PrismaClient,
   ) {}
 
@@ -185,6 +187,9 @@ export class CronService {
       console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
     }
     await this.ttmsPortfolioService.handleTtmsPortfolio(currentPstHour);
+
+    await this.airdropsService.checkAirdropRequirementsCron('airdrop1');
+    await this.airdropsService.checkAirdropRequirementsCron('airdrop2');
   }
 
   async volumeCron() {
