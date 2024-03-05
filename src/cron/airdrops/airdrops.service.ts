@@ -362,8 +362,15 @@ export class AirdropsService {
         }
       }
 
-      await this.prisma.airdropsParticipants.create({
-        data: {
+      await this.prisma.airdropsParticipants.upsert({
+        where: {
+          walletAddress_airdropName: {
+            walletAddress,
+            airdropName,
+          },
+        },
+        update: {},
+        create: {
           walletAddress,
           airdropName,
         },
