@@ -16,6 +16,15 @@ import * as jwt from 'jsonwebtoken';
 import { UTCDate } from '@date-fns/utc';
 import { differenceInDays, parseISO } from 'date-fns';
 
+interface airdropResult {
+  id: number;
+  airdropName: string;
+  usersLimit: number;
+  currentProgress: number;
+  status: string;
+  airdropAchieved: boolean;
+}
+
 @Controller('/api')
 export class AirdropsController {
   constructor(
@@ -140,25 +149,49 @@ export class AirdropsController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/airdrop-progress')
+  @Get('/airdrop-detail')
   async checkAirdropProgress(
     @Req() request: Request,
     @Res() response: Response,
     @Query('airdropName') airdropName: string,
   ) {
     try {
+      const accessToken = request.cookies['accessToken'];
+
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
       const airdrop = await this.prisma.airdrops.findUnique({
         where: {
           airdropName,
         },
       });
 
+      const participant = await this.prisma.airdropsParticipants.findUnique({
+        where: {
+          walletAddress_airdropName: {
+            walletAddress,
+            airdropName,
+          },
+        },
+      });
+
+      if (airdrop && participant && participant.airdropAchievedAt !== null) {
+        return response.status(200).json({
+          ...airdrop,
+          airdropAchieved: true,
+        });
+      }
+
       if (airdrop) {
         return response.status(200).json({
-          airdropName,
-          status: airdrop.status,
-          currentProgress: airdrop.currentProgress,
-          limit: airdrop.usersLimit,
+          ...airdrop,
+          airdropAchieved: false,
         });
       }
 
@@ -185,6 +218,59 @@ export class AirdropsController {
 
       return response.status(200).json({
         result,
+      });
+    } catch (e) {
+      return response.status(400).json({
+        error: e.message,
+      });
+    }
+  }
+
+  @Get('/airdrops-list')
+  async checkAirdropsList(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Query('airdropName') airdropName: string,
+  ) {
+    try {
+      const accessToken = request.cookies['accessToken'];
+
+      const decodedAccessToken = jwt.decode(accessToken) as {
+        walletAddress: string;
+        iat: number;
+        exp: number;
+      };
+
+      const { walletAddress } = decodedAccessToken;
+
+      const airdrops = await this.prisma.airdrops.findMany();
+      const participantAirdrops =
+        await this.prisma.airdropsParticipants.findMany({
+          where: { walletAddress },
+        });
+
+      const airdropsResult: airdropResult[] = [];
+
+      airdrops.forEach((airdrop) => {
+        const currentAirdrop = participantAirdrops.find(
+          (participant) => participant.airdropName === airdrop.airdropName,
+        );
+
+        if (currentAirdrop && currentAirdrop.airdropAchievedAt !== null) {
+          airdropsResult.push({
+            ...airdrop,
+            airdropAchieved: true,
+          });
+        } else {
+          airdropsResult.push({
+            ...airdrop,
+            airdropAchieved: false,
+          });
+        }
+      });
+
+      return response.status(200).json({
+        airdropsResult,
       });
     } catch (e) {
       return response.status(400).json({

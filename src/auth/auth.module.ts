@@ -36,6 +36,7 @@ export class AuthModule {
         'api/check-plan',
         'api/TW-balance-check',
         'api/tg-white-list',
+        'api/referral-code',
       );
   }
 }

@@ -106,7 +106,7 @@ export class AuthController {
 
       const refId = await this.prisma.users.findUnique({
         where: {
-          walletAddress: walletAddress,
+          walletAddress,
         },
         select: {
           ownRefId: true,
