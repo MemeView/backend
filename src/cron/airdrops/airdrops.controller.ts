@@ -148,63 +148,6 @@ export class AirdropsController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('/airdrop-detail')
-  async checkAirdropProgress(
-    @Req() request: Request,
-    @Res() response: Response,
-    @Query('airdropName') airdropName: string,
-  ) {
-    try {
-      const accessToken = request.cookies['accessToken'];
-
-      const decodedAccessToken = jwt.decode(accessToken) as {
-        walletAddress: string;
-        iat: number;
-        exp: number;
-      };
-
-      const { walletAddress } = decodedAccessToken;
-
-      const airdrop = await this.prisma.airdrops.findUnique({
-        where: {
-          airdropName,
-        },
-      });
-
-      const participant = await this.prisma.airdropsParticipants.findUnique({
-        where: {
-          walletAddress_airdropName: {
-            walletAddress,
-            airdropName,
-          },
-        },
-      });
-
-      if (airdrop && participant && participant.airdropAchievedAt !== null) {
-        return response.status(200).json({
-          ...airdrop,
-          airdropAchieved: true,
-        });
-      }
-
-      if (airdrop) {
-        return response.status(200).json({
-          ...airdrop,
-          airdropAchieved: false,
-        });
-      }
-
-      return response.status(400).json({
-        error: 'Airdrop not found',
-      });
-    } catch (e) {
-      return response.status(400).json({
-        error: e.message,
-      });
-    }
-  }
-
   @Get('/check-airdrop-requirements-cron')
   async checkAirdropRequirementsCron(
     @Req() request: Request,
@@ -226,7 +169,8 @@ export class AirdropsController {
     }
   }
 
-  @Get('/airdrops-list')
+  @UseGuards(JwtAuthGuard)
+  @Get('/airdrop')
   async checkAirdropsList(
     @Req() request: Request,
     @Res() response: Response,
@@ -248,6 +192,37 @@ export class AirdropsController {
         await this.prisma.airdropsParticipants.findMany({
           where: { walletAddress },
         });
+
+      if (airdropName) {
+        const participant = participantAirdrops.find(
+          (e) => e.airdropName === airdropName,
+        );
+        const airdrop = airdrops.find((e) => e.airdropName === airdropName);
+
+        if (!airdrop) {
+          return response.status(400).json({
+            error: 'Airdrop not found',
+          });
+        }
+
+        if (participant && airdrop) {
+          if (participant.airdropAchievedAt) {
+            return response.status(200).json({
+              ...airdrop,
+              airdropAchieved: true,
+            });
+          } else {
+            return response.status(200).json({
+              ...airdrop,
+              airdropAchieved: false,
+            });
+          }
+        }
+        return response.status(200).json({
+          ...airdrop,
+          airdropAchieved: false,
+        });
+      }
 
       const airdropsResult: airdropResult[] = [];
 

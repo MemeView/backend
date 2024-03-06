@@ -18,6 +18,7 @@ export class AirdropsModule {
         'api/participate-in-airdrop',
         'api/check-airdrop-requirements',
         'api/airdrop-progress',
+        'api/airdrop',
       );
   }
 }
