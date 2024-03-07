@@ -85,7 +85,8 @@ export class AirdropsController {
           airdrop.currentProgress >= airdrop.usersLimit)
       ) {
         return response.status(400).json({
-          error: 'Airdrop already completed',
+          error:
+            'Error. This airdrop has been finished. You can’t participate in it',
         });
       }
 
