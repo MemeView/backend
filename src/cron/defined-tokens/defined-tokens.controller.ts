@@ -1,9 +1,9 @@
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { DefinedTokensService } from './defined-tokens.service';
 import { GraphqlService } from '../../graphql/graphql.service';
 
-@Controller('api/defined-tokens-sync')
+@Controller('api')
 export class DefinedTokensController {
   constructor(private readonly definedTokensService: DefinedTokensService) {}
 
@@ -25,5 +25,12 @@ export class DefinedTokensController {
       console.error('Error', e);
       response.status(400).json({ error: e.message });
     }
+  }
+
+  @Post('/defined-tokenwatch')
+  async handleTokenWatch() {
+    const result = await this.definedTokensService.handleTokenWatch();
+
+    return result;
   }
 }

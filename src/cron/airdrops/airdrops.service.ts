@@ -341,10 +341,7 @@ export class AirdropsService {
       }
     }
 
-    throw new HttpException(
-      'Airdrop not found or already completed',
-      HttpStatus.NOT_FOUND,
-    );
+    throw new HttpException('Airdrop not found', HttpStatus.NOT_FOUND);
   }
 
   async checkAirdropRequirementsCron(airdropName: string) {

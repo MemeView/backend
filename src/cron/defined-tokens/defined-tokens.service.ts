@@ -10,6 +10,7 @@ import {
 
 import { GET_FILTER_TOKENS_SHORT } from 'src/graphql/getFilterTokensShort';
 import { GraphqlService } from '../../graphql/graphql.service';
+import { GET_FILTER_TOKENS_TOKEN_WATCH } from 'src/graphql/getFilterTokensTokenWatch';
 
 @Injectable()
 export class DefinedTokensService {
@@ -200,5 +201,36 @@ export class DefinedTokensService {
       }
       throw error;
     }
+  }
+
+  async handleTokenWatch() {
+    const result = await this.graphqlService.makeQuery<
+      FilterTokensQuery,
+      FilterTokensQueryVariables
+    >(GET_FILTER_TOKENS_TOKEN_WATCH, {
+      filters: {
+        network: [1],
+      },
+      tokens: ['0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3:1'],
+    });
+
+    const { filterTokens } = result;
+
+    const token = filterTokens.results as TokenFilterResult[];
+
+    const tokenWatch = token.map(({ token, priceUSD }) => {
+      return {
+        priceUSD,
+        name: token.name,
+        symbol: token.symbol,
+        address: token.address,
+        token: token,
+      };
+    });
+
+    await this.prisma.tokenWatch.deleteMany();
+    await this.prisma.tokenWatch.createMany({ data: tokenWatch });
+
+    return 'ok';
   }
 }

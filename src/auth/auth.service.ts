@@ -402,7 +402,7 @@ export class AuthService {
       return result;
     }
 
-    const currentTWPrice = await this.prisma.tokens.findFirst({
+    const currentTWPrice = await this.prisma.tokenWatch.findFirst({
       where: {
         address: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
       },
@@ -500,7 +500,7 @@ export class AuthService {
 
     const balance = await this.getTokenBalance(walletAddress);
 
-    const currentTWPrice = await this.prisma.tokens.findFirst({
+    const currentTWPrice = await this.prisma.tokenWatch.findFirst({
       where: {
         address: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
       },

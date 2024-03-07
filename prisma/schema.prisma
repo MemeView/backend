@@ -201,3 +201,12 @@ model AirdropsParticipants {
   airdrop             Airdrops @relation(fields: [airdropName], references: [airdropName])
   @@unique([walletAddress, airdropName])
 }
+
+model TokenWatch {
+  id                    Int     @id @default(autoincrement())
+  address               String? @unique
+  priceUSD              String?
+  name                  String?
+  symbol                String?
+  token                 Json?
+}

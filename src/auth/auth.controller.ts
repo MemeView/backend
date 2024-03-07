@@ -206,7 +206,7 @@ export class AuthController {
       if (plan !== 'trial') {
         const balance = await this.authService.getTokenBalance(walletAddress);
 
-        const currentTWPrice = await this.prisma.tokens.findFirst({
+        const currentTWPrice = await this.prisma.tokenWatch.findFirst({
           where: {
             address: '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3',
           },
