@@ -52,8 +52,6 @@ export class AirdropsController {
 
       const { walletAddress } = decodedAccessToken;
 
-      await this.prisma.airdropsParticipants.deleteMany();
-
       const participates = await this.prisma.airdropsParticipants.findUnique({
         where: {
           walletAddress_airdropName: {
@@ -66,6 +64,28 @@ export class AirdropsController {
       if (participates) {
         return response.status(409).json({
           error: 'You are already participating in this airdrop',
+        });
+      }
+
+      const airdrop = await this.prisma.airdrops.findUnique({
+        where: {
+          airdropName,
+        },
+      });
+
+      if (!airdrop) {
+        return response.status(404).json({
+          error: 'Airdrop not found',
+        });
+      }
+
+      if (
+        airdrop &&
+        (airdrop.status === 'completed' ||
+          airdrop.currentProgress >= airdrop.usersLimit)
+      ) {
+        return response.status(400).json({
+          error: 'Airdrop already completed',
         });
       }
 
