@@ -151,6 +151,7 @@ export class AirdropsController {
 
       const {
         airdropName: participantAirdropName,
+        airdropAchievedAt,
         ...resultWithoutAirdropName
       } = result;
 
