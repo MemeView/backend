@@ -198,6 +198,20 @@ export class AirdropsService {
         };
       }
 
+      const participant = await this.prisma.airdropsParticipants.upsert({
+        where: {
+          walletAddress_airdropName: {
+            walletAddress,
+            airdropName,
+          },
+        },
+        update: {},
+        create: {
+          walletAddress,
+          airdropName,
+        },
+      });
+
       return {
         airdropName: airdropName,
         freeTrialWasTaken: user.freeTrialWasTaken,
