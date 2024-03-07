@@ -62,6 +62,12 @@ export class SignalBotService {
               url: refAppUrl.href,
             },
           },
+          {
+            text: '💎 AirDrops',
+            web_app: {
+              url: 'https://twa.tokenwatch.ai/airdrops',
+            },
+          },
           { text: 'ℹ️ About', callback_data: 'about' },
         ],
       ];
