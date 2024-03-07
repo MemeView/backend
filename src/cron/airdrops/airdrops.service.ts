@@ -322,6 +322,25 @@ export class AirdropsService {
       }
     }
 
+    if (!participant && airdrop.status === 'ongoing') {
+      if (airdropName === 'airdrop1') {
+        return {
+          airdropName: airdropName,
+          freeTrialWasTaken: user.freeTrialWasTaken,
+          airdropAchievedAt: null,
+        };
+      }
+
+      if (airdropName === 'airdrop2') {
+        return {
+          airdropName: airdropName,
+          planIsActive: false,
+          daysLeftTillCompletion: 30,
+          airdropAchievedAt: null,
+        };
+      }
+    }
+
     throw new HttpException(
       'Airdrop not found or already completed',
       HttpStatus.NOT_FOUND,
