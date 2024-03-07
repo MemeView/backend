@@ -341,6 +341,28 @@ export class AirdropsService {
       }
     }
 
+    if (participant && airdrop.status === 'completed') {
+      if (airdropName === 'airdrop1') {
+        return {
+          airdropName: airdropName,
+          freeTrialWasTaken: user.freeTrialWasTaken,
+          airdropAchievedAt: participant.airdropAchievedAt,
+        };
+      }
+      if (airdropName === 'airdrop2') {
+        let planIsActive = false;
+        if (participant.planActivatedAt) {
+          planIsActive = true;
+        }
+        return {
+          airdropName: airdropName,
+          planIsActive,
+          daysLeftTillCompletion: 30,
+          airdropAchievedAt: participant.airdropAchievedAt,
+        };
+      }
+    }
+
     throw new HttpException('Airdrop not found', HttpStatus.NOT_FOUND);
   }
 
