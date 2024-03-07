@@ -322,7 +322,7 @@ export class AirdropsService {
       }
     }
 
-    if (!participant && airdrop.status === 'ongoing') {
+    if (!participant) {
       if (airdropName === 'airdrop1') {
         return {
           airdropName: airdropName,
