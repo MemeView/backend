@@ -23,6 +23,7 @@ interface airdropResult {
   currentProgress: number;
   status: string;
   participates: boolean;
+  daysLeftTillCompletion: number;
   airdropAchieved: boolean;
 }
 
@@ -188,11 +189,18 @@ export class AirdropsController {
 
       const { walletAddress } = decodedAccessToken;
 
-      const airdrops = await this.prisma.airdrops.findMany();
+      const airdrops = await this.prisma.airdrops.findMany({
+        orderBy: {
+          id: 'asc',
+        },
+      });
       const participantAirdrops =
         await this.prisma.airdropsParticipants.findMany({
           where: { walletAddress },
         });
+
+      const utcDate = new UTCDate();
+      const currentDate = new Date(utcDate);
 
       if (airdropName) {
         const participant = participantAirdrops.find(
@@ -207,16 +215,34 @@ export class AirdropsController {
         }
 
         if (participant && airdrop) {
+          let daysLeftTillCompletion = 30;
+          if (participant.planActivatedAt !== null) {
+            const planActivationDate = new Date(participant.planActivatedAt);
+
+            const daysPassedTillCompletion = differenceInDays(
+              parseISO(currentDate.toISOString()),
+              parseISO(planActivationDate.toISOString()),
+            );
+
+            daysLeftTillCompletion = 30 - daysPassedTillCompletion;
+
+            if (daysLeftTillCompletion <= 0) {
+              daysLeftTillCompletion = 0;
+            }
+          }
+
           if (participant.airdropAchievedAt) {
             return response.status(200).json({
               ...airdrop,
               participates: true,
+              daysLeftTillCompletion: 0,
               airdropAchieved: true,
             });
           } else {
             return response.status(200).json({
               ...airdrop,
               participates: true,
+              daysLeftTillCompletion,
               airdropAchieved: false,
             });
           }
@@ -224,6 +250,7 @@ export class AirdropsController {
         return response.status(200).json({
           ...airdrop,
           participates: false,
+          daysLeftTillCompletion: 30,
           airdropAchieved: false,
         });
       }
@@ -235,24 +262,46 @@ export class AirdropsController {
           (participant) => participant.airdropName === airdrop.airdropName,
         );
 
-        if (currentAirdrop && currentAirdrop.airdropAchievedAt !== null) {
-          airdropsResult.push({
-            ...airdrop,
-            participates: true,
-            airdropAchieved: true,
-          });
+        if (currentAirdrop) {
+          let daysLeftTillCompletion = 30;
+          if (currentAirdrop.planActivatedAt !== null) {
+            const planActivationDate = new Date(currentAirdrop.planActivatedAt);
+
+            const daysPassedTillCompletion = differenceInDays(
+              parseISO(currentDate.toISOString()),
+              parseISO(planActivationDate.toISOString()),
+            );
+
+            daysLeftTillCompletion = 30 - daysPassedTillCompletion;
+
+            if (daysLeftTillCompletion <= 0) {
+              daysLeftTillCompletion = 0;
+            }
+          }
+
+          if (currentAirdrop.airdropAchievedAt !== null) {
+            airdropsResult.push({
+              ...airdrop,
+              participates: true,
+              daysLeftTillCompletion: 0,
+              airdropAchieved: true,
+            });
+          }
+          if (currentAirdrop.airdropAchievedAt === null) {
+            airdropsResult.push({
+              ...airdrop,
+              participates: true,
+              daysLeftTillCompletion,
+              airdropAchieved: false,
+            });
+          }
         }
-        if (currentAirdrop && currentAirdrop.airdropAchievedAt === null) {
-          airdropsResult.push({
-            ...airdrop,
-            participates: true,
-            airdropAchieved: false,
-          });
-        }
+
         if (!currentAirdrop) {
           airdropsResult.push({
             ...airdrop,
             participates: false,
+            daysLeftTillCompletion: 30,
             airdropAchieved: false,
           });
         }
