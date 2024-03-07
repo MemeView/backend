@@ -52,6 +52,21 @@ export class AirdropsController {
 
       const { walletAddress } = decodedAccessToken;
 
+      const participates = await this.prisma.airdropsParticipants.findUnique({
+        where: {
+          walletAddress_airdropName: {
+            walletAddress,
+            airdropName,
+          },
+        },
+      });
+
+      if (participates) {
+        return response.status(409).json({
+          error: 'You are already participating in this airdrop',
+        });
+      }
+
       const result = await this.airdropsService.participateInAirdrop(
         walletAddress,
         airdropName,

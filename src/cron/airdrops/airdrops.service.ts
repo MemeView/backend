@@ -126,17 +126,14 @@ export class AirdropsService {
 
     if (airdropName === 'airdrop1') {
       if (user.freeTrialWasTaken) {
-        const participant = await this.prisma.airdropsParticipants.upsert({
+        let participant = await this.prisma.airdropsParticipants.upsert({
           where: {
             walletAddress_airdropName: {
               walletAddress,
               airdropName,
             },
           },
-          update: {
-            planActivatedAt: utcDate,
-            airdropAchievedAt: utcDate,
-          },
+          update: {},
           create: {
             walletAddress,
             airdropName,
@@ -144,6 +141,21 @@ export class AirdropsService {
             airdropAchievedAt: utcDate,
           },
         });
+
+        if (participant && participant.airdropAchievedAt === null) {
+          participant = await this.prisma.airdropsParticipants.update({
+            where: {
+              walletAddress_airdropName: {
+                walletAddress,
+                airdropName,
+              },
+            },
+            data: {
+              planActivatedAt: utcDate,
+              airdropAchievedAt: utcDate,
+            },
+          });
+        }
 
         await this.prisma.airdrops.update({
           where: {
