@@ -22,6 +22,7 @@ interface airdropResult {
   usersLimit: number;
   currentProgress: number;
   status: string;
+  participates: boolean;
   airdropAchieved: boolean;
 }
 
@@ -209,17 +210,20 @@ export class AirdropsController {
           if (participant.airdropAchievedAt) {
             return response.status(200).json({
               ...airdrop,
+              participates: true,
               airdropAchieved: true,
             });
           } else {
             return response.status(200).json({
               ...airdrop,
+              participates: true,
               airdropAchieved: false,
             });
           }
         }
         return response.status(200).json({
           ...airdrop,
+          participates: false,
           airdropAchieved: false,
         });
       }
@@ -234,11 +238,21 @@ export class AirdropsController {
         if (currentAirdrop && currentAirdrop.airdropAchievedAt !== null) {
           airdropsResult.push({
             ...airdrop,
+            participates: true,
             airdropAchieved: true,
           });
-        } else {
+        }
+        if (currentAirdrop && currentAirdrop.airdropAchievedAt === null) {
           airdropsResult.push({
             ...airdrop,
+            participates: true,
+            airdropAchieved: false,
+          });
+        }
+        if (!currentAirdrop) {
+          airdropsResult.push({
+            ...airdrop,
+            participates: false,
             airdropAchieved: false,
           });
         }
