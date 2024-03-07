@@ -14,6 +14,16 @@ interface participant {
   planActivatedAt: Date;
 }
 
+interface participantToCreate {
+  id: number;
+  walletAddress: string;
+  telegramId: number;
+  airdropName: string;
+  createdAt: Date;
+  planActivatedAt: Date;
+  airdropAchievedAt: Date;
+}
+
 @Injectable()
 export class AirdropsService {
   constructor(
@@ -35,6 +45,7 @@ export class AirdropsService {
     walletAddress: string,
     airdropName: string,
     response: Response,
+    participant: participantToCreate,
   ) {
     try {
       const checkAirdropRequirements =
@@ -42,7 +53,7 @@ export class AirdropsService {
           walletAddress,
           airdropName,
           response,
-          true,
+          participant,
         );
 
       return checkAirdropRequirements;
@@ -72,7 +83,7 @@ export class AirdropsService {
     walletAddress: string,
     airdropName: string,
     response: Response,
-    submittingForParticipation?: boolean,
+    participant: participantToCreate,
   ) {
     const utcDate = new UTCDate();
     const currentDate = new Date(utcDate);
@@ -93,323 +104,228 @@ export class AirdropsService {
       },
     });
 
-    if (
-      airdrop &&
-      airdrop.status === 'completed' &&
-      airdrop.currentProgress >= airdrop.usersLimit
-    ) {
-      throw new HttpException(
-        'Airdrop is already completed',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    const currentProgress = await this.prisma.airdropsParticipants.findMany({
+      where: {
+        AND: [{ airdropName }, { airdropAchievedAt: { not: null } }],
+      },
+    });
 
-    if (
-      airdrop &&
-      airdrop.status !== 'completed' &&
-      airdrop.currentProgress >= airdrop.usersLimit
-    ) {
-      await this.prisma.airdrops.update({
-        where: {
-          airdropName,
-        },
-        data: {
-          status: 'completed',
-        },
-      });
-
-      throw new HttpException(
-        'Airdrop is already completed',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    if (airdropName === 'airdrop1') {
-      if (user.freeTrialWasTaken) {
-        let participant = await this.prisma.airdropsParticipants.upsert({
-          where: {
-            walletAddress_airdropName: {
-              walletAddress,
-              airdropName,
-            },
-          },
-          update: {},
-          create: {
-            walletAddress,
-            airdropName,
-            planActivatedAt: utcDate,
-            airdropAchievedAt: utcDate,
-          },
-        });
-
-        if (participant && participant.airdropAchievedAt === null) {
-          participant = await this.prisma.airdropsParticipants.update({
-            where: {
-              walletAddress_airdropName: {
-                walletAddress,
-                airdropName,
-              },
-            },
-            data: {
-              planActivatedAt: utcDate,
-              airdropAchievedAt: utcDate,
-            },
-          });
-        }
-
+    if (currentProgress.length >= airdrop.usersLimit) {
+      if (airdrop.status !== 'completed') {
         await this.prisma.airdrops.update({
           where: {
             airdropName,
           },
           data: {
-            currentProgress: {
-              increment: 1,
-            },
+            currentProgress: currentProgress.length,
+            status: 'completed',
           },
         });
-
-        if (airdrop.usersLimit - airdrop.currentProgress === 1) {
-          const airdropStatus = await this.prisma.airdrops.findUnique({
-            where: {
-              airdropName,
-            },
-          });
-
-          if (
-            airdropStatus &&
-            airdropStatus.status !== 'completed' &&
-            airdropStatus.currentProgress >= airdropStatus.usersLimit
-          ) {
-            await this.prisma.airdrops.update({
-              where: {
-                airdropName,
-              },
-              data: {
-                status: 'completed',
-              },
-            });
-          }
-        }
-
-        return {
-          airdropName: airdropName,
-          freeTrialWasTaken: user.freeTrialWasTaken,
-          airdropAchievedAt: utcDate,
-        };
       }
-
-      const participant = await this.prisma.airdropsParticipants.upsert({
-        where: {
-          walletAddress_airdropName: {
-            walletAddress,
-            airdropName,
-          },
-        },
-        update: {},
-        create: {
-          walletAddress,
-          airdropName,
-        },
-      });
-
-      return {
-        airdropName: airdropName,
-        freeTrialWasTaken: user.freeTrialWasTaken,
-        airdropAchievedAt: null,
-      };
     }
 
-    if (airdropName === 'airdrop2') {
-      if (user.subscriptionLevel === 'plan1') {
-        const planIsActive = await this.authService.checkPlanIsActive(
-          walletAddress,
-          'plan1',
-        );
-
-        if (submittingForParticipation === true && planIsActive === true) {
-          const participant = await this.prisma.airdropsParticipants.create({
-            data: {
-              walletAddress,
-              airdropName,
-              planActivatedAt: utcDate,
-            },
-          });
-
-          return {
-            airdropName: airdropName,
-            planIsActive: planIsActive,
-            daysLeftTillCompletion: 30,
-            airdropAchievedAt: null,
-          };
-        }
-
-        if (submittingForParticipation === true && planIsActive === false) {
-          const participant = await this.prisma.airdropsParticipants.create({
-            data: {
-              walletAddress,
-              airdropName,
-            },
-          });
-
-          return {
-            airdropName: airdropName,
-            planIsActive: planIsActive,
-            daysLeftTillCompletion: 30,
-            airdropAchievedAt: null,
-          };
-        }
-
-        if (!submittingForParticipation) {
-          const participant = await this.prisma.airdropsParticipants.findUnique(
-            {
+    if (participant && airdrop.status === 'ongoing') {
+      if (airdropName === 'airdrop1') {
+        if (user.freeTrialWasTaken) {
+          if (participant && participant.airdropAchievedAt === null) {
+            participant = await this.prisma.airdropsParticipants.update({
               where: {
                 walletAddress_airdropName: {
                   walletAddress,
                   airdropName,
                 },
               },
+              data: {
+                planActivatedAt: utcDate,
+                airdropAchievedAt: utcDate,
+              },
+            });
+          }
+
+          await this.prisma.airdrops.update({
+            where: {
+              airdropName,
             },
+            data: {
+              currentProgress: {
+                increment: 1,
+              },
+            },
+          });
+
+          if (airdrop.usersLimit - airdrop.currentProgress === 1) {
+            const airdropStatus = await this.prisma.airdrops.findUnique({
+              where: {
+                airdropName,
+              },
+            });
+
+            if (
+              airdropStatus &&
+              airdropStatus.status !== 'completed' &&
+              airdropStatus.currentProgress >= airdropStatus.usersLimit
+            ) {
+              await this.prisma.airdrops.update({
+                where: {
+                  airdropName,
+                },
+                data: {
+                  status: 'completed',
+                },
+              });
+            }
+          }
+
+          return {
+            airdropName: airdropName,
+            freeTrialWasTaken: user.freeTrialWasTaken,
+            airdropAchievedAt: utcDate,
+          };
+        }
+
+        return {
+          airdropName: airdropName,
+          freeTrialWasTaken: user.freeTrialWasTaken,
+          airdropAchievedAt: null,
+        };
+      }
+
+      if (airdropName === 'airdrop2') {
+        if (user.subscriptionLevel === 'plan1') {
+          const planIsActive = await this.authService.checkPlanIsActive(
+            walletAddress,
+            'plan1',
           );
 
-          if (participant) {
-            if (planIsActive && participant.planActivatedAt != null) {
-              const planActivationDate = new Date(participant.planActivatedAt);
-              const daysPassedTillCompletion = differenceInDays(
-                parseISO(currentDate.toISOString()),
-                parseISO(planActivationDate.toISOString()),
-              );
+          if (participant.planActivatedAt === null && planIsActive === true) {
+            await this.prisma.airdropsParticipants.update({
+              where: {
+                walletAddress_airdropName: {
+                  walletAddress,
+                  airdropName,
+                },
+              },
+              data: {
+                planActivatedAt: utcDate,
+              },
+            });
 
-              let daysLeftTillCompletion = 30 - daysPassedTillCompletion;
+            return {
+              airdropName: airdropName,
+              planIsActive: planIsActive,
+              daysLeftTillCompletion: 30,
+              airdropAchievedAt: null,
+            };
+          }
 
-              if (daysLeftTillCompletion <= 0) {
-                daysLeftTillCompletion = 0;
+          if (participant.planActivatedAt !== null && planIsActive === false) {
+            await this.prisma.airdropsParticipants.update({
+              where: {
+                walletAddress_airdropName: {
+                  walletAddress,
+                  airdropName,
+                },
+              },
+              data: {
+                planActivatedAt: null,
+              },
+            });
 
-                await this.prisma.airdropsParticipants.update({
-                  where: {
-                    walletAddress_airdropName: {
-                      walletAddress,
-                      airdropName,
-                    },
+            return {
+              airdropName: airdropName,
+              planIsActive: planIsActive,
+              daysLeftTillCompletion: 30,
+              airdropAchievedAt: null,
+            };
+          }
+
+          if (planIsActive && participant.planActivatedAt != null) {
+            const planActivationDate = new Date(participant.planActivatedAt);
+            const daysPassedTillCompletion = differenceInDays(
+              parseISO(currentDate.toISOString()),
+              parseISO(planActivationDate.toISOString()),
+            );
+
+            let daysLeftTillCompletion = 30 - daysPassedTillCompletion;
+
+            if (daysLeftTillCompletion <= 0) {
+              daysLeftTillCompletion = 0;
+
+              await this.prisma.airdropsParticipants.update({
+                where: {
+                  walletAddress_airdropName: {
+                    walletAddress,
+                    airdropName,
                   },
-                  data: {
-                    airdropAchievedAt: utcDate,
-                  },
-                });
+                },
+                data: {
+                  airdropAchievedAt: utcDate,
+                },
+              });
 
-                const airdrop = await this.prisma.airdrops.update({
+              const airdrop = await this.prisma.airdrops.update({
+                where: {
+                  airdropName,
+                },
+                data: {
+                  currentProgress: {
+                    increment: 1,
+                  },
+                },
+              });
+
+              if (airdrop.usersLimit - airdrop.currentProgress === 1) {
+                const airdropStatus = await this.prisma.airdrops.findUnique({
                   where: {
                     airdropName,
                   },
-                  data: {
-                    currentProgress: {
-                      increment: 1,
-                    },
-                  },
                 });
 
-                if (airdrop.usersLimit - airdrop.currentProgress === 1) {
-                  const airdropStatus = await this.prisma.airdrops.findUnique({
+                if (
+                  airdropStatus &&
+                  airdropStatus.status !== 'completed' &&
+                  airdropStatus.currentProgress >= airdropStatus.usersLimit
+                ) {
+                  await this.prisma.airdrops.update({
                     where: {
                       airdropName,
                     },
+                    data: {
+                      status: 'completed',
+                    },
                   });
-
-                  if (
-                    airdropStatus &&
-                    airdropStatus.status !== 'completed' &&
-                    airdropStatus.currentProgress >= airdropStatus.usersLimit
-                  ) {
-                    await this.prisma.airdrops.update({
-                      where: {
-                        airdropName,
-                      },
-                      data: {
-                        status: 'completed',
-                      },
-                    });
-                  }
                 }
-
-                return {
-                  airdropName,
-                  planIsActive,
-                  daysLeftTillCompletion,
-                  airdropAchievedAt: utcDate,
-                };
               }
 
               return {
                 airdropName,
                 planIsActive,
                 daysLeftTillCompletion,
+                airdropAchievedAt: utcDate,
               };
             }
 
-            if (planIsActive && participant.planActivatedAt === null) {
-              await this.prisma.airdropsParticipants.update({
-                where: {
-                  walletAddress_airdropName: {
-                    walletAddress,
-                    airdropName,
-                  },
-                },
-                data: {
-                  planActivatedAt: utcDate,
-                },
-              });
-
-              return {
-                airdropName,
-                planIsActive,
-                daysLeftTillCompletion: 30,
-              };
-            }
-
-            if (!planIsActive && participant.planActivatedAt !== null) {
-              await this.prisma.airdropsParticipants.update({
-                where: {
-                  walletAddress_airdropName: {
-                    walletAddress,
-                    airdropName,
-                  },
-                },
-                data: {
-                  planActivatedAt: null,
-                },
-              });
-
-              return {
-                airdropName,
-                planIsActive,
-                daysLeftTillCompletion: 30,
-              };
-            }
+            return {
+              airdropName,
+              planIsActive,
+              daysLeftTillCompletion,
+            };
           }
         }
+
+        return {
+          airdropName: airdropName,
+          planIsActive: false,
+          daysLeftTillCompletion: 30,
+          airdropAchievedAt: null,
+        };
       }
-
-      await this.prisma.airdropsParticipants.upsert({
-        where: {
-          walletAddress_airdropName: {
-            walletAddress,
-            airdropName,
-          },
-        },
-        update: {},
-        create: {
-          walletAddress,
-          airdropName,
-        },
-      });
-
-      return {
-        airdropName: airdropName,
-        planIsActive: false,
-        daysLeftTillCompletion: 30,
-        airdropAchievedAt: null,
-      };
     }
-    throw new HttpException('Airdrop not found', HttpStatus.NOT_FOUND);
+
+    throw new HttpException(
+      'Airdrop not found or already completed',
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   async checkAirdropRequirementsCron(airdropName: string) {
@@ -422,7 +338,27 @@ export class AirdropsService {
         },
       });
 
-      if (airdrop && airdrop.usersLimit - airdrop.currentProgress > 0) {
+      const currentProgress = await this.prisma.airdropsParticipants.findMany({
+        where: {
+          AND: [{ airdropName }, { airdropAchievedAt: { not: null } }],
+        },
+      });
+
+      if (currentProgress.length >= airdrop.usersLimit) {
+        if (airdrop.status !== 'completed') {
+          await this.prisma.airdrops.update({
+            where: {
+              airdropName,
+            },
+            data: {
+              currentProgress: currentProgress.length,
+              status: 'completed',
+            },
+          });
+        }
+      }
+
+      if (airdrop && airdrop.status === 'ongoing') {
         const availableSpaceToParticipate =
           airdrop.usersLimit - airdrop.currentProgress;
 

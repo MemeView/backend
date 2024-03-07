@@ -52,6 +52,8 @@ export class AirdropsController {
 
       const { walletAddress } = decodedAccessToken;
 
+      await this.prisma.airdropsParticipants.deleteMany();
+
       const participates = await this.prisma.airdropsParticipants.findUnique({
         where: {
           walletAddress_airdropName: {
@@ -67,10 +69,18 @@ export class AirdropsController {
         });
       }
 
+      const participant = await this.prisma.airdropsParticipants.create({
+        data: {
+          walletAddress,
+          airdropName,
+        },
+      });
+
       const result = await this.airdropsService.participateInAirdrop(
         walletAddress,
         airdropName,
         response,
+        participant,
       );
 
       return response.status(200).json({
@@ -142,11 +152,21 @@ export class AirdropsController {
 
       const { walletAddress } = decodedAccessToken;
 
+      const participant = await this.prisma.airdropsParticipants.findUnique({
+        where: {
+          walletAddress_airdropName: {
+            walletAddress,
+            airdropName,
+          },
+        },
+      });
+
       const result =
         await this.airdropsService.checkAirdropRequirementsByParticipant(
           walletAddress,
           airdropName,
           response,
+          participant,
         );
 
       const {
