@@ -230,6 +230,30 @@ export class AirdropsController {
           id: 'asc',
         },
       });
+
+      airdrops.forEach(async (airdrop) => {
+        const currentProgress = await this.prisma.airdropsParticipants.findMany(
+          {
+            where: {
+              AND: [{ airdropName }, { airdropAchievedAt: { not: null } }],
+            },
+          },
+        );
+
+        if (currentProgress.length >= airdrop.usersLimit) {
+          if (airdrop.status !== 'completed') {
+            await this.prisma.airdrops.update({
+              where: {
+                airdropName,
+              },
+              data: {
+                currentProgress: currentProgress.length,
+                status: 'completed',
+              },
+            });
+          }
+        }
+      });
       const participantAirdrops =
         await this.prisma.airdropsParticipants.findMany({
           where: { walletAddress },
