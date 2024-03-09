@@ -29,6 +29,7 @@ model Tokens {
   image                 String?
   liquidityTokenSymbol  String?
   liquidityTokenAddress String?
+  txnCount24            Int?
 }
 
 model Blacklist {

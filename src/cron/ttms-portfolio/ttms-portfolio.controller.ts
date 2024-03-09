@@ -107,29 +107,14 @@ export class TtmsPortfolioController {
       const oneWeekAgo = subDays(todayStartOfDay, 7);
       const monthAgo = subDays(todayStartOfDay, 30);
 
-      const result24h9am =
+      const lastResult24h =
         await this.prisma.averageTtmsPortfolioResults.findFirst({
-          where: {
-            startedAt: '9am',
-          },
-          orderBy: { createdAt: 'desc' },
-        });
-
-      const result24h9pm =
-        await this.prisma.averageTtmsPortfolioResults.findFirst({
-          where: {
-            startedAt: '9pm',
-          },
           orderBy: { createdAt: 'desc' },
         });
 
       let averagePercentage24h = 0;
-      if (result24h9am.average24Result) {
-        averagePercentage24h += parseFloat(result24h9am.average24Result);
-      }
-
-      if (result24h9pm.average24Result) {
-        averagePercentage24h += parseFloat(result24h9pm.average24Result);
+      if (lastResult24h.average24Result) {
+        averagePercentage24h += parseFloat(lastResult24h.average24Result);
       }
 
       const resultOneWeek =

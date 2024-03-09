@@ -246,6 +246,12 @@ export class SolveScoreService {
             volumeScore -= 10;
           }
         }
+
+        // отнимаю баллы если два дня назад volume24 был меньше 500 долларов
+        if (parseFloat(tokenTwoDaysAgo.volume24) < 500) {
+          volumeScore -= 50;
+        }
+
         resultFromVolume.push({
           tokenAddress: tokenTwoDaysAgo.address,
           scoreFromVolume: volumeScore,
@@ -584,7 +590,12 @@ export class SolveScoreService {
     // Получаем информацию о токенах из базы данных, используя адреса из finalResultsAddresses
     const rawTokens = await this.prisma.tokens.findMany({
       where: { address: { in: finalResultsAddresses } },
-      select: { address: true, liquidity: true, createdAt: true },
+      select: {
+        address: true,
+        liquidity: true,
+        createdAt: true,
+        txnCount24: true,
+      },
     });
 
     // Обновляем баллы для токенов в зависимости от их ликвидности
@@ -595,6 +606,11 @@ export class SolveScoreService {
       );
 
       result.liquidity = token?.liquidity ?? '0';
+
+      if (token && token.txnCount24 < 10) {
+        // Уменьшаем баллы для токенов с низкой ликвидностью
+        result.tokenScore -= 50;
+      }
 
       if (token && parseFloat(token.liquidity!) < 5000) {
         // Уменьшаем баллы для токенов с низкой ликвидностью

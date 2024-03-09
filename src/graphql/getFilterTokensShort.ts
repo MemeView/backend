@@ -8,6 +8,7 @@ export const GET_FILTER_TOKENS_SHORT = `query ($tokens: [String], $limit: Int, $
         volume24
         createdAt
         priceUSD
+        txnCount24
         quoteToken
         pair {
           address

@@ -129,6 +129,7 @@ export class DefinedTokensService {
             volume24,
             createdAt,
             quoteToken,
+            txnCount24,
           }) => {
             const liquidityTokenSymbol =
               quoteToken === 'token0'
@@ -157,6 +158,7 @@ export class DefinedTokensService {
               image: token.info.imageLargeUrl,
               liquidityTokenSymbol,
               liquidityTokenAddress,
+              txnCount24,
             };
           },
         );
