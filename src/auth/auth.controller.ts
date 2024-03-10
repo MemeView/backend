@@ -398,6 +398,8 @@ export class AuthController {
           walletAddress,
         );
 
+        console.log('holdingTWAmount', holdingTWAmount);
+
         const plan = await this.prisma.subscriptions.findFirst({
           where: {
             title: user.subscriptionLevel,

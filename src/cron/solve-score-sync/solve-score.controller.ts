@@ -11,13 +11,7 @@ import {
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
-import {
-  getDate,
-  getMonth,
-  getYear,
-  subDays,
-  subHours,
-} from 'date-fns';
+import { getDate, getMonth, getYear, subDays, subHours } from 'date-fns';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';

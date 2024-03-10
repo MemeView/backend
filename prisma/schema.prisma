@@ -157,7 +157,7 @@ model TtmsPortfolio {
   startedAt             String
   ATH                   String?
   ATL                   String?
-  dailyPriceChange095   Int?
+  dailyPriceChange095   String?
   currentPrice          String?
   exitPrice             String?
   quoteToken            String?
