@@ -88,6 +88,9 @@ export class RefreshMiddleware implements NestMiddleware {
 
         res.cookie('accessToken', newAccessToken, {
           httpOnly: true,
+          secure: true,
+          sameSite: 'none',
+          path: '/',
         });
 
         req.cookies['accessToken'] = newAccessToken;
