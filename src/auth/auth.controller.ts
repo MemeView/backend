@@ -299,7 +299,7 @@ export class AuthController {
         );
 
         if (subscribedReferralsCount < 3) {
-          return response.status(403).json({
+          return response.status(200).json({
             plan: user.subscriptionLevel,
             isActive: false,
             req: {
@@ -414,7 +414,7 @@ export class AuthController {
           });
         }
 
-        return response.status(403).json({
+        return response.status(200).json({
           plan: user.subscriptionLevel,
           isActive: false,
           req: {
