@@ -24,6 +24,7 @@ interface airdropResult {
   status: string;
   participates: boolean;
   daysLeftTillCompletion: number;
+  planActivatedAt: Date;
   airdropAchieved: boolean;
 }
 
@@ -317,6 +318,7 @@ export class AirdropsController {
               ...airdrop,
               participates: true,
               daysLeftTillCompletion: 0,
+              planActivatedAt: participant.planActivatedAt,
               airdropAchieved: true,
             });
           } else {
@@ -324,6 +326,7 @@ export class AirdropsController {
               ...airdrop,
               participates: true,
               daysLeftTillCompletion,
+              planActivatedAt: participant.planActivatedAt,
               airdropAchieved: false,
             });
           }
@@ -332,6 +335,7 @@ export class AirdropsController {
           ...airdrop,
           participates: false,
           daysLeftTillCompletion: 30,
+          planActivatedAt: null,
           airdropAchieved: false,
         });
       }
@@ -365,6 +369,7 @@ export class AirdropsController {
               ...airdrop,
               participates: true,
               daysLeftTillCompletion: 0,
+              planActivatedAt: currentAirdrop.planActivatedAt,
               airdropAchieved: true,
             });
           }
@@ -373,6 +378,7 @@ export class AirdropsController {
               ...airdrop,
               participates: true,
               daysLeftTillCompletion,
+              planActivatedAt: currentAirdrop.planActivatedAt,
               airdropAchieved: false,
             });
           }
@@ -383,6 +389,7 @@ export class AirdropsController {
             ...airdrop,
             participates: false,
             daysLeftTillCompletion: 30,
+            planActivatedAt: null,
             airdropAchieved: false,
           });
         }

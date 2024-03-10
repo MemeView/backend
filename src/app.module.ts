@@ -13,6 +13,7 @@ import { ExcelModule } from './excel/excel.module';
 import { PostingModule } from './cron/posting/posting.module';
 import { AuthModule } from './auth/auth.module';
 import { TwitterModule } from './twitter/twitter.module';
+import { EventTrackerModule } from './event-tracker/event-tracker.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { TwitterModule } from './twitter/twitter.module';
     PostingModule,
     AuthModule,
     TwitterModule,
+    EventTrackerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

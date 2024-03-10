@@ -251,7 +251,8 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 T
             title: 'plan2',
           },
         });
-      } else {
+      }
+      if (currentPstHour === 9 || currentPstHour === 21) {
         allSubscriptions = await this.prisma.subscriptions.findMany();
       }
 
@@ -284,6 +285,7 @@ Check it by clicking the button below 👇`;
         // проверяю активность подписок plan1 или plan2
         if (
           subscription &&
+          Array.isArray(allSubscriptions) &&
           (subscription.title === 'plan1' || subscription.title === 'plan2') &&
           parseFloat(user.holdingTWAmountUSDT) >= subscription.holdingTWAmount
         ) {
@@ -308,6 +310,7 @@ Check it by clicking the button below 👇`;
         // проверяю активность триала
         if (
           subscription &&
+          Array.isArray(allSubscriptions) &&
           subscription.title === 'trial' &&
           user.trialCreatedAt > sevenDaysAgo
         ) {
@@ -330,7 +333,11 @@ Check it by clicking the button below 👇`;
         }
 
         // проверяю активность реферальной подписки
-        if (subscription && subscription.title === 'plan3') {
+        if (
+          subscription &&
+          Array.isArray(allSubscriptions) &&
+          subscription.title === 'plan3'
+        ) {
           const subscribedReferralsCount =
             await this.authService.checkReferrals(user.walletAddress);
 

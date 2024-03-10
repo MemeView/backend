@@ -229,6 +229,8 @@ export class PostingService {
             `#TokenWatch ` +
             `#CryptoCurrency ` +
             `#CryptoMarket ` +
+            `#ToTheMoonScore ` +
+            `#TTMS ` +
             `#Signals\n\n` +
             `by @TokenWatch\\_ai`;
 
@@ -244,6 +246,8 @@ export class PostingService {
             `#TokenWatch ` +
             `#CryptoCurrency ` +
             `#CryptoMarket ` +
+            `#ToTheMoonScore ` +
+            `#TTMS ` +
             `#Signals\n\n` +
             `by @TokenWatch_ai`;
 

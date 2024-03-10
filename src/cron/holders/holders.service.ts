@@ -263,7 +263,7 @@ export class HoldersService {
 
           // баллы для токенов, у которых networkId не 1
           if (token.holdersCount === -1) {
-            tokenScore += 16;
+            tokenScore += 10;
           }
 
           // баллы за количество холдеров

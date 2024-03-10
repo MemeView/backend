@@ -90,6 +90,87 @@ export class SignalBotController {
     try {
       const result = await this.signalBotService.sendMessageToAllUsers();
 
+      // let result = 0;
+      // let sendedCount = 0;
+
+      // for (let i = 0; i < 24; i++) {
+      //   let utcDate;
+      //   if (i < 10) {
+      //     utcDate = new UTCDate(`2024-03-10T0${i}:16:23.559Z`);
+      //   }
+      //   if (i >= 10) {
+      //     utcDate = new UTCDate(`2024-03-10T${i}:16:23.559Z`);
+      //   }
+      //   const pstDate = subHours(utcDate, 8);
+      //   const currentHour = utcDate.getUTCHours();
+      //   const currentPstHour = pstDate.getUTCHours();
+      //   let allSubscriptions = null;
+
+      //   if (i === 12) {
+      //     console.log('allSubscriptions', allSubscriptions);
+      //   }
+
+      //   console.log('================');
+      //   console.log('i', i);
+      //   console.log('utcDate', utcDate);
+      //   console.log('pstDate', pstDate);
+      //   console.log('currentPstHour', currentPstHour);
+
+      //   if (currentPstHour === 3) {
+      //     console.log('отправили');
+      //     allSubscriptions = await this.prisma.subscriptions.findFirst({
+      //       where: {
+      //         title: 'plan2',
+      //       },
+      //     });
+      //     sendedCount++;
+      //   }
+
+      //   if (currentPstHour === 9) {
+      //     console.log('отправили');
+      //     allSubscriptions = await this.prisma.subscriptions.findMany();
+      //     sendedCount++;
+      //   }
+
+      //   if (currentPstHour === 15) {
+      //     console.log('отправили');
+      //     allSubscriptions = await this.prisma.subscriptions.findFirst({
+      //       where: {
+      //         title: 'plan2',
+      //       },
+      //     });
+      //     sendedCount++;
+      //   }
+
+      //   if (currentPstHour === 21) {
+      //     console.log('отправили');
+      //     allSubscriptions = await this.prisma.subscriptions.findMany();
+      //     sendedCount++;
+      //   }
+      //   const allUsers = await this.prisma.users.findMany({
+      //     where: {
+      //       telegramId: { gt: 0 },
+      //     },
+      //   });
+
+      //   allUsers.forEach(async (user) => {
+      //     const chatId = user.telegramId;
+
+      //     if (allSubscriptions && Array.isArray(allSubscriptions)) {
+      //       const subscription = await allSubscriptions.find(
+      //         (subscription) => subscription.title === user.subscriptionLevel,
+      //       );
+
+      //       if (subscription) {
+      //         result++;
+      //       }
+      //     }
+      //   });
+
+      //   console.log('================');
+      // }
+      // console.log('sendedCount', result);
+
       return result;
     } catch (e) {
       return e;
