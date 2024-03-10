@@ -5,11 +5,8 @@ import {
   HttpException,
   Res,
   Query,
-  Post,
   UseGuards,
   Req,
-  UnauthorizedException,
-  UseInterceptors,
 } from '@nestjs/common';
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
@@ -18,7 +15,6 @@ import {
   getDate,
   getMonth,
   getYear,
-  parseISO,
   subDays,
   subHours,
 } from 'date-fns';
@@ -26,9 +22,6 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from 'src/auth/auth.service';
-import { RefreshMiddleware } from 'src/auth/refresh-jwt.middleware';
-import { useMiddleware } from 'graphql-config/typings/helpers';
-import { format } from 'path';
 
 @Controller('api')
 export class SolveScoreController {

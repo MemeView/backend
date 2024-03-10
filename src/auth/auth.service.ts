@@ -104,6 +104,9 @@ export class AuthService {
     // Установка cookie с accessToken
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+      path: '/',
     });
 
     const {
