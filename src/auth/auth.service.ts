@@ -228,6 +228,13 @@ export class AuthService {
     // Проверка, является ли walletAddress действительным адресом кошелька Ethereum
     const isValidAddress = isAddress(walletAddress);
 
+    console.log('=====================');
+    console.log(
+      'является ли walletAddress действительным адресом кошелька Ethereum',
+      isValidAddress,
+    );
+    console.log('=====================');
+
     if (!isValidAddress) {
       new UnauthorizedException('Invalid wallet address');
     }
@@ -239,6 +246,11 @@ export class AuthService {
     let user = null;
 
     if (!wallet) {
+      console.log('=====================');
+      console.log(
+        'провалились в условие, если пользователь авторизуется впервые и создаём этого пользователя',
+      );
+      console.log('=====================');
       user = await this.prisma.users.create({
         data: {
           walletAddress: walletAddress,
@@ -264,6 +276,13 @@ export class AuthService {
       wallet.telegramId !== null &&
       wallet.telegramId === telegramId
     ) {
+      console.log('=====================');
+      console.log(
+        `провалились в условие, когда пользователь авторизуется не в первый раз 
+и к нему уже привязан телеграмм аккаунт и он совпадает с тем, под которым мы сейчас авторизуемся`,
+      );
+      console.log('=====================');
+
       user = wallet;
 
       if (!user.ownRefId || user.ownRefId.length < 6) {
@@ -284,6 +303,13 @@ export class AuthService {
       wallet.telegramId !== null &&
       wallet.telegramId !== telegramId
     ) {
+      console.log('=====================');
+      console.log(
+        `провалились в условие, когда пользователь авторизуется не в первый раз 
+и к нему уже привязан телеграмм аккаунт и он НЕ совпадает с тем, под которым мы сейчас авторизуемся`,
+      );
+      console.log('=====================');
+
       throw new HttpException(
         'You cannot link this telegram account to this wallet, since another telegram account is already linked to it',
         400,
@@ -291,6 +317,13 @@ export class AuthService {
     }
 
     if (wallet && wallet.telegramId === null) {
+      console.log('=====================');
+      console.log(
+        `провалились в условие, когда пользователь авторизуется не в первый раз,
+но к нему еще не привязан телеграмм аккаунт и привязываем тот, под которым сейчас заходим`,
+      );
+      console.log('=====================');
+
       const refId = await this.generateRefId(wallet.id);
       user = await this.prisma.users.update({
         where: { walletAddress: walletAddress },
@@ -303,6 +336,10 @@ export class AuthService {
     }
 
     if (user !== null) {
+      console.log('=====================');
+      console.log('создаём jwt токены');
+      console.log('=====================');
+
       const accessToken = jwt.sign(
         { walletAddress: user.walletAddress, telegramId: user.telegramId },
         process.env.JWT_SECRET,
@@ -341,6 +378,10 @@ export class AuthService {
         id,
         ...userWithoutRefreshToken
       } = user;
+
+      console.log('=====================');
+      console.log('пользователь зашел');
+      console.log('=====================');
 
       return {
         user: userWithoutRefreshToken,
