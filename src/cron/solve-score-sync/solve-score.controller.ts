@@ -16,6 +16,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from 'src/auth/auth.service';
+import { getAbsoluteScore } from 'src/helpers/getAbsoluteScore';
 
 @Controller('api')
 export class SolveScoreController {
@@ -136,12 +137,73 @@ export class SolveScoreController {
   }
 
   @Get('/take-score')
-  async takeScore() {
+  async takeScore(
+    @Query('take') take: string,
+    @Query('skip') skip: string,
+    @Query('tokenAddress') tokenAddress: string,
+  ) {
     try {
-      const result = await this.prisma.score.findMany({
-        orderBy: {
-          tokenScore: 'desc',
+      let takeNumber = parseInt(take, 10);
+      let skipNumber = parseInt(skip, 10);
+
+      if (!skipNumber) {
+        skipNumber = 0;
+      }
+
+      if (!takeNumber) {
+        takeNumber = 50;
+      }
+
+      if (takeNumber > 50) {
+        takeNumber = 50;
+      }
+
+      const filter = tokenAddress ? { tokenAddress } : {};
+      if (filter.tokenAddress) {
+        takeNumber = 0;
+      }
+
+      const scores = await this.prisma.score.findMany({
+        where: filter,
+        skip: skipNumber,
+        take: takeNumber,
+        orderBy: [{ tokenScore: 'desc' }, { liquidity: 'desc' }],
+      });
+
+      const scoresQuery: string[] = [];
+      scores.forEach((element) => {
+        scoresQuery.push(element.tokenAddress);
+      });
+
+      const tokenList = await this.prisma.tokens.findMany({
+        take: takeNumber,
+        where: {
+          address: {
+            in: scoresQuery,
+          },
         },
+      });
+
+      let result = tokenList.map((token) => {
+        const score = scores.find(
+          (element) => element.tokenAddress === token.address,
+        );
+
+        return {
+          absoluteScore: score!.tokenScore,
+          score: Math.ceil(score!.tokenScore),
+          ...token,
+        };
+      });
+
+      result = result.sort((a, b) => {
+        if (
+          getAbsoluteScore(a.absoluteScore) ===
+          getAbsoluteScore(b.absoluteScore)
+        ) {
+          return Number(b.liquidity) - Number(a.liquidity);
+        }
+        return b.absoluteScore - a.absoluteScore;
       });
 
       return result;
