@@ -230,7 +230,7 @@ export class SolveScoreController {
       // Декодируем accessToken, чтобы получить данные пользователя
       const decodedAccessToken = jwt.decode(accessToken) as {
         walletAddress: string;
-        telegramId: number;
+        telegramId: string;
         iat: number;
         exp: number;
       };

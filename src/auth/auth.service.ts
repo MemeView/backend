@@ -217,7 +217,7 @@ export class AuthService {
 
   async signUpWithTelegram(
     walletAddress: string,
-    telegramId: number,
+    telegramId: string,
     res: Response,
     registrationRefId?: string,
   ): Promise<{ user: UserWithoutRefreshToken; accessToken: string }> {

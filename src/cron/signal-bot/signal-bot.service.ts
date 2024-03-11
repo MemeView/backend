@@ -321,7 +321,7 @@ It is the score from 1 to 100 that shows the current growth potential.`,
 
       const allUsers = await this.prisma.users.findMany({
         where: {
-          telegramId: { gt: 0 },
+          telegramId: { not: null },
         },
       });
 

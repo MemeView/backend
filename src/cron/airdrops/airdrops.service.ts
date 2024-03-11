@@ -7,7 +7,7 @@ import { AuthService } from 'src/auth/auth.service';
 
 interface participant {
   walletAddress: string;
-  telegramId: number;
+  telegramId: string;
   createdAt: Date;
   airdropName: string;
   airdropAchievedAt: Date;
@@ -17,7 +17,7 @@ interface participant {
 interface participantToCreate {
   id: number;
   walletAddress: string;
-  telegramId: number;
+  telegramId: string;
   airdropName: string;
   createdAt: Date;
   planActivatedAt: Date;

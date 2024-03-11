@@ -87,7 +87,7 @@ model DailyScore {
 
 model Users {
   walletAddress         String   @id @unique
-  telegramId            Int?
+  telegramId            String?
   votes                 Int      @default(5)
   updatedAt             DateTime @default(now())
   refreshToken          String?
@@ -146,7 +146,7 @@ model TtmsByHours {
 }
 
 model TgWhiteList {
-  telegramId    Int @id @unique
+  telegramId    String @id @unique
 }
 
 model TtmsPortfolio {
@@ -194,7 +194,7 @@ model Airdrops {
 model AirdropsParticipants {
   id                  Int @id @default(autoincrement())
   walletAddress       String
-  telegramId          Int?
+  telegramId          String?
   airdropName         String
   createdAt           DateTime @default(now())
   planActivatedAt     DateTime?

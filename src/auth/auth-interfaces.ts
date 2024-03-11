@@ -1,6 +1,6 @@
 export interface UserWithoutRefreshToken {
   walletAddress: string;
-  telegramId: number;
+  telegramId: string;
   votes: number;
   updatedAt: Date;
   freeTrialWasTaken: boolean;

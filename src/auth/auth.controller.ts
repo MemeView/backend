@@ -126,7 +126,7 @@ export class AuthController {
   @Post('/auth-with-telegram')
   async signUpWithTelegram(
     @Body('walletAddress') walletAddress: string,
-    @Body('telegramId') telegramId: number,
+    @Body('telegramId') telegramId: string,
     @Res() res: Response,
     @Body('registrationRefId') registrationRefId?: string,
   ) {
@@ -264,7 +264,7 @@ export class AuthController {
 
       const decodedAccessToken = jwt.decode(accessToken) as {
         walletAddress: string;
-        telegramId: number;
+        telegramId: string;
         iat: number;
         exp: number;
       };
@@ -343,7 +343,7 @@ export class AuthController {
         const isSubscribedOnChanel =
           await this.signalBotService.checkSubscriptionByUserId(
             channelId,
-            telegramId,
+            parseFloat(telegramId),
           );
 
         const userHasVoted = await this.signalBotService.checkUserHasVoted(
@@ -462,7 +462,7 @@ export class AuthController {
   async addToTgWhiteList(
     @Req() request: Request,
     @Res() response: Response,
-    @Body('telegramIds') telegramIds: number[],
+    @Body('telegramIds') telegramIds: string[],
   ) {
     try {
       const usersToCreate = telegramIds.map((id) => ({ telegramId: id }));
