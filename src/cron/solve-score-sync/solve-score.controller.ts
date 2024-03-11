@@ -212,6 +212,86 @@ export class SolveScoreController {
     }
   }
 
+  @Get('/take-free-score')
+  async takeFreeScore(
+    @Query('take') take: string,
+    @Query('skip') skip: string,
+    @Query('tokenAddress') tokenAddress: string,
+  ) {
+    try {
+      let takeNumber = parseInt(take, 10);
+      let skipNumber = parseInt(skip, 10);
+
+      if (!skipNumber) {
+        skipNumber = 0;
+      }
+
+      if (!takeNumber) {
+        takeNumber = 50;
+      }
+
+      if (takeNumber > 50) {
+        takeNumber = 50;
+      }
+
+      if (skipNumber < 30) {
+        skipNumber = 30;
+      }
+
+      const filter = tokenAddress ? { tokenAddress } : {};
+      if (filter.tokenAddress) {
+        takeNumber = 0;
+      }
+
+      const scores = await this.prisma.score.findMany({
+        where: filter,
+        skip: skipNumber,
+        take: takeNumber,
+        orderBy: [{ tokenScore: 'desc' }, { liquidity: 'desc' }],
+      });
+
+      const scoresQuery: string[] = [];
+      scores.forEach((element) => {
+        scoresQuery.push(element.tokenAddress);
+      });
+
+      const tokenList = await this.prisma.tokens.findMany({
+        take: takeNumber,
+        where: {
+          address: {
+            in: scoresQuery,
+          },
+        },
+      });
+
+      let result = tokenList.map((token) => {
+        const score = scores.find(
+          (element) => element.tokenAddress === token.address,
+        );
+
+        return {
+          absoluteScore: score!.tokenScore,
+          score: Math.ceil(score!.tokenScore),
+          ...token,
+        };
+      });
+
+      result = result.sort((a, b) => {
+        if (
+          getAbsoluteScore(a.absoluteScore) ===
+          getAbsoluteScore(b.absoluteScore)
+        ) {
+          return Number(b.liquidity) - Number(a.liquidity);
+        }
+        return b.absoluteScore - a.absoluteScore;
+      });
+
+      return result;
+    } catch (e) {
+      return e;
+    }
+  }
+
   @Get('/ttms-by-hours')
   @UseGuards(JwtAuthGuard)
   async ttmsByHours(
