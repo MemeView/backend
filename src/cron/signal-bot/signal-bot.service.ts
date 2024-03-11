@@ -98,7 +98,9 @@ We are here to help your daily tokens investment decisions become smarter 🧠
 
 To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonScore”.`;
 
-      const betaMessage = `Signal Bot is in beta now and works accurately only on PC / Mac.
+      const betaMessage = `⚡️⚡️⚡️ INFORMATION ⚡️⚡️⚡️
+
+Signal Bot is in beta now and works accurately only on PC / Mac.
 
 Android and iOS version is to be released next days.
 
@@ -106,7 +108,7 @@ If you find any accidential errors and can't proceed please write to support@tok
 
       telegramBot.sendMessage(chatId, welcomeMessage, options);
 
-      telegramBot.sendMessage(chatId, betaMessage, options);
+      setTimeout(() => telegramBot.sendMessage(chatId, betaMessage, options), 1000);
     });
 
     telegramBot.onText(/ℹ️ About/, (msg) => {
