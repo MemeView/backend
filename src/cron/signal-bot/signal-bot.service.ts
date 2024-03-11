@@ -103,9 +103,21 @@ To get your first Top-30 tokens predictions click on “🚀 Top-30 ToTheMoonSco
 
     telegramBot.onText(/ℹ️ About/, (msg) => {
       const chatId = msg.chat.id;
+      const firstMessageButtons = [
+        [{ text: '🌐 Website', url: 'https://tokenwatch.ai/en' }],
+        [{ text: '🐦 Twitter', url: 'https://twitter.com/TokenWatch_ai' }],
+        [
+          {
+            text: '📣 Telegram',
+            callback_data: 'telegramButton',
+            // url: 'https://t.me/TokenWatch_ai',
+          },
+        ],
+        [{ text: '❓ Support', callback_data: 'button6' }],
+      ];
       telegramBot.sendMessage(
         chatId,
-        `About TokenWatch
+        `*About TokenWatch*
 
 TokenWatch.ai bot is your own AI oracle that provides you with best predictions on token’s potential growth right in your Telegram app!
 
@@ -116,6 +128,12 @@ With TokenWatch.ai you can:
 
 We make investments smarter 🧠
 and more successful to everyone! 💰`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: firstMessageButtons,
+          },
+        },
       );
 
       const buttons = [
@@ -131,27 +149,17 @@ and more successful to everyone! 💰`,
             url: 'https://www.bitrue.com/trade/tokenwatch_usdt',
           },
         ],
-        [{ text: '🌐 Website', url: 'https://tokenwatch.ai/en' }],
-        [{ text: '🐦 Twitter', url: 'https://twitter.com/TokenWatch_ai' }],
-        [
-          {
-            text: '📣 Telegram',
-            url: 'https://t.me/TokenWatch_ai',
-          },
-        ],
-        [{ text: '❓ Support', callback_data: 'button6' }],
       ];
 
       telegramBot.sendMessage(
         chatId,
-        `ToTheMoonScore
+        `*About ToTheMoonScore*
 
-ToTheMoonScore™ is the summarised result of deep Artificial Intelligence analyses of every token.
+ToTheMoonScore™ (TTMS) is the summarised result of deep Artificial Intelligence analyses of every token.
 
-It is the score from 1 to 100 that shows the current growth potential.
-
-Start getting your first Top-30 tokens predictions now by clicking  on “🚀 Top-30 ToTheMoonScore“.`,
+It is the score from 1 to 100 that shows the current growth potential.`,
         {
+          parse_mode: 'Markdown',
           reply_markup: {
             inline_keyboard: buttons,
           },
@@ -162,6 +170,61 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 T
     telegramBot.on('callback_query', (query) => {
       const { data } = query;
       const chatId = query.message.chat.id;
+
+      if (data === 'telegramButton') {
+        const message = `Choose among Telegram groups:`;
+
+        const buttons = [
+          [
+            {
+              text: '📣 Official Channel',
+              url: 'https://t.me/TokenWatch_ai',
+            },
+          ],
+          [
+            {
+              text: '💬 English Chat',
+              url: 'https://t.me/TokenWatch_ai_chat',
+            },
+          ],
+          [
+            {
+              text: '💬 Chinese Chat',
+              url: 'https://t.me/TokenWatch_ai_chat_ZH',
+            },
+          ],
+          [
+            {
+              text: '💬 Portuguese Chat',
+              url: 'https://t.me/TokenWatch_ai_chat_PT',
+            },
+          ],
+          [
+            {
+              text: '💬 Spanush Chat',
+              url: 'https://t.me/TokenWatch_ai_chat_ES',
+            },
+          ],
+          [
+            {
+              text: '💬 Arabic Chat',
+              url: 'https://t.me/TokenWatch_ai_chat_AR',
+            },
+          ],
+          [
+            {
+              text: '💬 Russian Chat',
+              url: 'https://t.me/TokenWatch_ai_chat_RU',
+            },
+          ],
+        ];
+
+        telegramBot.sendMessage(chatId, message, {
+          reply_markup: {
+            inline_keyboard: buttons,
+          },
+        });
+      }
 
       if (data === 'button6') {
         const supportMessage = `In a case of any issues feel free to reach our Support Team at support@tokenwatch.ai\n\nPlease be patient and expect the answer in 72 hours.`;
