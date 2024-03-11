@@ -143,8 +143,8 @@ export class SolveScoreController {
     @Query('tokenAddress') tokenAddress: string,
   ) {
     try {
-      let takeNumber = parseInt(take, 10);
-      let skipNumber = parseInt(skip, 10);
+      let takeNumber = await parseInt(take);
+      let skipNumber = await parseInt(skip);
 
       if (!skipNumber) {
         skipNumber = 0;
@@ -160,7 +160,7 @@ export class SolveScoreController {
 
       const filter = tokenAddress ? { tokenAddress } : {};
       if (filter.tokenAddress) {
-        takeNumber = 0;
+        takeNumber = 1;
       }
 
       const scores = await this.prisma.score.findMany({
@@ -219,8 +219,8 @@ export class SolveScoreController {
     @Query('tokenAddress') tokenAddress: string,
   ) {
     try {
-      let takeNumber = parseInt(take, 10);
-      let skipNumber = parseInt(skip, 10);
+      let takeNumber = parseInt(take);
+      let skipNumber = parseInt(skip);
 
       if (!skipNumber) {
         skipNumber = 0;
@@ -240,7 +240,8 @@ export class SolveScoreController {
 
       const filter = tokenAddress ? { tokenAddress } : {};
       if (filter.tokenAddress) {
-        takeNumber = 0;
+        takeNumber = 1;
+        skipNumber = 0;
       }
 
       const scores = await this.prisma.score.findMany({
