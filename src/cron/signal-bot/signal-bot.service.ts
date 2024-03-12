@@ -211,7 +211,7 @@ It is the score from 1 to 100 that shows the current growth potential.`,
           ],
           [
             {
-              text: '💬 Spanush Chat',
+              text: '💬 Spanish Chat',
               url: 'https://t.me/TokenWatch_ai_chat_ES',
             },
           ],
