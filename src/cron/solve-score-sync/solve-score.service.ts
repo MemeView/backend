@@ -605,12 +605,21 @@ export class SolveScoreService {
         (item) => item.address === result.tokenAddress,
       );
 
+      if (token.address === '0x672d7b3333d0f069a28b73a268bc6eaec65f2e1a') {
+        console.log('---------------------------');
+        console.log('txnCount24', token.txnCount24);
+      }
+
       result.liquidity = token?.liquidity ?? '0';
 
       if (token && token.txnCount24 < 10) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
+        console.log(result.tokenScore);
         result.tokenScore -= 50;
+        console.log(result.tokenScore);
       }
+
+      console.log('---------------------------');
 
       if (token && parseFloat(token.liquidity!) < 5000) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
@@ -749,6 +758,8 @@ export class SolveScoreService {
   }
 
   async updateDailyScores() {
+    const utcDate = new UTCDate();
+    const startOfToday = startOfDay(utcDate);
     const allScores = await this.prisma.scoreByHours.findMany();
 
     const averages = allScores
@@ -801,6 +812,7 @@ export class SolveScoreService {
               averageScoreToday: averageScore,
               averageScore24Ago: null,
               averageScore48Ago: null,
+              updatedAt: utcDate,
             },
           });
         } else {
@@ -810,6 +822,7 @@ export class SolveScoreService {
               averageScore48Ago: currentScores.averageScore24Ago, // предыдущее значение для 24Ago стало 48Ago
               averageScore24Ago: currentScores.averageScoreToday, // предыдущее значение для Today стало 24Ago
               averageScoreToday: averageScore, // новое значение
+              updatedAt: utcDate,
             },
           });
         }
@@ -824,6 +837,14 @@ export class SolveScoreService {
       const results = await updateChunk(chunk);
       chunkResults.push(results);
     }
+
+    await this.prisma.dailyScore.deleteMany({
+      where: {
+        updatedAt: {
+          lt: startOfToday,
+        },
+      },
+    });
 
     return 'ok';
   }

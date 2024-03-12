@@ -271,11 +271,15 @@ export class AuthController {
 
       const { walletAddress, telegramId } = decodedAccessToken;
 
-      const userInWhiteList = await this.prisma.tgWhiteList.findUnique({
-        where: {
-          telegramId: telegramId,
-        },
-      });
+      let userInWhiteList = null;
+
+      if (telegramId !== null) {
+        userInWhiteList = await this.prisma.tgWhiteList.findUnique({
+          where: {
+            telegramId: telegramId,
+          },
+        });
+      }
 
       if (userInWhiteList) {
         return response.status(200).json({

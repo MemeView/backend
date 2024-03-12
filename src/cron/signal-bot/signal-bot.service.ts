@@ -303,7 +303,7 @@ It is the score from 1 to 100 that shows the current growth potential.`,
 
       const utcDate = new UTCDate();
       const sevenDaysAgo = subDays(utcDate, 7);
-      const pstDate = subHours(utcDate, 8);
+      const pstDate = subHours(utcDate, 7);
       const currentPstHour = pstDate.getUTCHours();
 
       let allSubscriptions = null;

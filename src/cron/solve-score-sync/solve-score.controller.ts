@@ -11,7 +11,14 @@ import {
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
-import { getDate, getMonth, getYear, subDays, subHours } from 'date-fns';
+import {
+  getDate,
+  getMonth,
+  getYear,
+  startOfDay,
+  subDays,
+  subHours,
+} from 'date-fns';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
@@ -302,7 +309,7 @@ export class SolveScoreController {
     try {
       let scoreQuery = ``;
       const utcDate = new UTCDate();
-      const pstDate = subHours(utcDate, 8);
+      const pstDate = subHours(utcDate, 7);
       const currentPstHour = pstDate.getUTCHours();
       const sevenDaysAgo = subDays(utcDate, 7);
 

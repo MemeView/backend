@@ -83,6 +83,7 @@ model DailyScore {
   averageScoreToday Float?
   averageScore24Ago Float?
   averageScore48Ago Float?
+  updatedAt         DateTime @default(now())
 }
 
 model Users {

@@ -202,7 +202,7 @@ export class PostingService {
           network = 'bsc';
         }
 
-        if (messagesCount < 2 && token.averageScoreToday >= 20) {
+        if (messagesCount < 2 && token.averageScoreToday >= 55) {
           // Создаем сообщение для отправки
           const growth = parseFloat(token.change24) * 100;
           const message =

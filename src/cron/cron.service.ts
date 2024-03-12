@@ -62,7 +62,7 @@ export class CronService {
   @Cron('0 * * * *', { disabled: process.env.NODE_ENV === 'development' }) // начало каждого часа
   async tokensCron() {
     const utcDate = new UTCDate();
-    const pstDate = subHours(utcDate, 8);
+    const pstDate = subHours(utcDate, 7);
     const currentHour = utcDate.getUTCHours();
     const currentPstHour = pstDate.getUTCHours();
 
