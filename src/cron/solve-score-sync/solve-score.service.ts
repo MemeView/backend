@@ -605,21 +605,12 @@ export class SolveScoreService {
         (item) => item.address === result.tokenAddress,
       );
 
-      if (token.address === '0x672d7b3333d0f069a28b73a268bc6eaec65f2e1a') {
-        console.log('---------------------------');
-        console.log('txnCount24', token.txnCount24);
-      }
-
       result.liquidity = token?.liquidity ?? '0';
 
       if (token && token.txnCount24 < 10) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
-        console.log(result.tokenScore);
         result.tokenScore -= 50;
-        console.log(result.tokenScore);
       }
-
-      console.log('---------------------------');
 
       if (token && parseFloat(token.liquidity!) < 5000) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
