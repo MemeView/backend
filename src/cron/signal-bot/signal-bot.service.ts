@@ -50,6 +50,7 @@ export class SignalBotService {
         [
           {
             text: '🚀 Top-30 ToTheMoonScore',
+            // url: 'https://tokenwatch.ai',
             web_app: {
               url: webAppUrl.href,
             },
@@ -108,7 +109,10 @@ If you find any accidential errors and can't proceed please write to support@tok
 
       telegramBot.sendMessage(chatId, welcomeMessage, options);
 
-      setTimeout(() => telegramBot.sendMessage(chatId, betaMessage, options), 1000);
+      setTimeout(
+        () => telegramBot.sendMessage(chatId, betaMessage, options),
+        1000,
+      );
     });
 
     telegramBot.onText(/ℹ️ About/, (msg) => {
@@ -124,29 +128,6 @@ If you find any accidential errors and can't proceed please write to support@tok
           },
         ],
         [{ text: '❓ Support', callback_data: 'button6' }],
-      ];
-      telegramBot.sendMessage(
-        chatId,
-        `*About TokenWatch*
-
-TokenWatch.ai bot is your own AI oracle that provides you with best predictions on token’s potential growth right in your Telegram app!
-
-With TokenWatch.ai you can:
-• Get access to the most advanced AI that analyses all tokens on the market together with social media activities for you
-• Receive up to 4 times a day Top-30 predictions to help you with your investment decisions
-• Earn $TOKENWATCH tokens for inviting friends
-
-We make investments smarter 🧠
-and more successful to everyone! 💰`,
-        {
-          parse_mode: 'Markdown',
-          reply_markup: {
-            inline_keyboard: firstMessageButtons,
-          },
-        },
-      );
-
-      const buttons = [
         [
           {
             text: 'Buy $TOKENWATCH on DEX',
@@ -163,15 +144,35 @@ and more successful to everyone! 💰`,
 
       telegramBot.sendMessage(
         chatId,
-        `*About ToTheMoonScore*
+        `*About TokenWatch*
 
-ToTheMoonScore™ (TTMS) is the summarised result of deep Artificial Intelligence analyses of every token.
+TokenWatch.ai bot is your own AI oracle that provides you with best predictions on token’s potential growth right in your Telegram app!
 
-It is the score from 1 to 100 that shows the current growth potential.`,
+With TokenWatch.ai you can:
+• Get access to the most advanced AI that analyses all tokens on the market together with social media activities for you
+• Receive up to 4 times a day Top-30 predictions to help you with your investment decisions
+• Earn $TOKENWATCH tokens for inviting friends
+
+We make investments smarter 🧠
+and more successful to everyone! 💰`,
+        {
+          parse_mode: 'Markdown',
+        },
+      );
+
+      telegramBot.sendMessage(
+        chatId,
+        `*ToTheMoonScore*
+
+ToTheMoonScore™ is the summarised result of deep Artificial Intelligence analyses of every token.
+        
+It is the score from 1 to 100 that shows the current growth potential.
+        
+Start getting your first Top-30 tokens predictions now by clicking  on “🚀 *Top-30 ToTheMoonScore*“.`,
         {
           parse_mode: 'Markdown',
           reply_markup: {
-            inline_keyboard: buttons,
+            inline_keyboard: firstMessageButtons,
           },
         },
       );
@@ -339,11 +340,11 @@ It is the score from 1 to 100 that shows the current growth potential.`,
 
       const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
 
-      const message = `🌟 ToTheMoonScore Top-30 Portfolio Update! 🌟
-
-The Top-30 list of tokens has just been updated and available in the Bot.
+      const message = `Hello!
       
-Check it by clicking the button below 👇`;
+ToTheMoonScore has been updated with fresh Top-30 ToTheMoonScore predictions for you!
+      
+Press “🚀 *Top-30 ToTheMoonScore*“ button to get it.`;
 
       const photoPath =
         'https://twa.tokenwatch.ai/tokenwatch_signalbot_autopost.png';
@@ -364,6 +365,7 @@ Check it by clicking the button below 👇`;
         ) {
           await telegramBot.sendPhoto(chatId, photoPath, {
             caption: message,
+            parse_mode: 'Markdown',
             reply_markup: {
               inline_keyboard: [
                 [
