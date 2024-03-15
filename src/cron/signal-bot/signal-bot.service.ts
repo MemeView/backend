@@ -26,7 +26,7 @@ export class SignalBotService {
 
     telegramBot.onText(/\/start/, async (msg) => {
       const chatId = msg.chat.id;
-      const userId = msg.from.id;
+
       const refId = msg.text.split(' ')[1]?.split('-')[1];
 
       const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
@@ -35,12 +35,19 @@ export class SignalBotService {
         `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
       );
 
-      webAppUrl.searchParams.append('telegramId', userId.toString());
-      refAppUrl.searchParams.append('telegramId', userId.toString());
+      const airdrop1Url = new URL(
+        `${process.env.SIGNAL_BOT_WEBAPP_URL}/airdrop/airdrop1`,
+      );
+
+      const airdrop2Url = new URL(
+        `${process.env.SIGNAL_BOT_WEBAPP_URL}/airdrop/airdrop2`,
+      );
 
       if (refId) {
         webAppUrl.searchParams.append('ref', refId);
         refAppUrl.searchParams.append('ref', refId);
+        airdrop1Url.searchParams.append('ref', refId);
+        airdrop2Url.searchParams.append('ref', refId);
       }
 
       console.log('webAppUrl', webAppUrl.href);
@@ -183,9 +190,21 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 *
 
     telegramBot.onText(/🚀 Top-30 ToTheMoonScore/, (msg) => {
       const chatId = msg.chat.id;
-      const top30Button = [
-        [{ text: 'Get Your Top-30', url: 'https://tokenwatch.ai' }],
-      ];
+
+      const refId = msg.text.split(' ')[1]?.split('-')[1];
+
+      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+
+      const refAppUrl = new URL(
+        `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
+      );
+
+      if (refId) {
+        webAppUrl.searchParams.append('ref', refId);
+        refAppUrl.searchParams.append('ref', refId);
+      }
+
+      const top30Button = [[{ text: 'Get Your Top-30', url: webAppUrl.href }]];
 
       const top30ReplyMarkup = {
         inline_keyboard: top30Button,
@@ -205,9 +224,19 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 *
 
     telegramBot.onText(/💰 Referral/, (msg) => {
       const chatId = msg.chat.id;
+      const refId = msg.text.split(' ')[1]?.split('-')[1];
+
+      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+
       const refAppUrl = new URL(
         `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
       );
+
+      if (refId) {
+        webAppUrl.searchParams.append('ref', refId);
+        refAppUrl.searchParams.append('ref', refId);
+      }
+
       const referralButton = [
         [{ text: 'Go to Referral Page', url: refAppUrl.href }],
       ];
@@ -236,31 +265,126 @@ Benefit from it!!`,
       );
     });
 
-    telegramBot.onText(/💎 AirDrops/, (msg) => {
+    telegramBot.onText(/💎 AirDrops/, async (msg) => {
       const chatId = msg.chat.id;
-      const airdropsButton = [
+
+      const refId = msg.text.split(' ')[1]?.split('-')[1];
+
+      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+
+      const refAppUrl = new URL(
+        `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
+      );
+
+      const airdrop1Url = new URL(
+        `${process.env.SIGNAL_BOT_WEBAPP_URL}/airdrop/airdrop1`,
+      );
+
+      const airdrop2Url = new URL(
+        `${process.env.SIGNAL_BOT_WEBAPP_URL}/airdrop/airdrop2`,
+      );
+
+      if (refId) {
+        webAppUrl.searchParams.append('ref', refId);
+        refAppUrl.searchParams.append('ref', refId);
+        airdrop1Url.searchParams.append('ref', refId);
+        airdrop2Url.searchParams.append('ref', refId);
+      }
+
+      const airdrop1Button = [
         [
           {
-            text: 'Participate in Airdrops',
-            url: 'https://twa.tokenwatch.ai/airdrops',
+            text: 'Learn more >>',
+            url: airdrop1Url.href,
           },
         ],
       ];
 
-      const airdropsReplyMarkup = {
-        inline_keyboard: airdropsButton,
+      const airdrop2Button = [
+        [
+          {
+            text: 'Learn more >>',
+            url: airdrop2Url.href,
+          },
+        ],
+      ];
+
+      const airdrop1ReplyMarkup = {
+        inline_keyboard: airdrop1Button,
       };
 
-      const airdropsOptions = {
-        reply_markup: airdropsReplyMarkup,
+      const airdrop2ReplyMarkup = {
+        inline_keyboard: airdrop2Button,
+      };
+
+      const airdrop1Options = {
+        reply_markup: airdrop1ReplyMarkup,
         disable_notification: true,
       };
 
-      telegramBot.sendMessage(
+      const airdrop2Options = {
+        reply_markup: airdrop2ReplyMarkup,
+        disable_notification: true,
+      };
+
+      await telegramBot.sendMessage(
         chatId,
-        'To get ToTheMoonScore Top-30 tokens predicted by TokenWatch AI click the button below 👇👇👇',
-        airdropsOptions,
+        `AirDrops
+
+We reward you with $TOKENWATCH tokens by results of the following Airdrop campaigns:`,
+        // airdropsOptions,
       );
+
+      const airdrop1PhotoPath = 'https://twa.tokenwatch.ai/air-drop-pic-1.jpg';
+      const airdrop2PhotoPath = 'https://twa.tokenwatch.ai/air-drop-pic-2.jpg';
+
+      const airdrop1Message = `*[AirDrop 1] Get $5* by starting free Signal Bot TRIAL*
+
+Reward pool of $10,000* will be distributed among first 2,000 users who will start free TokenWatch Signal Bot TRIAL.
+
+The campaign is First Come First Serve.
+
+\\* in $TOKENWATCH tokens on market price at distribution moment`;
+
+      const airdrop2Message = `*[AirDrop 2] Get $100* by using PLAN 1 for 30 days*
+
+Reward pool of $10,000* will be distributed among first 100 users. Users need to use TokenWatch Signal Bot PLAN 1 for at least 30 days to be eligible.
+
+Kindly monitor your $TOKENWATCH tokens balance (to maintain PLAN 1 for 30 days) to ensure access is not interrupted due to market price fluctuations. Maintain PLAN 1 for 30 days by keeping more than 2,000 USDT worth of $TOKENWATCH tokens at any moment.
+
+The campaign is First Come First Serve.
+
+\\* in $TOKENWATCH tokens on market price at distribution moment`;
+
+      await telegramBot.sendPhoto(chatId, airdrop1PhotoPath, {
+        caption: airdrop1Message,
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'Learn more >>',
+                url: airdrop1Url.href,
+              },
+            ],
+          ],
+        },
+      });
+
+      await telegramBot.sendPhoto(chatId, airdrop2PhotoPath, {
+        caption: airdrop2Message,
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'Learn more >>',
+                url: airdrop2Url.href,
+              },
+            ],
+          ],
+        },
+      });
     });
 
     telegramBot.on('callback_query', (query) => {
