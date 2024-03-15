@@ -50,24 +50,27 @@ export class SignalBotService {
         [
           {
             text: '🚀 Top-30 ToTheMoonScore',
+            callback_data: 'top30',
             // url: 'https://tokenwatch.ai',
-            web_app: {
-              url: webAppUrl.href,
-            },
+            // web_app: {
+            //   url: webAppUrl.href,
+            // },
           },
         ],
         [
           {
             text: '💰 Referral',
-            web_app: {
-              url: refAppUrl.href,
-            },
+            callback_data: 'referral',
+            // web_app: {
+            //   url: refAppUrl.href,
+            // },
           },
           {
             text: '💎 AirDrops',
-            web_app: {
-              url: 'https://twa.tokenwatch.ai/airdrops',
-            },
+            callback_data: 'airdrops',
+            // web_app: {
+            //   url: 'https://twa.tokenwatch.ai/airdrops',
+            // },
           },
           { text: 'ℹ️ About', callback_data: 'about' },
         ],
@@ -175,6 +178,88 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 *
             inline_keyboard: firstMessageButtons,
           },
         },
+      );
+    });
+
+    telegramBot.onText(/🚀 Top-30 ToTheMoonScore/, (msg) => {
+      const chatId = msg.chat.id;
+      const top30Button = [
+        [{ text: 'Get Your Top-30', url: 'https://tokenwatch.ai' }],
+      ];
+
+      const top30ReplyMarkup = {
+        inline_keyboard: top30Button,
+      };
+
+      const top30Options = {
+        reply_markup: top30ReplyMarkup,
+        disable_notification: true,
+      };
+
+      telegramBot.sendMessage(
+        chatId,
+        'To get ToTheMoonScore Top-30 tokens predicted by TokenWatch AI click the button below 👇👇👇',
+        top30Options,
+      );
+    });
+
+    telegramBot.onText(/💰 Referral/, (msg) => {
+      const chatId = msg.chat.id;
+      const refAppUrl = new URL(
+        `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
+      );
+      const referralButton = [
+        [{ text: 'Go to Referral Page', url: refAppUrl.href }],
+      ];
+
+      const referralReplyMarkup = {
+        inline_keyboard: referralButton,
+      };
+
+      const referralOptions = {
+        reply_markup: referralReplyMarkup,
+        disable_notification: true,
+      };
+
+      telegramBot.sendMessage(
+        chatId,
+        `*Referral Program*
+
+Are you an influencer? Have a lot of friends? Do you own a community?
+
+Benefit from it!!`,
+        {
+          parse_mode: 'Markdown',
+          reply_markup: referralReplyMarkup,
+          disable_notification: true,
+        },
+      );
+    });
+
+    telegramBot.onText(/💎 AirDrops/, (msg) => {
+      const chatId = msg.chat.id;
+      const airdropsButton = [
+        [
+          {
+            text: 'Participate in Airdrops',
+            url: 'https://twa.tokenwatch.ai/airdrops',
+          },
+        ],
+      ];
+
+      const airdropsReplyMarkup = {
+        inline_keyboard: airdropsButton,
+      };
+
+      const airdropsOptions = {
+        reply_markup: airdropsReplyMarkup,
+        disable_notification: true,
+      };
+
+      telegramBot.sendMessage(
+        chatId,
+        'To get ToTheMoonScore Top-30 tokens predicted by TokenWatch AI click the button below 👇👇👇',
+        airdropsOptions,
       );
     });
 
