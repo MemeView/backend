@@ -23,61 +23,32 @@ export class SignalBotService {
     const telegramBot = SignalBotService.bot;
     this.authorizedUsers = new Set();
     let userId = 0;
+    let startRefId = undefined;
 
     telegramBot.onText(/\/start/, async (msg) => {
+      console.log('start')
+
       const chatId = msg.chat.id;
 
-      const refId = msg.text.split(' ')[1]?.split('-')[1];
+      startRefId = msg.text.split(' ')[1]?.split('-')[1];
 
-      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
-
-      const refAppUrl = new URL(
-        `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
-      );
-
-      const airdrop1Url = new URL(
-        `${process.env.SIGNAL_BOT_WEBAPP_URL}/airdrop/airdrop1`,
-      );
-
-      const airdrop2Url = new URL(
-        `${process.env.SIGNAL_BOT_WEBAPP_URL}/airdrop/airdrop2`,
-      );
-
-      if (refId) {
-        webAppUrl.searchParams.append('ref', refId);
-        refAppUrl.searchParams.append('ref', refId);
-        airdrop1Url.searchParams.append('ref', refId);
-        airdrop2Url.searchParams.append('ref', refId);
-      }
-
-      console.log('webAppUrl', webAppUrl.href);
-      console.log('refAppUrl', refAppUrl.href);
+      console.log('startRefId', startRefId);
 
       const buttons = [
         [
           {
             text: '🚀 Top-30 ToTheMoonScore',
             callback_data: 'top30',
-            // url: 'https://tokenwatch.ai',
-            // web_app: {
-            //   url: webAppUrl.href,
-            // },
           },
         ],
         [
           {
             text: '💰 Referral',
             callback_data: 'referral',
-            // web_app: {
-            //   url: refAppUrl.href,
-            // },
           },
           {
             text: '💎 AirDrops',
             callback_data: 'airdrops',
-            // web_app: {
-            //   url: 'https://twa.tokenwatch.ai/airdrops',
-            // },
           },
           { text: 'ℹ️ About', callback_data: 'about' },
         ],
@@ -197,20 +168,13 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 *
     telegramBot.onText(/🚀 Top-30 ToTheMoonScore/, (msg) => {
       const chatId = msg.chat.id;
 
-      const refId = msg.text.split(' ')[1]?.split('-')[1];
+      const mainPageUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
 
-      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
-
-      const refAppUrl = new URL(
-        `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
-      );
-
-      if (refId) {
-        webAppUrl.searchParams.append('ref', refId);
-        refAppUrl.searchParams.append('ref', refId);
+      if (startRefId) {
+        mainPageUrl.searchParams.append('ref', startRefId);
       }
 
-      const top30Button = [[{ text: 'Get Your Top-30', url: webAppUrl.href }]];
+      const top30Button = [[{ text: 'Get Your Top-30', url: mainPageUrl.href }]];
 
       const top30ReplyMarkup = {
         inline_keyboard: top30Button,
@@ -230,21 +194,17 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 *
 
     telegramBot.onText(/💰 Referral/, (msg) => {
       const chatId = msg.chat.id;
-      const refId = msg.text.split(' ')[1]?.split('-')[1];
 
-      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+      const mainPageUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
 
-      const refAppUrl = new URL(
-        `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
-      );
+      const referralPageUrl = new URL(`/referral-program`, mainPageUrl);
 
-      if (refId) {
-        webAppUrl.searchParams.append('ref', refId);
-        refAppUrl.searchParams.append('ref', refId);
+      if (startRefId) {
+        referralPageUrl.searchParams.append('ref', startRefId);
       }
 
       const referralButton = [
-        [{ text: 'Go to Referral Page', url: refAppUrl.href }],
+        [{ text: 'Go to Referral Page', url: referralPageUrl.href }],
       ];
 
       const referralReplyMarkup = {
@@ -274,27 +234,15 @@ Benefit from it!!`,
     telegramBot.onText(/💎 AirDrops/, async (msg) => {
       const chatId = msg.chat.id;
 
-      const refId = msg.text.split(' ')[1]?.split('-')[1];
+      const mainPageUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
 
-      const webAppUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+      const airdrop1Url = new URL(`/airdrop/airdrop1`, mainPageUrl);
 
-      const refAppUrl = new URL(
-        `${process.env.SIGNAL_BOT_WEBAPP_URL}/referral-program`,
-      );
+      const airdrop2Url = new URL(`/airdrop/airdrop2`, mainPageUrl);
 
-      const airdrop1Url = new URL(
-        `${process.env.SIGNAL_BOT_WEBAPP_URL}/airdrop/airdrop1`,
-      );
-
-      const airdrop2Url = new URL(
-        `${process.env.SIGNAL_BOT_WEBAPP_URL}/airdrop/airdrop2`,
-      );
-
-      if (refId) {
-        webAppUrl.searchParams.append('ref', refId);
-        refAppUrl.searchParams.append('ref', refId);
-        airdrop1Url.searchParams.append('ref', refId);
-        airdrop2Url.searchParams.append('ref', refId);
+      if (startRefId) {
+        airdrop1Url.searchParams.append('ref', startRefId);
+        airdrop2Url.searchParams.append('ref', startRefId);
       }
 
       const airdrop1Button = [
