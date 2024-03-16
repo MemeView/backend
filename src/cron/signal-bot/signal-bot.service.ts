@@ -138,6 +138,9 @@ If you find any accidential errors and can't proceed please write to support@tok
           },
         ],
         [{ text: '❓ Support', callback_data: 'button6' }],
+      ];
+
+      const secondMessageButtons = [
         [
           {
             text: 'Buy $TOKENWATCH on DEX',
@@ -167,6 +170,9 @@ We make investments smarter 🧠
 and more successful to everyone! 💰`,
         {
           parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: firstMessageButtons,
+          },
         },
       );
 
@@ -182,7 +188,7 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 *
         {
           parse_mode: 'Markdown',
           reply_markup: {
-            inline_keyboard: firstMessageButtons,
+            inline_keyboard: secondMessageButtons,
           },
         },
       );
