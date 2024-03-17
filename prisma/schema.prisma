@@ -212,3 +212,16 @@ model TokenWatch {
   symbol                String?
   token                 Json?
 }
+
+model SignalBotUsers {
+  id          Int       @id @default(autoincrement())
+  telegramId  String    @unique
+  userName    String?
+  createdAt   DateTime  @default(now())
+  status      Status    @default(active)
+}
+
+enum Status {
+  active
+  inactive
+}

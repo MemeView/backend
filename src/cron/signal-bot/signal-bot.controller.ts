@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   Res,
@@ -14,6 +15,12 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import * as jwt from 'jsonwebtoken';
 import { UTCDate } from '@date-fns/utc';
 import { subHours } from 'date-fns';
+
+enum SignalBotStatusEnum {
+  active = 'active',
+  inactive = 'inactive',
+  notRunning = 'not-running',
+}
 
 @Controller('/api')
 export class SignalBotController {
@@ -82,6 +89,35 @@ export class SignalBotController {
       }
     } catch (e) {
       return e;
+    }
+  }
+
+  @Post('/check-signal-bot/:telegramId')
+  async checkSignalBot(
+    @Req() request: Request,
+    @Res() response: Response,
+    @Param('telegramId') telegramId: string,
+  ) {
+    try {
+      const user = await this.prisma.signalBotUsers.findUnique({
+        where: {
+          telegramId,
+        },
+      });
+
+      let status: SignalBotStatusEnum = SignalBotStatusEnum.notRunning;
+
+      if (user) {
+        status = SignalBotStatusEnum.active;
+      }
+
+      return response.status(200).json({
+        status,
+      });
+    } catch (e) {
+      return response.status(400).json({
+        error: e.message,
+      });
     }
   }
 

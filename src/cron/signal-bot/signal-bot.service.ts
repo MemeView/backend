@@ -26,13 +26,29 @@ export class SignalBotService {
     let startRefId = undefined;
 
     telegramBot.onText(/\/start/, async (msg) => {
-      console.log('start')
+      console.log('start');
 
       const chatId = msg.chat.id;
+
+      const userId = msg.from.id;
+
+      const user = await telegramBot.getChat(userId);
+
+      const userName = user.username;
 
       startRefId = msg.text.split(' ')[1]?.split('-')[1];
 
       console.log('startRefId', startRefId);
+
+      await this.prisma.signalBotUsers.upsert({
+        where: { telegramId: JSON.stringify(chatId) },
+        create: {
+          telegramId: JSON.stringify(chatId),
+        },
+        update: {
+          userName,
+        },
+      });
 
       const buttons = [
         [
@@ -94,6 +110,10 @@ If you find any accidential errors and can't proceed please write to support@tok
         () => telegramBot.sendMessage(chatId, betaMessage, options),
         1000,
       );
+    });
+
+    telegramBot.onText(/\/block/, async (msg) => {
+      console.log('blocked');
     });
 
     telegramBot.onText(/ℹ️ About/, (msg) => {
@@ -174,7 +194,9 @@ Start getting your first Top-30 tokens predictions now by clicking  on “🚀 *
         mainPageUrl.searchParams.append('ref', startRefId);
       }
 
-      const top30Button = [[{ text: 'Get Your Top-30', url: mainPageUrl.href }]];
+      const top30Button = [
+        [{ text: 'Get Your Top-30', url: mainPageUrl.href }],
+      ];
 
       const top30ReplyMarkup = {
         inline_keyboard: top30Button,
