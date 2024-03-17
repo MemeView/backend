@@ -92,7 +92,7 @@ export class SignalBotController {
     }
   }
 
-  @Post('/check-signal-bot/:telegramId')
+  @Get('/check-signal-bot/:telegramId')
   async checkSignalBot(
     @Req() request: Request,
     @Res() response: Response,
