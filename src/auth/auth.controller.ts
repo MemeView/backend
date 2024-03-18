@@ -444,14 +444,16 @@ export class AuthController {
 
       const decodedAccessToken = jwt.decode(accessToken) as {
         walletAddress: string;
+        telegramId: string;
         iat: number;
         exp: number;
       };
 
-      const { walletAddress } = decodedAccessToken;
+      const { walletAddress, telegramId } = decodedAccessToken;
 
       const result = await this.authService.calculateSubscriptionLevel(
         walletAddress,
+        telegramId,
         plan,
       );
 
