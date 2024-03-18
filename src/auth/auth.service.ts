@@ -410,6 +410,7 @@ export class AuthService {
 
   async calculateSubscriptionLevel(
     walletAddress: string,
+    telegramId: string,
     plan: string,
   ): Promise<any> {
     const balance = await this.getTokenBalance(walletAddress);
@@ -467,27 +468,35 @@ export class AuthService {
 
     const holdingTWAmountUSDT = balance * parseFloat(currentTWPrice.priceUSD);
 
-    if (plan === 'trial' && user.freeTrialWasTaken === true) {
-      return new HttpException('you have already taken a trial period', 400);
-    }
-
-    if (plan === 'trial' && user.freeTrialWasTaken === false) {
-      const utcDate = new UTCDate();
-
-      const result = await this.prisma.users.update({
+    if (plan === 'trial') {
+      const trialByTelegram = await this.prisma.users.findFirst({
         where: {
-          walletAddress: walletAddress,
-        },
-        data: {
-          holdingTWAmount: JSON.stringify(balance),
-          holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
-          subscriptionLevel: subscription.title,
-          trialCreatedAt: utcDate,
-          freeTrialWasTaken: true,
+          AND: [{ telegramId }, { freeTrialWasTaken: true }],
         },
       });
 
-      return result;
+      if (trialByTelegram || user.freeTrialWasTaken === true) {
+        return new HttpException('you have already taken a trial period', 400);
+      }
+
+      if (user.freeTrialWasTaken === false) {
+        const utcDate = new UTCDate();
+
+        const result = await this.prisma.users.update({
+          where: {
+            walletAddress: walletAddress,
+          },
+          data: {
+            holdingTWAmount: JSON.stringify(balance),
+            holdingTWAmountUSDT: JSON.stringify(holdingTWAmountUSDT),
+            subscriptionLevel: subscription.title,
+            trialCreatedAt: utcDate,
+            freeTrialWasTaken: true,
+          },
+        });
+
+        return result;
+      }
     }
 
     if (holdingTWAmountUSDT >= subscription.holdingTWAmount) {
