@@ -305,26 +305,31 @@ Benefit from it!!`,
 
       await telegramBot.sendMessage(
         chatId,
-        `AirDrops
+        `*AirDrops*
 
 We reward you with $TOKENWATCH tokens by results of the following Airdrop campaigns:`,
+        {
+          parse_mode: 'Markdown',
+        },
         // airdropsOptions,
       );
 
-      const airdrop1PhotoPath = 'https://twa.tokenwatch.ai/air-drop-pic-1.jpg';
-      const airdrop2PhotoPath = 'https://twa.tokenwatch.ai/air-drop-pic-2.jpg';
+      const airdrop1PhotoPath =
+        'https://twa.tokenwatch.ai/airdrop1_mainpic.png';
+      const airdrop2PhotoPath =
+        'https://twa.tokenwatch.ai/airdrop2_mainpic.png';
 
-      const airdrop1Message = `*[AirDrop 1] Get $5* by starting free Signal Bot TRIAL*
+      const airdrop1Message = `*[AirDrop 1] Get $5 by starting free Signal Bot TRIAL*
 
-Reward pool of $10,000* will be distributed among first 2,000 users who will start free TokenWatch Signal Bot TRIAL.
+Reward pool of $500\\* will be distributed among first 100 users who will start free TokenWatch Signal Bot TRIAL.
 
-The campaign is First Come First Serve.
+The campaign is First Come First Served.
 
 \\* in $TOKENWATCH tokens on market price at distribution moment`;
 
-      const airdrop2Message = `*[AirDrop 2] Get $100* by using PLAN 1 for 30 days*
+      const airdrop2Message = `*[AirDrop 2] Get $100 by using PLAN 1 for 30 days*
 
-Reward pool of $10,000* will be distributed among first 100 users. Users need to use TokenWatch Signal Bot PLAN 1 for at least 30 days to be eligible.
+Reward pool of $10,000\\* will be distributed among first 100 users. Users need to use TokenWatch Signal Bot PLAN 1 for at least 30 days to be eligible.
 
 Kindly monitor your $TOKENWATCH tokens balance (to maintain PLAN 1 for 30 days) to ensure access is not interrupted due to market price fluctuations. Maintain PLAN 1 for 30 days by keeping more than 2,000 USDT worth of $TOKENWATCH tokens at any moment.
 
