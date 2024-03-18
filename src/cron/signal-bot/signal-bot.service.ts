@@ -315,7 +315,7 @@ We reward you with $TOKENWATCH tokens by results of the following Airdrop campai
       );
 
       const airdrop1PhotoPath =
-        'https://twa.tokenwatch.ai/airdrop1_mainpic.png';
+        'https://twa.tokenwatch.ai/airdrop1_mainpic.png?2';
       const airdrop2PhotoPath =
         'https://twa.tokenwatch.ai/airdrop2_mainpic.png';
 
