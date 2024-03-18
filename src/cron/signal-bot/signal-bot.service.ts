@@ -258,9 +258,9 @@ Benefit from it!!`,
 
       const mainPageUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
 
-      const airdrop1Url = new URL(`/airdrop/airdrop1`, mainPageUrl);
+      const airdrop1Url = new URL(`/airdrops`, mainPageUrl);
 
-      const airdrop2Url = new URL(`/airdrop/airdrop2`, mainPageUrl);
+      const airdrop2Url = new URL(`/airdrops`, mainPageUrl);
 
       if (startRefId) {
         airdrop1Url.searchParams.append('ref', startRefId);
