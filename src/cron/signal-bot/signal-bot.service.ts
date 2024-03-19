@@ -249,46 +249,12 @@ Benefit from it!!`,
 
       const airdrop2Url = new URL(`/airdrops`, mainPageUrl);
 
+      const airdrop3Url = 'https://galxe.com/e7xLTbzyjmhxXjjTEJkcxu?statuses=Active%7CNotStarted%7CExpired';
+
       if (startRefId) {
         airdrop1Url.searchParams.append('ref', startRefId);
         airdrop2Url.searchParams.append('ref', startRefId);
       }
-
-      const airdrop1Button = [
-        [
-          {
-            text: 'Learn more >>',
-            url: airdrop1Url.href,
-          },
-        ],
-      ];
-
-      const airdrop2Button = [
-        [
-          {
-            text: 'Learn more >>',
-            url: airdrop2Url.href,
-          },
-        ],
-      ];
-
-      const airdrop1ReplyMarkup = {
-        inline_keyboard: airdrop1Button,
-      };
-
-      const airdrop2ReplyMarkup = {
-        inline_keyboard: airdrop2Button,
-      };
-
-      const airdrop1Options = {
-        reply_markup: airdrop1ReplyMarkup,
-        disable_notification: true,
-      };
-
-      const airdrop2Options = {
-        reply_markup: airdrop2ReplyMarkup,
-        disable_notification: true,
-      };
 
       await telegramBot.sendMessage(
         chatId,
@@ -298,13 +264,16 @@ We reward you with $TOKENWATCH tokens by results of the following Airdrop campai
         {
           parse_mode: 'Markdown',
         },
-        // airdropsOptions,
       );
 
       const airdrop1PhotoPath =
         'https://twa.tokenwatch.ai/airdrop1_mainpic.png?2';
+
       const airdrop2PhotoPath =
         'https://twa.tokenwatch.ai/airdrop2_mainpic.png';
+
+      const airdrop3PhotoPath =
+        'https://twa.tokenwatch.ai/airdrops_galxe.png';
 
       const airdrop1Message = `*[AirDrop 1] Get $5 by starting free Signal Bot TRIAL*
 
@@ -323,6 +292,8 @@ Kindly monitor your $TOKENWATCH tokens balance (to maintain PLAN 1 for 30 days) 
 The campaign is First Come First Serve.
 
 \\* in $TOKENWATCH tokens on market price at distribution moment`;
+
+      const airdrop3Message = `*More AirDrops*`;
 
       await telegramBot.sendPhoto(chatId, airdrop1PhotoPath, {
         caption: airdrop1Message,
@@ -348,6 +319,21 @@ The campaign is First Come First Serve.
               {
                 text: 'Learn more >>',
                 url: airdrop2Url.href,
+              },
+            ],
+          ],
+        },
+      });
+
+      await telegramBot.sendPhoto(chatId, airdrop3PhotoPath, {
+        caption: airdrop3Message,
+        parse_mode: 'Markdown',
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                text: 'Learn more >>',
+                url: airdrop3Url,
               },
             ],
           ],
