@@ -249,7 +249,8 @@ Benefit from it!!`,
 
       const airdrop2Url = new URL(`/airdrops`, mainPageUrl);
 
-      const airdrop3Url = 'https://galxe.com/e7xLTbzyjmhxXjjTEJkcxu?statuses=Active%7CNotStarted%7CExpired';
+      const airdrop3Url =
+        'https://galxe.com/e7xLTbzyjmhxXjjTEJkcxu?statuses=Active%7CNotStarted%7CExpired';
 
       if (startRefId) {
         airdrop1Url.searchParams.append('ref', startRefId);
@@ -272,8 +273,7 @@ We reward you with $TOKENWATCH tokens by results of the following Airdrop campai
       const airdrop2PhotoPath =
         'https://twa.tokenwatch.ai/airdrop2_mainpic.png';
 
-      const airdrop3PhotoPath =
-        'https://twa.tokenwatch.ai/airdrops_galxe.png';
+      const airdrop3PhotoPath = 'https://twa.tokenwatch.ai/airdrops_galxe.png';
 
       const airdrop1Message = `*[AirDrop 1] Get $5 by starting free Signal Bot TRIAL*
 
@@ -475,6 +475,8 @@ The campaign is First Come First Serve.
       }
       const telegramBot = SignalBotService.bot;
 
+      const mainPageUrl = new URL(process.env.SIGNAL_BOT_WEBAPP_URL);
+
       const utcDate = new UTCDate();
       const sevenDaysAgo = subDays(utcDate, 7);
       const pstDate = subHours(utcDate, 7);
@@ -534,9 +536,7 @@ Press “🚀 *Top-30 ToTheMoonScore*“ button to get it.`;
                 [
                   {
                     text: 'Get your free Top-30 list',
-                    web_app: {
-                      url: webAppUrl.href,
-                    },
+                    url: mainPageUrl.href,
                   },
                 ],
               ],
@@ -559,9 +559,7 @@ Press “🚀 *Top-30 ToTheMoonScore*“ button to get it.`;
                 [
                   {
                     text: 'Get your free Top-30 list',
-                    web_app: {
-                      url: webAppUrl.href,
-                    },
+                    url: mainPageUrl.href,
                   },
                 ],
               ],
@@ -587,9 +585,7 @@ Press “🚀 *Top-30 ToTheMoonScore*“ button to get it.`;
                   [
                     {
                       text: 'Get your free Top-30 list',
-                      web_app: {
-                        url: webAppUrl.href,
-                      },
+                      url: mainPageUrl.href,
                     },
                   ],
                 ],
