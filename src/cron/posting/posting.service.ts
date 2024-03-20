@@ -14,6 +14,17 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.TWITTER_ACCESS_SECRET,
 });
 
+interface mergedToken {
+  address: string;
+  symbol: string;
+  quoteToken: string;
+  change24: string;
+  pairAddress: string;
+  networkId: number;
+  twitterUrl: string;
+  averageScoreToday: string;
+}
+
 @Injectable()
 export class PostingService {
   constructor(private prisma: PrismaClient) {}
@@ -107,6 +118,7 @@ export class PostingService {
           quoteToken: true,
           pairAddress: true,
           networkId: true,
+          twitterUrl: true,
         },
       });
 
@@ -124,7 +136,7 @@ export class PostingService {
         },
       });
 
-      const mergedTokens = [];
+      const mergedTokens: mergedToken[] = [];
 
       scores.forEach((score) => {
         const token = bestByChange24.find(
@@ -142,13 +154,14 @@ export class PostingService {
         ) {
           mergedTokens.push({
             ...token,
-            averageScoreToday: score.averageScoreToday,
+            averageScoreToday: JSON.stringify(score.averageScoreToday),
           });
         }
       });
 
       const sortedByScore = mergedTokens.sort(
-        (a, b) => b.averageScoreToday - a.averageScoreToday,
+        (a, b) =>
+          parseFloat(b.averageScoreToday) - parseFloat(a.averageScoreToday),
       );
 
       const utcDate = new UTCDate();
@@ -202,16 +215,20 @@ export class PostingService {
           network = 'bsc';
         }
 
-        if (messagesCount < 2 && token.averageScoreToday >= 50) {
+        if (messagesCount < 2 && parseFloat(token.averageScoreToday) >= 50) {
           // Создаем сообщение для отправки
           const growth = parseFloat(token.change24) * 100;
+          let tokenTwitterUrl = null;
+          if (token.twitterUrl) {
+            tokenTwitterUrl = token.twitterUrl.split('https://twitter.com/');
+          }
           const message =
             `[$${token.symbol.toUpperCase()}](https://tokenwatch.ai/en/tokens/${network}/${
               token.pairAddress
             }?quoteToken=${token.quoteToken}) \n\n` +
             `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
             `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
-              token.averageScoreToday,
+              parseFloat(token.averageScoreToday),
             )}\n\n` +
             `#${token.symbol.toUpperCase()} ` +
             `#${token.symbol.toUpperCase()}growth ` +
@@ -234,7 +251,7 @@ export class PostingService {
             `#Signals\n\n` +
             `by @TokenWatch\\_ai`;
 
-          const twitterTestMessage =
+          let twitterTestMessage =
             `$${token.symbol.toUpperCase()}\n\n` +
             `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
             `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
@@ -250,6 +267,11 @@ export class PostingService {
             `#TTMS ` +
             `#Signals\n\n` +
             `by @TokenWatch_ai`;
+
+          if (tokenTwitterUrl) {
+            twitterTestMessage =
+              `@${tokenTwitterUrl[1]}\n` + twitterTestMessage;
+          }
 
           const twitterMessage =
             `$${token.symbol.toUpperCase()}\n\n` +

@@ -255,8 +255,12 @@ export class TtmsPortfolioService {
           portfolio.currentPrice = freshToken.priceUSD;
           // Новая цена больше той, с которой мы начали вычисления ?
           if (
-            parseFloat(freshToken.priceUSD) >= parseFloat(portfolio.priceUSD)
+            parseFloat(freshToken.priceUSD) > parseFloat(portfolio.priceUSD)
           ) {
+            // если с момента A0 цена начала расти, то фиксируем stopLoss на -5% на будущее
+            if (portfolio.stopLoss === null) {
+              portfolio.stopLoss = '-5';
+            }
             // Новая цена Больше ATH ?
             if (parseFloat(freshToken.priceUSD) > parseFloat(portfolio.ATH)) {
               portfolio.ATH = freshToken.priceUSD;
@@ -279,6 +283,11 @@ export class TtmsPortfolioService {
               }
             }
           } else {
+            // если с момента A0 цена начала падать, то фиксируем stopLoss на -3% на будущее
+            if (portfolio.stopLoss === null) {
+              portfolio.stopLoss = '-3';
+            }
+
             // Новая цена <= Цены на старте 24 часового цикла * 0,95 ?
             if (
               parseFloat(freshToken.priceUSD) <=
@@ -289,7 +298,7 @@ export class TtmsPortfolioService {
                   parseFloat(portfolio.priceUSD) * 0.95,
                 );
               }
-              portfolio.dailyPriceChange095 = '-5.00';
+              portfolio.dailyPriceChange095 = portfolio.stopLoss;
               portfolio.exitPrice = JSON.stringify(
                 parseFloat(portfolio.priceUSD) * 0.95,
               );

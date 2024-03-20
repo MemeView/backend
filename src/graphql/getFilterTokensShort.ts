@@ -29,6 +29,9 @@ export const GET_FILTER_TOKENS_SHORT = `query ($tokens: [String], $limit: Int, $
           info {
             imageLargeUrl
           }
+          socialLinks{
+            twitter
+          }
         }
       }
     }

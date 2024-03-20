@@ -141,6 +141,11 @@ export class DefinedTokensService {
                 ? pair.token1Data.address
                 : pair.token0Data.address;
 
+            let twitterUrl = null;
+            if (token && token.socialLinks && token.socialLinks.twitter) {
+              twitterUrl = token.socialLinks.twitter;
+            }
+
             return {
               change24,
               volume24,
@@ -159,6 +164,7 @@ export class DefinedTokensService {
               liquidityTokenSymbol,
               liquidityTokenAddress,
               txnCount24,
+              twitterUrl,
             };
           },
         )

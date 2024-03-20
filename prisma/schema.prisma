@@ -30,6 +30,7 @@ model Tokens {
   liquidityTokenSymbol  String?
   liquidityTokenAddress String?
   txnCount24            Int?
+  twitterUrl            String?
 }
 
 model Blacklist {
@@ -167,6 +168,7 @@ model TtmsPortfolio {
   image                 String?
   liquidityTokenSymbol  String?
   liquidityTokenAddress String?
+  stopLoss              String? 
 }
 
 model Last24SolvedTtmsPortfolio {
