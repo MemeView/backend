@@ -161,6 +161,12 @@ export class DefinedTokensService {
               txnCount24,
             };
           },
+        )
+        .filter(
+          (token) =>
+            token.liquidityTokenSymbol === 'WETH' ||
+            token.liquidityTokenSymbol === 'WBNB' ||
+            token.liquidityTokenSymbol === 'USDT',
         );
 
       console.log('=========================================');
