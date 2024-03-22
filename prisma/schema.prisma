@@ -113,10 +113,6 @@ model Volume {
   change24        String?  @default("0")
 }
 
-model TelegramBotUsers {
-  id Int @id @unique
-}
-
 model PostedTokens {
   tokenAddress String   @id @unique
   createdAt    DateTime @default(now())
@@ -169,6 +165,8 @@ model TtmsPortfolio {
   liquidityTokenSymbol  String?
   liquidityTokenAddress String?
   stopLoss              String? 
+  interval              Int?
+  intervalCheck         Int?
 }
 
 model Last24SolvedTtmsPortfolio {
@@ -176,6 +174,7 @@ model Last24SolvedTtmsPortfolio {
   portfolio        Json
   startedAt        String
   createdAt        DateTime @default(now())
+  interval         Int?
 }
 
 model AverageTtmsPortfolioResults {

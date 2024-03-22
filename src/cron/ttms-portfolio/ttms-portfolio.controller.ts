@@ -11,6 +11,8 @@ import {
   subHours,
 } from 'date-fns';
 
+type IntervalType = 24 | 48;
+
 @Controller('/api')
 export class TtmsPortfolioController {
   constructor(

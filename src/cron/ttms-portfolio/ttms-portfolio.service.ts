@@ -3,6 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { getDate, getMonth, getYear, startOfDay, subDays } from 'date-fns';
 
+type IntervalType = 24 | 48;
+
 @Injectable()
 export class TtmsPortfolioService {
   constructor(private readonly prisma: PrismaClient) {}
@@ -265,19 +267,20 @@ export class TtmsPortfolioService {
             if (parseFloat(freshToken.priceUSD) > parseFloat(portfolio.ATH)) {
               portfolio.ATH = freshToken.priceUSD;
             } else {
-              // Новая цена меньше, чем ATH * 0,95 ?
+              const stopLoss = 100 + parseFloat(portfolio.stopLoss);
+              // Новая цена меньше, чем ATH * stopLoss ?
               if (
                 parseFloat(freshToken.priceUSD) <=
-                parseFloat(portfolio.ATH) * 0.95
+                parseFloat(portfolio.ATH) * stopLoss
               ) {
                 const dailyPercentage = JSON.stringify(
-                  (parseFloat(portfolio.ATH) * 0.95 -
+                  (parseFloat(portfolio.ATH) * stopLoss -
                     parseFloat(portfolio.priceUSD)) /
                     (parseFloat(portfolio.priceUSD) / 100),
                 );
                 portfolio.dailyPriceChange095 = dailyPercentage;
                 portfolio.exitPrice = JSON.stringify(
-                  parseFloat(portfolio.ATH) * 0.95,
+                  parseFloat(portfolio.ATH) * stopLoss,
                 );
                 // мы вышли
               }
@@ -288,19 +291,21 @@ export class TtmsPortfolioService {
               portfolio.stopLoss = '-3';
             }
 
-            // Новая цена <= Цены на старте 24 часового цикла * 0,95 ?
+            const stopLoss = 100 + parseFloat(portfolio.stopLoss);
+
+            // Новая цена <= Цены на старте 24 часового цикла * stopLoss ?
             if (
               parseFloat(freshToken.priceUSD) <=
-              parseFloat(portfolio.priceUSD) * 0.95
+              parseFloat(portfolio.priceUSD) * stopLoss
             ) {
               if (parseFloat(freshToken.priceUSD) < parseFloat(portfolio.ATL)) {
                 portfolio.ATL = JSON.stringify(
-                  parseFloat(portfolio.priceUSD) * 0.95,
+                  parseFloat(portfolio.priceUSD) * stopLoss,
                 );
               }
               portfolio.dailyPriceChange095 = portfolio.stopLoss;
               portfolio.exitPrice = JSON.stringify(
-                parseFloat(portfolio.priceUSD) * 0.95,
+                parseFloat(portfolio.priceUSD) * stopLoss,
               );
               // мы вышли
             } else {
