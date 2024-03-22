@@ -179,7 +179,8 @@ model Last24SolvedTtmsPortfolio {
 
 model AverageTtmsPortfolioResults {
   id                  Int @id @default(autoincrement())
-  average24Result     String
+  average24Result     String?
+  average48Result     String?
   startedAt           String
   createdAt           DateTime @default(now())
 }

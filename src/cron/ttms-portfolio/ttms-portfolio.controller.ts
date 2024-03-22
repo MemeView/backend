@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { TtmsPortfolioService } from './ttms-portfolio.service';
 import { PrismaClient } from '@prisma/client';
 import { UTCDate } from '@date-fns/utc';
@@ -11,7 +18,7 @@ import {
   subHours,
 } from 'date-fns';
 
-type IntervalType = 24 | 48;
+type IntervalType = '24' | '48';
 
 @Controller('/api')
 export class TtmsPortfolioController {
@@ -31,14 +38,24 @@ export class TtmsPortfolioController {
     }
   }
 
-  @Get('/last-24-ttms-portfolio')
-  async last24TtmsPortfolio() {
+  @Get('/last-24-ttms-portfolio/:interval')
+  async last24TtmsPortfolio(@Param('interval') interval: IntervalType) {
     try {
+      if (!interval) {
+        throw new HttpException('interval in url is required', 400);
+      }
+
+      console.log(interval);
+
       const result = await this.prisma.last24SolvedTtmsPortfolio.findFirst({
+        where: {
+          interval: parseFloat(interval),
+        },
         orderBy: {
           createdAt: 'desc',
         },
       });
+
       const portfolioCalculatedAt = result.createdAt;
       const portfolioCalculatedAtPst = subHours(portfolioCalculatedAt, 8);
       const portfolioCalculationStartedAt = subHours(
@@ -101,17 +118,24 @@ export class TtmsPortfolioController {
     }
   }
 
-  @Get('/average-ttms-portfolio-results')
-  async averageTtmsPortfolioResults() {
+  @Get('/average-ttms-portfolio-results/:interval')
+  async averageTtmsPortfolioResults(@Param('interval') interval: IntervalType) {
     try {
       const utcDate = new UTCDate();
       const todayStartOfDay = startOfDay(utcDate);
       const oneWeekAgo = subDays(todayStartOfDay, 7);
       const monthAgo = subDays(todayStartOfDay, 30);
 
+      if (!interval) {
+        throw new HttpException('interval in url is required', 400);
+      }
+
+      const intervalRow = `average${interval}Result`;
+
       const lastResult24h =
         await this.prisma.averageTtmsPortfolioResults.findFirst({
           orderBy: { createdAt: 'desc' },
+          select: { [intervalRow]: true },
         });
 
       let averagePercentage24h = 0;
@@ -124,6 +148,7 @@ export class TtmsPortfolioController {
           where: {
             createdAt: { gte: oneWeekAgo },
           },
+          select: { [intervalRow]: true },
         });
 
       const resultOneMonth =
@@ -131,6 +156,7 @@ export class TtmsPortfolioController {
           where: {
             createdAt: { gte: monthAgo },
           },
+          select: { [intervalRow]: true },
         });
 
       return {

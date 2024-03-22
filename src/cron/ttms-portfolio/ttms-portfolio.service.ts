@@ -19,7 +19,15 @@ export class TtmsPortfolioService {
       if (hour === 9) {
         const oldPortfolio = await this.prisma.ttmsPortfolio.findMany({
           where: {
-            startedAt: '9am',
+            AND: [
+              { startedAt: '9am' },
+              {
+                OR: [
+                  { interval: 24 },
+                  { AND: [{ interval: 48 }, { intervalCheck: 1 }] },
+                ],
+              },
+            ],
           },
         });
 
@@ -40,6 +48,14 @@ export class TtmsPortfolioService {
             }
           });
 
+          const oldPortfolio24 = oldPortfolio.filter(
+            (item) => item.interval === 24,
+          );
+
+          const oldPortfolio48 = oldPortfolio.filter(
+            (item) => item.interval === 48 && item.intervalCheck === 1,
+          );
+
           await this.prisma.last24SolvedTtmsPortfolio.deleteMany({
             where: {
               startedAt: '9am',
@@ -48,13 +64,28 @@ export class TtmsPortfolioService {
 
           await this.prisma.last24SolvedTtmsPortfolio.create({
             data: {
-              portfolio: oldPortfolio,
+              portfolio: oldPortfolio24,
+              interval: 24,
               startedAt: '9am',
             },
           });
 
-          const totalDailyPriceChange095 = JSON.stringify(
-            oldPortfolio.reduce((acc, portfolio) => {
+          await this.prisma.last24SolvedTtmsPortfolio.create({
+            data: {
+              portfolio: oldPortfolio48,
+              interval: 48,
+              startedAt: '9am',
+            },
+          });
+
+          const totalDailyPriceChange095By24h = JSON.stringify(
+            oldPortfolio24.reduce((acc, portfolio) => {
+              return acc + parseFloat(portfolio.dailyPriceChange095);
+            }, 0) / oldPortfolio.length,
+          );
+
+          const totalDailyPriceChange095By48h = JSON.stringify(
+            oldPortfolio48.reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
             }, 0) / oldPortfolio.length,
           );
@@ -77,7 +108,8 @@ export class TtmsPortfolioService {
 
           await this.prisma.averageTtmsPortfolioResults.create({
             data: {
-              average24Result: totalDailyPriceChange095,
+              average24Result: totalDailyPriceChange095By24h,
+              average48Result: totalDailyPriceChange095By48h,
               startedAt: '9am',
             },
           });
@@ -85,7 +117,24 @@ export class TtmsPortfolioService {
 
         await this.prisma.ttmsPortfolio.deleteMany({
           where: {
-            startedAt: '9am',
+            AND: [
+              { startedAt: '9am' },
+              {
+                OR: [
+                  { interval: 24 },
+                  { AND: [{ interval: 48 }, { intervalCheck: 1 }] },
+                ],
+              },
+            ],
+          },
+        });
+
+        await this.prisma.ttmsPortfolio.updateMany({
+          where: {
+            intervalCheck: null,
+          },
+          data: {
+            intervalCheck: 1,
           },
         });
 
@@ -101,7 +150,7 @@ export class TtmsPortfolioService {
           },
         });
 
-        const ttmsPortfolio9amData = Object.entries(
+        const ttmsPortfolio9amData24 = Object.entries(
           ttmsTop30At9am.score9am,
         ).map(([key, value]) => ({
           tokenAddress: value.address,
@@ -116,8 +165,32 @@ export class TtmsPortfolioService {
           image: value.image,
           liquidityTokenSymbol: value.liquidityTokenSymbol,
           liquidityTokenAddress: value.liquidityTokenAddress,
+          interval: 24,
           startedAt: '9am',
         }));
+
+        const ttmsPortfolio9amData48 = Object.entries(
+          ttmsTop30At9am.score9am,
+        ).map(([key, value]) => ({
+          tokenAddress: value.address,
+          symbol: value.symbol,
+          pairAddress: value.pairAddress,
+          quoteToken: value.quoteToken,
+          priceUSD: value.priceUSD,
+          ATH: value.priceUSD,
+          ATL: value.priceUSD,
+          currentPrice: value.currentPrice,
+          networkId: value.networkId,
+          image: value.image,
+          liquidityTokenSymbol: value.liquidityTokenSymbol,
+          liquidityTokenAddress: value.liquidityTokenAddress,
+          interval: 48,
+          startedAt: '9am',
+        }));
+
+        const ttmsPortfolio9amData = ttmsPortfolio9amData24.concat(
+          ttmsPortfolio9amData48,
+        );
 
         await this.prisma.ttmsPortfolio.createMany({
           data: ttmsPortfolio9amData,
@@ -127,7 +200,15 @@ export class TtmsPortfolioService {
       if (hour === 21) {
         const oldPortfolio = await this.prisma.ttmsPortfolio.findMany({
           where: {
-            startedAt: '9pm',
+            AND: [
+              { startedAt: '9pm' },
+              {
+                OR: [
+                  { interval: 24 },
+                  { AND: [{ interval: 48 }, { intervalCheck: 1 }] },
+                ],
+              },
+            ],
           },
         });
 
@@ -148,6 +229,14 @@ export class TtmsPortfolioService {
             }
           });
 
+          const oldPortfolio24 = oldPortfolio.filter(
+            (item) => item.interval === 24,
+          );
+
+          const oldPortfolio48 = oldPortfolio.filter(
+            (item) => item.interval === 48 && item.intervalCheck === 1,
+          );
+
           await this.prisma.last24SolvedTtmsPortfolio.deleteMany({
             where: {
               startedAt: '9pm',
@@ -156,13 +245,28 @@ export class TtmsPortfolioService {
 
           await this.prisma.last24SolvedTtmsPortfolio.create({
             data: {
-              portfolio: oldPortfolio,
+              portfolio: oldPortfolio24,
+              interval: 24,
               startedAt: '9pm',
             },
           });
 
-          const totalDailyPriceChange095 = JSON.stringify(
-            oldPortfolio.reduce((acc, portfolio) => {
+          await this.prisma.last24SolvedTtmsPortfolio.create({
+            data: {
+              portfolio: oldPortfolio48,
+              interval: 48,
+              startedAt: '9pm',
+            },
+          });
+
+          const totalDailyPriceChange095By24h = JSON.stringify(
+            oldPortfolio24.reduce((acc, portfolio) => {
+              return acc + parseFloat(portfolio.dailyPriceChange095);
+            }, 0) / oldPortfolio.length,
+          );
+
+          const totalDailyPriceChange095By48h = JSON.stringify(
+            oldPortfolio48.reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
             }, 0) / oldPortfolio.length,
           );
@@ -185,7 +289,8 @@ export class TtmsPortfolioService {
 
           await this.prisma.averageTtmsPortfolioResults.create({
             data: {
-              average24Result: totalDailyPriceChange095,
+              average24Result: totalDailyPriceChange095By24h,
+              average48Result: totalDailyPriceChange095By48h,
               startedAt: '9pm',
             },
           });
@@ -193,7 +298,24 @@ export class TtmsPortfolioService {
 
         await this.prisma.ttmsPortfolio.deleteMany({
           where: {
-            startedAt: '9pm',
+            AND: [
+              { startedAt: '9pm' },
+              {
+                OR: [
+                  { interval: 24 },
+                  { AND: [{ interval: 48 }, { intervalCheck: 1 }] },
+                ],
+              },
+            ],
+          },
+        });
+
+        await this.prisma.ttmsPortfolio.updateMany({
+          where: {
+            intervalCheck: null,
+          },
+          data: {
+            intervalCheck: 1,
           },
         });
 
@@ -209,7 +331,7 @@ export class TtmsPortfolioService {
           },
         });
 
-        const ttmsPortfolio9pmData = Object.entries(
+        const ttmsPortfolio9pmData24 = Object.entries(
           ttmsTop30At9pm.score9pm,
         ).map(([key, value]) => ({
           tokenAddress: value.address,
@@ -224,8 +346,32 @@ export class TtmsPortfolioService {
           image: value.image,
           liquidityTokenSymbol: value.liquidityTokenSymbol,
           liquidityTokenAddress: value.liquidityTokenAddress,
+          interval: 24,
           startedAt: '9pm',
         }));
+
+        const ttmsPortfolio9pmData48 = Object.entries(
+          ttmsTop30At9pm.score9pm,
+        ).map(([key, value]) => ({
+          tokenAddress: value.address,
+          symbol: value.symbol,
+          pairAddress: value.pairAddress,
+          quoteToken: value.quoteToken,
+          priceUSD: value.priceUSD,
+          ATH: value.priceUSD,
+          ATL: value.priceUSD,
+          currentPrice: value.currentPrice,
+          networkId: value.networkId,
+          image: value.image,
+          liquidityTokenSymbol: value.liquidityTokenSymbol,
+          liquidityTokenAddress: value.liquidityTokenAddress,
+          interval: 48,
+          startedAt: '9pm',
+        }));
+
+        const ttmsPortfolio9pmData = ttmsPortfolio9pmData24.concat(
+          ttmsPortfolio9pmData48,
+        );
 
         await this.prisma.ttmsPortfolio.createMany({
           data: ttmsPortfolio9pmData,
