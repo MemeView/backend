@@ -45,8 +45,6 @@ export class TtmsPortfolioController {
         throw new HttpException('interval in url is required', 400);
       }
 
-      console.log(interval);
-
       const result = await this.prisma.last24SolvedTtmsPortfolio.findFirst({
         where: {
           interval: parseFloat(interval),
@@ -139,8 +137,8 @@ export class TtmsPortfolioController {
         });
 
       let averagePercentage24h = 0;
-      if (lastResult24h.average24Result) {
-        averagePercentage24h += parseFloat(lastResult24h.average24Result);
+      if (lastResult24h[intervalRow]) {
+        averagePercentage24h += parseFloat(lastResult24h[intervalRow]);
       }
 
       const resultOneWeek =
@@ -160,12 +158,12 @@ export class TtmsPortfolioController {
         });
 
       return {
-        averagePercentage24h: averagePercentage24h,
+        lastAveragePercentage: averagePercentage24h,
         averagePercentage7d: resultOneWeek.reduce((acc, result) => {
-          return acc + parseFloat(result.average24Result);
+          return acc + parseFloat(result[intervalRow]);
         }, 0),
         averagePercentage30d: resultOneMonth.reduce((acc, result) => {
-          return acc + parseFloat(result.average24Result);
+          return acc + parseFloat(result[intervalRow]);
         }, 0),
       };
     } catch (e) {

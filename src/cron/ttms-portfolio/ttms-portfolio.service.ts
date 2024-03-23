@@ -131,7 +131,7 @@ export class TtmsPortfolioService {
 
         await this.prisma.ttmsPortfolio.updateMany({
           where: {
-            intervalCheck: null,
+            AND: [{ intervalCheck: null }, { startedAt: '9am' }],
           },
           data: {
             intervalCheck: 1,
@@ -312,7 +312,7 @@ export class TtmsPortfolioService {
 
         await this.prisma.ttmsPortfolio.updateMany({
           where: {
-            intervalCheck: null,
+            AND: [{ intervalCheck: null }, { startedAt: '9pm' }],
           },
           data: {
             intervalCheck: 1,
