@@ -189,6 +189,12 @@ export class CronService {
       console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
     }
     await this.ttmsPortfolioService.handleTtmsPortfolio(currentPstHour);
+    console.log('ttms portfolio cron job completed');
+
+    if (currentPstHour === 9 || currentPstHour === 21) {
+      await this.postingService.portfolioAutoPosting();
+      console.log('portfolio-auto-posting cron job completed');
+    }
 
     await this.airdropsService.checkAirdropRequirementsCron('airdrop1');
     await this.airdropsService.checkAirdropRequirementsCron('airdrop2');
