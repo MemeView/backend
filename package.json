@@ -33,7 +33,7 @@
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/schedule": "^4.0.0",
-    "@nestjs/serve-static": "^4.0.0",
+    "@nestjs/serve-static": "^4.0.1",
     "@prisma/client": "^5.10.2",
     "@tma.js/init-data-node": "^1.1.5",
     "@types/axios": "^0.14.0",

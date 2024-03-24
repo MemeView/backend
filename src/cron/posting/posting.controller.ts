@@ -75,6 +75,12 @@ export class PostingController {
   @Get('portfolio-auto-posting')
   async portfolioAutoPosting() {
     const result = this.postingService.portfolioAutoPosting();
+    await this.prisma.ttmsPortfolio.updateMany({
+      data: {
+        exitPrice: null,
+        dailyPriceChange095: null,
+      },
+    });
 
     return result;
   }

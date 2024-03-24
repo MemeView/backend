@@ -36,14 +36,20 @@ export class PostingService {
     const canvas = createCanvas(1200, 675);
     const ctx = canvas.getContext('2d');
 
-    // Загрузка изображения
     const image = await loadImage(imagePath);
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    // Добавление текста
-    ctx.font = '30px Arial';
+    ctx.font = 'bold 150px Arial';
     ctx.fillStyle = 'white';
-    ctx.fillText(text, 50, 50); // Позиция текста
+    ctx.textAlign = 'center'; // Выравнивание текста по центру
+    ctx.textBaseline = 'middle'; // Выравнивание текста по вертикали по центру
+
+    // Рассчитываем координаты
+    const textWidth = ctx.measureText(text).width;
+    const xPosition = (canvas.width - textWidth) / 2;
+    const yPosition = canvas.height / 2 - 100;
+
+    ctx.fillText(text, xPosition + textWidth / 2, yPosition);
 
     return canvas.toBuffer();
   }
@@ -437,7 +443,7 @@ export class PostingService {
         });
 
       if (parseFloat(lastAveragePortfolio.average24Result) > 1) {
-        const message = `💹 24h portfolio growth: +${parseFloat(
+        const telegramMessage = `💹 24h portfolio growth: +${parseFloat(
           lastAveragePortfolio.average24Result,
         ).toFixed(1)}% 🚀
 
@@ -447,16 +453,38 @@ Start Signal Bot ⏩ https://t.me/TokenWatch\\_SignalBot
 
 #TokenWatch #TokenGrowth #CryptoCurrency #CryptoMarket #Signals #AI #CryptoAI #ToTheMoonScore #TTMS`;
 
-        // const image = 'https://twa.tokenwatch.ai/airdrop1_mainpic.png?2';
-        // const imagePath = path.join(__dirname, 'tokenwatch_post_standard.png');
-        const imagePath = 'https://twa.tokenwatch.ai/airdrop1_mainpic.png?2';
+        const twitterMessage = `💹 24h portfolio growth: +${parseFloat(
+          lastAveragePortfolio.average24Result,
+        ).toFixed(1)}% 🚀
 
-        const modifiedImage = await this.addTextToImage(imagePath, '1.2');
+Details 👉 https://tokenwatch.ai/en/top30-portfolio-invetment-results/
 
-        // Сохранение измененного изображения
-        fs.writeFileSync('modified_image.png', modifiedImage);
+Start Signal Bot ⏩ https://t.me/TokenWatch_SignalBot
 
-        await this.sendTelegramPhoto(message, 'modified_image.png');
+#TokenWatch #TokenGrowth #CryptoCurrency #CryptoMarket #Signals #AI #CryptoAI #ToTheMoonScore #TTMS`;
+
+        const imagePath = path.join(
+          __dirname,
+          '../../../..',
+          'public/images',
+          'tokenwatch_post_standard.png',
+        );
+
+        fs.readFile(imagePath, async (err, data) => {
+          if (err) {
+            console.error(err);
+            return;
+          }
+          const modifiedImage = await this.addTextToImage(
+            data,
+            `+${parseFloat(lastAveragePortfolio.average24Result).toFixed(2)}%`,
+          );
+
+          fs.writeFileSync('modified_image.png', modifiedImage);
+
+          await this.sendTelegramPhoto(telegramMessage, 'modified_image.png');
+          await this.sendTwitterPhoto(twitterMessage, 'modified_image.png');
+        });
       }
 
       return 'ok';
