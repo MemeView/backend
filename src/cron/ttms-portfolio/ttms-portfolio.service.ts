@@ -9,6 +9,16 @@ type IntervalType = 24 | 48;
 export class TtmsPortfolioService {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async convertFromScientificNotation(numberString: string): Promise<string> {
+    if (numberString.includes('e')) {
+      const [base, exponent] = numberString.split('e');
+      const parsedNumber = parseFloat(base) * Math.pow(10, parseInt(exponent));
+      return parsedNumber.toFixed(20).replace(/0+$/, '').replace(/\.+$/, '');
+    } else {
+      return numberString;
+    }
+  }
+
   async handleTtmsPortfolio(hour: number) {
     try {
       const utcDate = new UTCDate();
@@ -31,7 +41,7 @@ export class TtmsPortfolioService {
           },
         });
 
-        if (oldPortfolio) {
+        if (oldPortfolio.length > 0) {
           oldPortfolio.forEach((portfolio) => {
             if (!portfolio.currentPrice) {
               portfolio.currentPrice = portfolio.priceUSD;
@@ -212,7 +222,7 @@ export class TtmsPortfolioService {
           },
         });
 
-        if (oldPortfolio) {
+        if (oldPortfolio.length > 0) {
           oldPortfolio.forEach((portfolio) => {
             if (!portfolio.currentPrice) {
               portfolio.currentPrice = portfolio.priceUSD;
@@ -413,7 +423,7 @@ export class TtmsPortfolioService {
             if (parseFloat(freshToken.priceUSD) > parseFloat(portfolio.ATH)) {
               portfolio.ATH = freshToken.priceUSD;
             } else {
-              const stopLoss = 100 + parseFloat(portfolio.stopLoss);
+              const stopLoss = (100 + parseFloat(portfolio.stopLoss)) / 100;
               // Новая цена меньше, чем ATH * stopLoss ?
               if (
                 parseFloat(freshToken.priceUSD) <=
@@ -437,7 +447,7 @@ export class TtmsPortfolioService {
               portfolio.stopLoss = '-3';
             }
 
-            const stopLoss = 100 + parseFloat(portfolio.stopLoss);
+            const stopLoss = (100 + parseFloat(portfolio.stopLoss)) / 100;
 
             // Новая цена <= Цены на старте 24 часового цикла * stopLoss ?
             if (

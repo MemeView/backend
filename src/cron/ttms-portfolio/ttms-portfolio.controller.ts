@@ -54,11 +54,24 @@ export class TtmsPortfolioController {
         },
       });
 
+      Object.entries(result.portfolio).forEach(async ([key, value]) => {
+        value.exitPrice =
+          await this.ttmsPortfolioService.convertFromScientificNotation(
+            value.exitPrice,
+          );
+      });
+
+      let portfolioStartedAtInterval = 24;
+
+      if (interval === '48') {
+        portfolioStartedAtInterval = 48;
+      }
+
       const portfolioCalculatedAt = result.createdAt;
       const portfolioCalculatedAtPst = subHours(portfolioCalculatedAt, 8);
       const portfolioCalculationStartedAt = subHours(
         portfolioCalculatedAtPst,
-        24,
+        portfolioStartedAtInterval,
       );
 
       const portfolioCalculationStartedAtUtc = new Date(

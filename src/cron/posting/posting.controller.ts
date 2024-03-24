@@ -1,7 +1,19 @@
-import { Controller, InternalServerErrorException, Post } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Post,
+} from '@nestjs/common';
 import { PostingService } from './posting.service';
 import { PrismaClient } from '@prisma/client';
-import { addHours, format, startOfDay, startOfHour, subDays, subHours } from 'date-fns';
+import {
+  addHours,
+  format,
+  startOfDay,
+  startOfHour,
+  subDays,
+  subHours,
+} from 'date-fns';
 import { UTCDate } from '@date-fns/utc';
 
 @Controller('api')
@@ -27,10 +39,10 @@ export class PostingController {
       console.log('utcDate', utcDate);
 
       const utcDateAddedTwoHours = addHours(utcDate, 2).toString();
-      console.log('utcDateAddedTwoHours', utcDateAddedTwoHours)
+      console.log('utcDateAddedTwoHours', utcDateAddedTwoHours);
 
       const today = startOfDay(utcDate);
-      console.log('today', today)
+      console.log('today', today);
 
       const yesterday = startOfDay(subDays(utcDate, 1));
       console.log('yesterday', yesterday);
@@ -55,10 +67,15 @@ export class PostingController {
 
       const timestampInSeconds = Math.floor(utcDate.getTime() / 1000);
       console.log('timestamp', timestampInSeconds);
-
-
     } catch (error) {
       throw new InternalServerErrorException('bad request');
     }
+  }
+
+  @Get('portfolio-auto-posting')
+  async portfolioAutoPosting() {
+    const result = this.postingService.portfolioAutoPosting();
+
+    return result;
   }
 }

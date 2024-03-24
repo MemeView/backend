@@ -6,6 +6,9 @@ import { TwitterApi } from 'twitter-api-v2';
 import * as nodemailer from 'nodemailer';
 import * as moment from 'moment/moment';
 import { UTCDate } from '@date-fns/utc';
+import * as path from 'path';
+import * as fs from 'fs';
+import { createCanvas, loadImage } from 'canvas';
 
 const twitterClient = new TwitterApi({
   appKey: process.env.TWITTER_APP_KEY,
@@ -28,6 +31,22 @@ interface mergedToken {
 @Injectable()
 export class PostingService {
   constructor(private prisma: PrismaClient) {}
+
+  async addTextToImage(imagePath, text) {
+    const canvas = createCanvas(1200, 675);
+    const ctx = canvas.getContext('2d');
+
+    // Загрузка изображения
+    const image = await loadImage(imagePath);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    // Добавление текста
+    ctx.font = '30px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText(text, 50, 50); // Позиция текста
+
+    return canvas.toBuffer();
+  }
 
   getAbsoluteScore(absoluteScore: number): string {
     const parts = String(absoluteScore).split('.'); // Разделяем число на целую и десятичную части
@@ -67,6 +86,44 @@ export class PostingService {
       console.log('Telegram message sent successfully!');
     } catch (error) {
       console.error('Failed to send Telegram message:', error);
+    }
+  }
+
+  async sendTelegramPhoto(message: string, image: string) {
+    const botToken = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+    const bot = new TelegramBot(botToken, {
+      polling: false,
+    });
+
+    try {
+      await bot.sendPhoto(chatId, image, {
+        caption: message,
+        parse_mode: 'Markdown',
+      });
+      console.log('Telegram message with image sent successfully!');
+    } catch (error) {
+      console.error('Failed to send Telegram message:', error);
+    }
+  }
+
+  async sendTwitterPhoto(message, imageUrl) {
+    try {
+      // const imageData = fs.readFileSync(imageUrl);
+
+      const tweet = await twitterClient.post('media/upload', {
+        media: imageUrl,
+      });
+      const tweetId = tweet.media_id_string;
+
+      await twitterClient.post('statuses/update', {
+        status: message,
+        media_ids: tweetId,
+      });
+
+      console.log('Twitter message sent successfully!');
+    } catch (error) {
+      console.error('Failed to send Twitter message:', error);
     }
   }
 
@@ -367,4 +424,44 @@ export class PostingService {
   //       }
   //     }
   //   }
+  async portfolioAutoPosting() {
+    try {
+      const lastAveragePortfolio =
+        await this.prisma.averageTtmsPortfolioResults.findFirst({
+          orderBy: {
+            createdAt: 'desc',
+          },
+          select: {
+            average24Result: true,
+          },
+        });
+
+      if (parseFloat(lastAveragePortfolio.average24Result) > 1) {
+        const message = `💹 24h portfolio growth: +${parseFloat(
+          lastAveragePortfolio.average24Result,
+        ).toFixed(1)}% 🚀
+
+Details 👉 https://tokenwatch.ai/en/top30-portfolio-invetment-results/
+
+Start Signal Bot ⏩ https://t.me/TokenWatch\\_SignalBot
+
+#TokenWatch #TokenGrowth #CryptoCurrency #CryptoMarket #Signals #AI #CryptoAI #ToTheMoonScore #TTMS`;
+
+        // const image = 'https://twa.tokenwatch.ai/airdrop1_mainpic.png?2';
+        // const imagePath = path.join(__dirname, 'tokenwatch_post_standard.png');
+        const imagePath = 'https://twa.tokenwatch.ai/airdrop1_mainpic.png?2';
+
+        const modifiedImage = await this.addTextToImage(imagePath, '1.2');
+
+        // Сохранение измененного изображения
+        fs.writeFileSync('modified_image.png', modifiedImage);
+
+        await this.sendTelegramPhoto(message, 'modified_image.png');
+      }
+
+      return 'ok';
+    } catch (error) {
+      return error;
+    }
+  }
 }
