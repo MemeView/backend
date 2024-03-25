@@ -14,16 +14,11 @@ import { PostingModule } from './cron/posting/posting.module';
 import { AuthModule } from './auth/auth.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { EventTrackerModule } from './event-tracker/event-tracker.module';
-import { ServeStaticModule } from '@nestjs/serve-static';
-import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: ['.env'],
-    }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
     }),
     GraphqlModule,
     CronModule,

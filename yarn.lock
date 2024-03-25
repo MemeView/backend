@@ -1469,13 +1469,6 @@
     jsonc-parser "3.2.0"
     pluralize "8.0.0"
 
-"@nestjs/serve-static@^4.0.1":
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/@nestjs/serve-static/-/serve-static-4.0.1.tgz#287b8b059602705184980b4c8c24b62cc24d26c1"
-  integrity sha512-AoOrVdAe+WmsceuCcA8nWmKUYmaOsg9pqBCbIj7PS4W3XdikJQMtfxgSIoOlyUksZdhTBFjHqKh0Yhpj6pulwQ==
-  dependencies:
-    path-to-regexp "0.2.5"
-
 "@nestjs/testing@^10.0.0":
   version "10.3.1"
   resolved "https://registry.yarnpkg.com/@nestjs/testing/-/testing-10.3.1.tgz#ea28a7d29122dd3a2df1542842e741a52dd7c474"
@@ -1542,46 +1535,46 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@prisma/client@^5.10.2":
+"@prisma/client@^5.11.0":
   version "5.11.0"
   resolved "https://registry.yarnpkg.com/@prisma/client/-/client-5.11.0.tgz#d8e55fab85163415b2245fb408b9106f83c8106d"
   integrity sha512-SWshvS5FDXvgJKM/a0y9nDC1rqd7KG0Q6ZVzd+U7ZXK5soe73DJxJJgbNBt2GNXOa+ysWB4suTpdK5zfFPhwiw==
 
-"@prisma/debug@5.10.2":
-  version "5.10.2"
-  resolved "https://registry.yarnpkg.com/@prisma/debug/-/debug-5.10.2.tgz#74be81d8969978f4d53c1b4e76d61f04bfbc3951"
-  integrity sha512-bkBOmH9dpEBbMKFJj8V+Zp8IZHIBjy3fSyhLhxj4FmKGb/UBSt9doyfA6k1UeUREsMJft7xgPYBbHSOYBr8XCA==
+"@prisma/debug@5.11.0":
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/@prisma/debug/-/debug-5.11.0.tgz#80e3f9d5a8f678c67a8783f7fcdda3cbbb8dd091"
+  integrity sha512-N6yYr3AbQqaiUg+OgjkdPp3KPW1vMTAgtKX6+BiB/qB2i1TjLYCrweKcUjzOoRM5BriA4idrkTej9A9QqTfl3A==
 
-"@prisma/engines-version@5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9":
-  version "5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9"
-  resolved "https://registry.yarnpkg.com/@prisma/engines-version/-/engines-version-5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9.tgz#1502335d4d72d2014cb25b8ad8a740a3a13400ea"
-  integrity sha512-uCy/++3Jx/O3ufM+qv2H1L4tOemTNqcP/gyEVOlZqTpBvYJUe0tWtW0y3o2Ueq04mll4aM5X3f6ugQftOSLdFQ==
+"@prisma/engines-version@5.11.0-15.efd2449663b3d73d637ea1fd226bafbcf45b3102":
+  version "5.11.0-15.efd2449663b3d73d637ea1fd226bafbcf45b3102"
+  resolved "https://registry.yarnpkg.com/@prisma/engines-version/-/engines-version-5.11.0-15.efd2449663b3d73d637ea1fd226bafbcf45b3102.tgz#a7aa218b1ebf1077798c931632461aae8ce6a8f7"
+  integrity sha512-WXCuyoymvrS4zLz4wQagSsc3/nE6CHy8znyiMv8RKazKymOMd5o9FP5RGwGHAtgoxd+aB/BWqxuP/Ckfu7/3MA==
 
-"@prisma/engines@5.10.2":
-  version "5.10.2"
-  resolved "https://registry.yarnpkg.com/@prisma/engines/-/engines-5.10.2.tgz#a4851d90f76ad6d22e783d5fd2e2e8c0640f1e81"
-  integrity sha512-HkSJvix6PW8YqEEt3zHfCYYJY69CXsNdhU+wna+4Y7EZ+AwzeupMnUThmvaDA7uqswiHkgm5/SZ6/4CStjaGmw==
+"@prisma/engines@5.11.0":
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/@prisma/engines/-/engines-5.11.0.tgz#96e941c5c81ce68f3a8b4c481007d397564c5d4b"
+  integrity sha512-gbrpQoBTYWXDRqD+iTYMirDlF9MMlQdxskQXbhARhG6A/uFQjB7DZMYocMQLoiZXO/IskfDOZpPoZE8TBQKtEw==
   dependencies:
-    "@prisma/debug" "5.10.2"
-    "@prisma/engines-version" "5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9"
-    "@prisma/fetch-engine" "5.10.2"
-    "@prisma/get-platform" "5.10.2"
+    "@prisma/debug" "5.11.0"
+    "@prisma/engines-version" "5.11.0-15.efd2449663b3d73d637ea1fd226bafbcf45b3102"
+    "@prisma/fetch-engine" "5.11.0"
+    "@prisma/get-platform" "5.11.0"
 
-"@prisma/fetch-engine@5.10.2":
-  version "5.10.2"
-  resolved "https://registry.yarnpkg.com/@prisma/fetch-engine/-/fetch-engine-5.10.2.tgz#a061f6727d395c7033b55f9c6e92f8741a70d5c5"
-  integrity sha512-dSmXcqSt6DpTmMaLQ9K8ZKzVAMH3qwGCmYEZr/uVnzVhxRJ1EbT/w2MMwIdBNq1zT69Rvh0h75WMIi0mrIw7Hg==
+"@prisma/fetch-engine@5.11.0":
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/@prisma/fetch-engine/-/fetch-engine-5.11.0.tgz#cd7a2fa5b5d89f1da0689e329c56fa69223fba7d"
+  integrity sha512-994viazmHTJ1ymzvWugXod7dZ42T2ROeFuH6zHPcUfp/69+6cl5r9u3NFb6bW8lLdNjwLYEVPeu3hWzxpZeC0w==
   dependencies:
-    "@prisma/debug" "5.10.2"
-    "@prisma/engines-version" "5.10.0-34.5a9203d0590c951969e85a7d07215503f4672eb9"
-    "@prisma/get-platform" "5.10.2"
+    "@prisma/debug" "5.11.0"
+    "@prisma/engines-version" "5.11.0-15.efd2449663b3d73d637ea1fd226bafbcf45b3102"
+    "@prisma/get-platform" "5.11.0"
 
-"@prisma/get-platform@5.10.2":
-  version "5.10.2"
-  resolved "https://registry.yarnpkg.com/@prisma/get-platform/-/get-platform-5.10.2.tgz#7af97b1d82e5574a474e3fbf6eaf04f4156bc535"
-  integrity sha512-nqXP6vHiY2PIsebBAuDeWiUYg8h8mfjBckHh6Jezuwej0QJNnjDiOq30uesmg+JXxGk99nqyG3B7wpcOODzXvg==
+"@prisma/get-platform@5.11.0":
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/@prisma/get-platform/-/get-platform-5.11.0.tgz#19a768127b1712c27f5dec8a0a79a4c9675829eb"
+  integrity sha512-rxtHpMLxNTHxqWuGOLzR2QOyQi79rK1u1XYAVLZxDGTLz/A+uoDnjz9veBFlicrpWjwuieM4N6jcnjj/DDoidw==
   dependencies:
-    "@prisma/debug" "5.10.2"
+    "@prisma/debug" "5.11.0"
 
 "@protobufjs/aspromise@^1.1.1", "@protobufjs/aspromise@^1.1.2":
   version "1.1.2"
@@ -4054,6 +4047,11 @@ eventemitter3@^3.0.0, eventemitter3@^3.1.0:
   version "3.1.2"
   resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-3.1.2.tgz#2d3d48f9c346698fce83a85d7d664e98535df6e7"
   integrity sha512-tvtQIeLVHjDkJYnzf2dgVMxfuSGJeM/7UCG17TT4EumTfNtF+0nebF/4zWOIkCreAbtNqhGEboB6BWrwqNaw4Q==
+
+eventemitter3@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/eventemitter3/-/eventemitter3-5.0.1.tgz#53f5ffd0a492ac800721bb42c66b841de96423c4"
+  integrity sha512-GWkBvjiSZK87ELrYOSESUYeVIc9mvLLf/nXalMOS5dYrgZq9o5OVkbZAVM06CVxYsCwH9BDZFPlQTlPA1j4ahA==
 
 events@^3.2.0:
   version "3.3.0"
@@ -6701,11 +6699,6 @@ path-to-regexp@0.1.7:
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz#df604178005f522f15eb4490e7247a1bfaa67f8c"
   integrity sha512-5DFkuoqlv1uYQKxy8omFBeJPQcdoE07Kv2sferDCrAq1ohOU+MSDswDIbnx3YAM60qIOnYa53wBhXW0EbMonrQ==
 
-path-to-regexp@0.2.5:
-  version "0.2.5"
-  resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.2.5.tgz#0b426991e387fc4c675de23557f358715eb66fb0"
-  integrity sha512-l6qtdDPIkmAmzEO6egquYDfqQGPMRNGjYtrU13HAXb3YSRrt7HSb1sJY0pKp6o2bAa86tSB6iwaW2JbthPKr7Q==
-
 path-to-regexp@3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-3.2.0.tgz#fa7877ecbc495c601907562222453c43cc204a5f"
@@ -6784,12 +6777,12 @@ pretty-format@^29.0.0, pretty-format@^29.7.0:
     ansi-styles "^5.0.0"
     react-is "^18.0.0"
 
-prisma@^5.7.0:
-  version "5.10.2"
-  resolved "https://registry.yarnpkg.com/prisma/-/prisma-5.10.2.tgz#aa63085c49dc74cdb5c3816e8dd1fb4d74a2aadd"
-  integrity sha512-hqb/JMz9/kymRE25pMWCxkdyhbnIWrq+h7S6WysJpdnCvhstbJSNP/S6mScEcqiB8Qv2F+0R3yG+osRaWqZacQ==
+prisma@^5.11.0:
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/prisma/-/prisma-5.11.0.tgz#ef3891f79921a2deec6f540eba13a3cc8525f6d2"
+  integrity sha512-KCLiug2cs0Je7kGkQBN9jDWoZ90ogE/kvZTUTgz2h94FEo8pczCkPH7fPNXkD1sGU7Yh65risGGD1HQ5DF3r3g==
   dependencies:
-    "@prisma/engines" "5.10.2"
+    "@prisma/engines" "5.11.0"
 
 process-nextick-args@~2.0.0:
   version "2.0.1"
@@ -8151,7 +8144,7 @@ web3-eth-accounts@^4.1.0, web3-eth-accounts@^4.1.1:
     web3-utils "^4.1.1"
     web3-validator "^2.0.4"
 
-web3-eth-contract@^4.1.2, web3-eth-contract@^4.2.0:
+web3-eth-contract@^4.2.0:
   version "4.2.0"
   resolved "https://registry.yarnpkg.com/web3-eth-contract/-/web3-eth-contract-4.2.0.tgz#73f70b19217cd4854211c05846f0c841763b3b29"
   integrity sha512-K7bUypsomTs8/Oa0Lgvq5plsSB5afgKJ79NMuXxvC5jfV+AxNrQyKcr5Vd5yEGNqrdQuIPduGQa8DpuY+rMe1g==
@@ -8164,20 +8157,20 @@ web3-eth-contract@^4.1.2, web3-eth-contract@^4.2.0:
     web3-utils "^4.1.1"
     web3-validator "^2.0.4"
 
-web3-eth-ens@^4.0.8:
-  version "4.0.8"
-  resolved "https://registry.yarnpkg.com/web3-eth-ens/-/web3-eth-ens-4.0.8.tgz#f4e0a018ce6cc69e37007ee92063867feb5994f0"
-  integrity sha512-nj0JfeD45BbzVJcVYpUJnSo8iwDcY9CQ7CZhhIVVOFjvpMAPw0zEwjTvZEIQyCW61OoDG9xcBzwxe2tZoYhMRw==
+web3-eth-ens@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/web3-eth-ens/-/web3-eth-ens-4.1.0.tgz#8e1f94dcf9a5ee051ab961389e9cc2975e81f5b9"
+  integrity sha512-B+QsXXJb/gJkHb1ZGfErNLeFI9zUf2TsQcvi2+NsSuzFwvjIO5IyrrGtqBmXMLWC8ZikMOHuc8ZfFuGrELl31Q==
   dependencies:
     "@adraffy/ens-normalize" "^1.8.8"
-    web3-core "^4.3.0"
-    web3-errors "^1.1.3"
-    web3-eth "^4.3.1"
-    web3-eth-contract "^4.1.2"
+    web3-core "^4.3.2"
+    web3-errors "^1.1.4"
+    web3-eth "^4.5.0"
+    web3-eth-contract "^4.2.0"
     web3-net "^4.0.7"
-    web3-types "^1.3.0"
-    web3-utils "^4.0.7"
-    web3-validator "^2.0.3"
+    web3-types "^1.5.0"
+    web3-utils "^4.2.1"
+    web3-validator "^2.0.4"
 
 web3-eth-iban@^4.0.7:
   version "4.0.7"
@@ -8216,6 +8209,23 @@ web3-eth@^4.3.1, web3-eth@^4.4.0:
     web3-rpc-methods "^1.1.4"
     web3-types "^1.3.1"
     web3-utils "^4.1.1"
+    web3-validator "^2.0.4"
+
+web3-eth@^4.5.0:
+  version "4.5.0"
+  resolved "https://registry.yarnpkg.com/web3-eth/-/web3-eth-4.5.0.tgz#57f5cc020c9b3c4c20d0dacbd87eaa1a9d6c86c0"
+  integrity sha512-crisE46o/SHMVm+XHAXEaR8k76NCImq+hi0QQEJ+VaLZbDobI/Gvog1HwTukDUDRgnYSAFGqD0cTRyAwDurwpA==
+  dependencies:
+    setimmediate "^1.0.5"
+    web3-core "^4.3.2"
+    web3-errors "^1.1.4"
+    web3-eth-abi "^4.2.0"
+    web3-eth-accounts "^4.1.1"
+    web3-net "^4.0.7"
+    web3-providers-ws "^4.0.7"
+    web3-rpc-methods "^1.2.0"
+    web3-types "^1.5.0"
+    web3-utils "^4.2.1"
     web3-validator "^2.0.4"
 
 web3-net@^4.0.7:
@@ -8268,10 +8278,24 @@ web3-rpc-methods@^1.1.3, web3-rpc-methods@^1.1.4:
     web3-types "^1.3.1"
     web3-validator "^2.0.3"
 
+web3-rpc-methods@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/web3-rpc-methods/-/web3-rpc-methods-1.2.0.tgz#761dcb036ab16edb2b03e80c11e3f5df24690345"
+  integrity sha512-CWJ/g4I4WyYvLkf21wCZAehdhU/VjX/OAPHnqF5/FPDJlogOsOnGXHqi1Z5AP+ocdt395PNubd8jyMMJoYGSBA==
+  dependencies:
+    web3-core "^4.3.2"
+    web3-types "^1.5.0"
+    web3-validator "^2.0.4"
+
 web3-types@^1.3.0, web3-types@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/web3-types/-/web3-types-1.3.1.tgz#cf6148ad46b68c5c89714613380b270d31e297be"
   integrity sha512-8fXi7h/t95VKRtgU4sxprLPZpsTh3jYDfSghshIDBgUD/OoGe5S+syP24SUzBZYllZ/L+hMr2gdp/0bGJa8pYQ==
+
+web3-types@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/web3-types/-/web3-types-1.5.0.tgz#35b5c0ab149b0d566efeaed8ddaa40db159c748e"
+  integrity sha512-geWuMIeegQ8AedKAO6wO4G4j1gyQ1F/AyKLMw2vud4bsfZayyzWJgCMDZtjYMm5uo2a7i8j1W3/4QFmzlSy5cw==
 
 web3-utils@^4.0.7, web3-utils@^4.1.0, web3-utils@^4.1.1:
   version "4.1.1"
@@ -8281,6 +8305,17 @@ web3-utils@^4.0.7, web3-utils@^4.1.0, web3-utils@^4.1.1:
     ethereum-cryptography "^2.0.0"
     web3-errors "^1.1.4"
     web3-types "^1.3.1"
+    web3-validator "^2.0.4"
+
+web3-utils@^4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/web3-utils/-/web3-utils-4.2.1.tgz#326bc6e9e4d047f7b38ba68bee1399c4f9f621e3"
+  integrity sha512-Fk29BlEqD9Q9Cnw4pBkKw7czcXiRpsSco/BzEUl4ye0ZTSHANQFfjsfQmNm4t7uY11u6Ah+8F3tNjBeU4CA80A==
+  dependencies:
+    ethereum-cryptography "^2.0.0"
+    eventemitter3 "^5.0.1"
+    web3-errors "^1.1.4"
+    web3-types "^1.5.0"
     web3-validator "^2.0.4"
 
 web3-validator@^2.0.3, web3-validator@^2.0.4:
@@ -8294,26 +8329,26 @@ web3-validator@^2.0.3, web3-validator@^2.0.4:
     web3-types "^1.3.1"
     zod "^3.21.4"
 
-web3@^4.4.0:
-  version "4.4.0"
-  resolved "https://registry.yarnpkg.com/web3/-/web3-4.4.0.tgz#83e5906675608adf9a14841f257e441c9154a8c7"
-  integrity sha512-WcFA3RgE+cyM96MHLPs5Ec155nkYQuwhjk3JIhxcy6J1QrZK2zvKGzTQCCYHe3JhraduNTMbWy+EeNNGGji9+Q==
+web3@^4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/web3/-/web3-4.6.0.tgz#202b31489d843d278547002b9a73327f19952b70"
+  integrity sha512-hoI6r29B4kjxINI21rBVaE0Bz0hwtW+Sbppn5ZDTWn5PSQpBW4ecYFDVKVE6K3gbmSjY2fknu2cjBTqha7S53A==
   dependencies:
     web3-core "^4.3.2"
     web3-errors "^1.1.4"
-    web3-eth "^4.4.0"
+    web3-eth "^4.5.0"
     web3-eth-abi "^4.2.0"
     web3-eth-accounts "^4.1.1"
     web3-eth-contract "^4.2.0"
-    web3-eth-ens "^4.0.8"
+    web3-eth-ens "^4.1.0"
     web3-eth-iban "^4.0.7"
     web3-eth-personal "^4.0.8"
     web3-net "^4.0.7"
     web3-providers-http "^4.1.0"
     web3-providers-ws "^4.0.7"
-    web3-rpc-methods "^1.1.4"
-    web3-types "^1.3.1"
-    web3-utils "^4.1.1"
+    web3-rpc-methods "^1.2.0"
+    web3-types "^1.5.0"
+    web3-utils "^4.2.1"
     web3-validator "^2.0.4"
 
 webidl-conversions@^3.0.0:
