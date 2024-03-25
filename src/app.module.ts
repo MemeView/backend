@@ -23,7 +23,7 @@ import { join } from 'path';
       envFilePath: ['.env'],
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'client'),
+      rootPath: join(__dirname, '..', 'public'),
     }),
     GraphqlModule,
     CronModule,
