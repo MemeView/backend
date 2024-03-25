@@ -5,10 +5,17 @@ import { AuthService } from 'src/auth/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RefreshMiddleware } from 'src/auth/refresh-jwt.middleware';
+import { SignalBotService } from '../signal-bot/signal-bot.service';
 
 @Module({
   controllers: [SolveScoreController],
-  providers: [SolveScoreService, AuthService, JwtService, JwtAuthGuard],
+  providers: [
+    SolveScoreService,
+    AuthService,
+    JwtService,
+    JwtAuthGuard,
+    SignalBotService,
+  ],
 })
 export class SolveScoreModule {
   configure(consumer: MiddlewareConsumer) {

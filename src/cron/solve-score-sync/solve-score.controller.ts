@@ -7,6 +7,7 @@ import {
   Query,
   UseGuards,
   Req,
+  Post,
 } from '@nestjs/common';
 import { SolveScoreService } from './solve-score.service';
 import { PrismaClient } from '@prisma/client';
@@ -24,12 +25,14 @@ import { Request, Response } from 'express';
 import * as jwt from 'jsonwebtoken';
 import { AuthService } from 'src/auth/auth.service';
 import { getAbsoluteScore } from 'src/helpers/getAbsoluteScore';
+import { SignalBotService } from '../signal-bot/signal-bot.service';
 
 @Controller('api')
 export class SolveScoreController {
   constructor(
     private readonly solveScoreService: SolveScoreService,
     private readonly authService: AuthService,
+    private readonly signalBotService: SignalBotService,
     private prisma: PrismaClient,
   ) {}
 
@@ -484,6 +487,21 @@ export class SolveScoreController {
         calculatedOn: calculatedOn,
         data: result[scoreQuery],
       };
+    } catch (e) {
+      return e;
+    }
+  }
+
+  @Post('/solve-ttms-by-hours')
+  async solveTtmsByHours() {
+    try {
+      await this.solveScoreService.solveTtmsByHours('9am');
+      console.log(`Current ttms has beet copied to the column 9am`);
+      const sendedMessagesCount =
+        await this.signalBotService.sendMessageToAllUsers();
+      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
+
+      return 'ok';
     } catch (e) {
       return e;
     }
