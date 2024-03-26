@@ -95,9 +95,9 @@ export class PostingService {
     }
   }
 
-  async sendTelegramPhoto(message: string, image: string) {
+  async sendTelegramPhoto(message: string, image: string, chatId: string) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    const chatId = process.env.TELEGRAM_CHAT_ID;
+    // const chatId = process.env.TELEGRAM_CHAT_ID;
     const bot = new TelegramBot(botToken, {
       polling: false,
     });
@@ -462,7 +462,7 @@ Start Signal Bot ⏩ https://t.me/TokenWatch\\_SignalBot
           lastAveragePortfolio.average24Result,
         ).toFixed(1)}% 🚀
 
-Details 👉 https://tokenwatch.ai/en/top30-portfolio-invetment-results/
+Details 👉 https://tokenwatch.ai/en/investment-results
 
 Start Signal Bot ⏩ https://t.me/TokenWatch_SignalBot
 
@@ -488,8 +488,43 @@ Start Signal Bot ⏩ https://t.me/TokenWatch_SignalBot
 
           fs.writeFileSync('modified_image.png', modifiedImage);
 
-          await this.sendTelegramPhoto(telegramMessage, 'modified_image.png');
+          await this.sendTelegramPhoto(
+            telegramMessage,
+            'modified_image.png',
+            process.env.TELEGRAM_CHAT_ID,
+          );
           await this.sendTwitterPhoto(twitterMessage, 'modified_image.png');
+
+          // await this.sendTelegramPhoto(
+          //   telegramMessage,
+          //   'modified_image.png',
+          //   process.env.TELEGRAM_TOKENWATCH_AI_ID,
+          // );
+          // await this.sendTelegramPhoto(
+          //   telegramMessage,
+          //   'modified_image.png',
+          //   process.env.CHAT_RU_ID,
+          // );
+          // await this.sendTelegramPhoto(
+          //   telegramMessage,
+          //   'modified_image.png',
+          //   process.env.CHAT_AR_ID,
+          // );
+          // await this.sendTelegramPhoto(
+          //   telegramMessage,
+          //   'modified_image.png',
+          //   process.env.CHAT_ES_ID,
+          // );
+          // await this.sendTelegramPhoto(
+          //   telegramMessage,
+          //   'modified_image.png',
+          //   process.env.CHAT_PT_ID,
+          // );
+          // await this.sendTelegramPhoto(
+          //   telegramMessage,
+          //   'modified_image.png',
+          //   process.env.CHAT_ZH_ID,
+          // );
         });
       }
 
