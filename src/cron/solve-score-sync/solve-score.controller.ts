@@ -352,14 +352,15 @@ export class SolveScoreController {
       if (
         user &&
         user.subscriptionLevel === 'trial' &&
-        user.trialCreatedAt < sevenDaysAgo
+        user.trialCreatedAt < sevenDaysAgo &&
+        !userInWhiteList
       ) {
         return response.status(403).json({
           message: `Your trial period has already expired`,
         });
       }
 
-      if (user && user.subscriptionLevel === 'plan3') {
+      if (user && user.subscriptionLevel === 'plan3' && !userInWhiteList) {
         const subscribedReferralsCount = await this.authService.checkReferrals(
           decodedAccessToken.walletAddress,
         );
@@ -374,7 +375,8 @@ export class SolveScoreController {
       if (
         user &&
         (user.subscriptionLevel === 'plan1' ||
-          user.subscriptionLevel === 'plan2')
+          user.subscriptionLevel === 'plan2') &&
+        !userInWhiteList
       ) {
         const holdingTWAmount = await this.authService.getTokenBalance(
           decodedAccessToken.walletAddress,

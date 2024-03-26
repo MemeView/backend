@@ -115,21 +115,26 @@ export class PostingService {
 
   async sendTwitterPhoto(message, imageUrl) {
     try {
-      // const imageData = fs.readFileSync(imageUrl);
+      const imageData = fs.readFileSync(imageUrl, { encoding: 'base64' });
+      // const imageData = imageUrl;
 
-      const tweet = await twitterClient.post('media/upload', {
-        media: imageUrl,
+      const mediaUpload = await twitterClient.post('media/upload', {
+        media: imageData,
       });
-      const tweetId = tweet.media_id_string;
+
+      const mediaId = mediaUpload.media_id_string;
 
       await twitterClient.post('statuses/update', {
         status: message,
-        media_ids: tweetId,
+        media_ids: mediaId,
       });
 
       console.log('Twitter message sent successfully!');
     } catch (error) {
       console.error('Failed to send Twitter message:', error);
+      if (error.errors) {
+        console.error('Twitter API errors:', error.errors);
+      }
     }
   }
 
@@ -469,6 +474,7 @@ Start Signal Bot ⏩ https://t.me/TokenWatch_SignalBot
           'public/images',
           'tokenwatch_post_standard.png',
         );
+        console.log(imagePath);
 
         fs.readFile(imagePath, async (err, data) => {
           if (err) {

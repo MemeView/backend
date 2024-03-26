@@ -46,9 +46,31 @@ model Votes {
 }
 
 model Score {
-  tokenAddress String  @id @unique
-  tokenScore   Float
-  liquidity    String?
+  tokenAddress                      String  @id @unique
+  tokenScore                        Float
+  liquidity                         String?
+  scoreFromVolume                   Float?
+  votesCount24                      Float?
+  scoreFromVotesFor24h              Float?
+  scoreFromVotes                    Float?
+  votersPercentageFor24h            Float?
+  scoreFromVotersPercentageFor24h   Float?
+  votesPercentageFor24h             Float?
+  scoreFromVotesPercentageFor24h    Float?
+  scoreFromVotesPercentageFor7d     Float?
+  votesPercentageFor7d              Float?
+  change24                          String?
+  scoreFromChange24                 Float?
+  volume                            String?
+  volumeChangePercentage            Float?
+  createdAt                         Int?
+  txnCount24                        Int?
+  holders                           Int?
+  holdersCountScore                 Int?
+  holdersGrowthPercentage1h         Int?
+  scoreHoldersGrowthPercentage1h    Int?
+  holdersGrowthPercentage24h        Int?
+  scoreHoldersGrowthPercentage24h   Int?
 }
 
 model ScoreByHours {

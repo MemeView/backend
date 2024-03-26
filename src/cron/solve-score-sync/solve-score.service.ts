@@ -18,9 +18,20 @@ interface finalResults {
 
 interface Result {
   tokenAddress: string;
+  scoreFromVolume?: number | null;
+  votesCount24?: number;
+  scoreFromVotesFor24h?: number;
   scoreFromVotes?: number;
+  votersPercentageFor24h?: number;
+  scoreFromVotersPercentageFor24h?: number;
+  votesPercentageFor24h?: number;
+  scoreFromVotesPercentageFor24h?: number;
+  scoreFromVotesPercentageFor7d?: number;
+  votesPercentageFor7d?: number;
+  change24?: string;
   scoreFromChange24?: number;
-  scoreFromVolume?: number;
+  volume?: string;
+  volumeChangePercentage?: number;
 }
 
 interface Token {
@@ -31,9 +42,39 @@ interface Token {
 
 interface Volume {
   tokenAddress: string;
-  scoreFromVolume: number | null;
+  scoreFromVolume?: number | null;
+  votesCount24?: number;
+  scoreFromVotesFor24h?: number;
   scoreFromVotes?: number;
+  votersPercentageFor24h?: number;
+  scoreFromVotersPercentageFor24h?: number;
+  votesPercentageFor24h?: number;
+  scoreFromVotesPercentageFor24h?: number;
+  scoreFromVotesPercentageFor7d?: number;
+  votesPercentageFor7d?: number;
+  change24?: string;
   scoreFromChange24?: number;
+  volume?: string;
+  volumeChangePercentage?: number;
+}
+
+interface CombinedResult {
+  tokenAddress: string;
+  score: number | null;
+  scoreFromVolume: number | null;
+  votesCount24: number | null;
+  scoreFromVotesFor24h: number | null;
+  scoreFromVotes: number | null;
+  votersPercentageFor24h: number | null;
+  scoreFromVotersPercentageFor24h: number | null;
+  votesPercentageFor24h: number | null;
+  scoreFromVotesPercentageFor24h: number | null;
+  scoreFromVotesPercentageFor7d: number | null;
+  votesPercentageFor7d: number | null;
+  change24: string | null;
+  scoreFromChange24: number | null;
+  volume: string | null;
+  volumeChangePercentage: number | null;
 }
 
 type ColumnName =
@@ -255,6 +296,8 @@ export class SolveScoreService {
         resultFromVolume.push({
           tokenAddress: tokenTwoDaysAgo.address,
           scoreFromVolume: volumeScore,
+          volume: tokenYesterday.volume24,
+          volumeChangePercentage: volumePercentage,
         });
       }
 
@@ -379,27 +422,45 @@ export class SolveScoreService {
       // Получаем количество голосов в целом за текущий токен за сегодня
       const countToday = resultTodayObj[row.tokenAddress] || 0;
 
+      const votersPercentageFor24h = uniqueVotersRatio;
+      const scoreFromVotersPercentageFor24h = votersScore;
+      const votesCount24 = countToday;
+      let scoreFromVotesFor24h = 0;
+
       if (countToday >= 100) {
         // Вычисляем баллы от количества голосов за 1 день
         scoreForCurrentToken += 3;
+        scoreFromVotesFor24h += 3;
       } else {
         scoreForCurrentToken += 3 * (countToday / 100);
+        scoreFromVotesFor24h += 3 * (countToday / 100);
       }
 
       const todayPercentage = totalCountToday
         ? (countToday / totalCountToday) * 100
         : 0;
+
+      const votesPercentageFor24h = todayPercentage;
+      let scoreFromVotesPercentageFor24h = 0;
       // Вычисляем баллы от общего количества голосов за 1 день
       if (todayPercentage >= 10) {
         scoreForCurrentToken += 6;
+        scoreFromVotesPercentageFor24h += 6;
       } else {
         scoreForCurrentToken += (6 * todayPercentage) / 10;
+        scoreFromVotesPercentageFor24h += (6 * todayPercentage) / 10;
       }
 
       // Добавляем результаты в массив для результатов сегодняшнего дня
       resultsFromVotesToday.push({
         tokenAddress: row.tokenAddress,
         scoreFromVotes: scoreForCurrentToken,
+        votersPercentageFor24h,
+        scoreFromVotersPercentageFor24h,
+        votesCount24,
+        scoreFromVotesFor24h,
+        votesPercentageFor24h,
+        scoreFromVotesPercentageFor24h,
       });
     });
 
@@ -412,17 +473,24 @@ export class SolveScoreService {
       const sevenDaysPercentage = totalCount
         ? (countSevenDays / totalCount) * 100
         : 0;
+
+      const votesPercentageFor7d = sevenDaysPercentage;
+      let scoreFromVotesPercentageFor7d = 0;
       // Вычисляем баллы от общего количества голосов за последние 7 дней
       if (sevenDaysPercentage >= 5) {
         scoreForCurrentToken += 3;
+        scoreFromVotesPercentageFor7d += 3;
       } else {
         scoreForCurrentToken += (3 * sevenDaysPercentage) / 5;
+        scoreFromVotesPercentageFor7d += (3 * sevenDaysPercentage) / 5;
       }
 
       // Добавляем результаты в массив для последних 7 дней
       resultsFromVotesSevenDays.push({
         tokenAddress: row.tokenAddress,
         scoreFromVotes: scoreForCurrentToken,
+        votesPercentageFor7d,
+        scoreFromVotesPercentageFor7d,
       });
     });
 
@@ -441,6 +509,37 @@ export class SolveScoreService {
           if (found) {
             found.scoreFromVotes =
               (found.scoreFromVotes ?? 0) + (current.scoreFromVotes ?? 0);
+
+            found.votersPercentageFor24h =
+              (found.votersPercentageFor24h ?? 0) +
+              (current.votersPercentageFor24h ?? 0);
+
+            found.scoreFromVotersPercentageFor24h =
+              (found.scoreFromVotersPercentageFor24h ?? 0) +
+              (current.scoreFromVotersPercentageFor24h ?? 0);
+
+            found.votesCount24 =
+              (found.votesCount24 ?? 0) + (current.votesCount24 ?? 0);
+
+            found.scoreFromVotesFor24h =
+              (found.scoreFromVotesFor24h ?? 0) +
+              (current.scoreFromVotesFor24h ?? 0);
+
+            found.votesPercentageFor24h =
+              (found.votesPercentageFor24h ?? 0) +
+              (current.votesPercentageFor24h ?? 0);
+
+            found.scoreFromVotesPercentageFor24h =
+              (found.scoreFromVotesPercentageFor24h ?? 0) +
+              (current.scoreFromVotesPercentageFor24h ?? 0);
+
+            found.votesPercentageFor7d =
+              (found.votesPercentageFor7d ?? 0) +
+              (current.votesPercentageFor7d ?? 0);
+
+            found.scoreFromVotesPercentageFor7d =
+              (found.scoreFromVotesPercentageFor7d ?? 0) +
+              (current.scoreFromVotesPercentageFor7d ?? 0);
           } else {
             previous[current.tokenAddress] = current;
             current.scoreFromVotes = current.scoreFromVotes ?? 0;
@@ -471,6 +570,7 @@ export class SolveScoreService {
         const score = await this.calculateScore(item.change24);
         const result: Result = {
           tokenAddress: item.address,
+          change24: item.change24,
           scoreFromChange24: score || 0,
         };
         return result;
@@ -573,14 +673,100 @@ export class SolveScoreService {
       return acc;
     }, {});
 
-    // Преобразуем объединенные результаты в окончательные результаты
-    let scoreFinalResults = Object.entries(combinedResults).map(
-      ([tokenAddress, { score }]) => ({
+    //
+    const combinedResultsArray: CombinedResult[] = Object.keys(
+      combinedResults,
+    ).map((tokenAddress) => {
+      const combinedResult: CombinedResult = {
         tokenAddress,
-        tokenScore: score + 20, // +20 за 2theMoon
-        liquidity: '',
-      }),
-    );
+        score: combinedResults[tokenAddress].score,
+        scoreFromVolume: null,
+        votesCount24: null,
+        scoreFromVotesFor24h: null,
+        scoreFromVotes: null,
+        votersPercentageFor24h: null,
+        scoreFromVotersPercentageFor24h: null,
+        votesPercentageFor24h: null,
+        scoreFromVotesPercentageFor24h: null,
+        scoreFromVotesPercentageFor7d: null,
+        votesPercentageFor7d: null,
+        change24: null,
+        scoreFromChange24: null,
+        volume: null,
+        volumeChangePercentage: null,
+      };
+
+      uniqueResultFromVolume.forEach((result) => {
+        if (result.tokenAddress === tokenAddress) {
+          combinedResult.scoreFromVolume = result.scoreFromVolume ?? null;
+          combinedResult.volume = result.volume ?? null;
+          combinedResult.volumeChangePercentage =
+            result.volumeChangePercentage ?? null;
+        }
+      });
+
+      uniqueResultFromVotes.forEach((result) => {
+        if (result.tokenAddress === tokenAddress) {
+          combinedResult.votesCount24 = result.votesCount24 ?? null;
+          combinedResult.scoreFromVotesFor24h =
+            result.scoreFromVotesFor24h ?? null;
+          combinedResult.scoreFromVotes = result.scoreFromVotes ?? null;
+          combinedResult.votersPercentageFor24h =
+            result.votersPercentageFor24h ?? null;
+          combinedResult.scoreFromVotersPercentageFor24h =
+            result.scoreFromVotersPercentageFor24h ?? null;
+          combinedResult.votesPercentageFor24h =
+            result.votesPercentageFor24h ?? null;
+          combinedResult.scoreFromVotesPercentageFor24h =
+            result.scoreFromVotesPercentageFor24h ?? null;
+          combinedResult.scoreFromVotesPercentageFor7d =
+            result.scoreFromVotesPercentageFor7d ?? null;
+          combinedResult.votesPercentageFor7d =
+            result.votesPercentageFor7d ?? null;
+        }
+      });
+
+      uniqueResultFromChange24.forEach((result) => {
+        if (result.tokenAddress === tokenAddress) {
+          combinedResult.change24 = result.change24 ?? null;
+          combinedResult.scoreFromChange24 = result.scoreFromChange24 ?? null;
+        }
+      });
+
+      return combinedResult;
+    });
+    //
+
+    // Преобразуем объединенные результаты в окончательные результаты
+    // let scoreFinalResults = Object.entries(combinedResultsArray).map(
+    //   ([tokenAddress, { score }]) => ({
+    //     tokenAddress,
+    //     tokenScore: score + 20, // +20 за 2theMoon
+    //     liquidity: '',
+    //   }),
+    // );
+
+    let scoreFinalResults = combinedResultsArray.map((result) => ({
+      tokenAddress: result.tokenAddress,
+      scoreFromVolume: result.scoreFromVolume,
+      votesCount24: result.votesCount24,
+      scoreFromVotesFor24h: result.scoreFromVotesFor24h,
+      scoreFromVotes: result.scoreFromVotes,
+      votersPercentageFor24h: result.votersPercentageFor24h,
+      scoreFromVotersPercentageFor24h: result.scoreFromVotersPercentageFor24h,
+      votesPercentageFor24h: result.votesPercentageFor24h,
+      scoreFromVotesPercentageFor24h: result.scoreFromVotesPercentageFor24h,
+      scoreFromVotesPercentageFor7d: result.scoreFromVotesPercentageFor7d,
+      votesPercentageFor7d: result.votesPercentageFor7d,
+      change24: result.change24,
+      scoreFromChange24: result.scoreFromChange24,
+      volume: result.volume,
+      volumeChangePercentage: result.volumeChangePercentage,
+      tokenScore: result.score + 20, // +20 за 2theMoon
+      liquidity: '',
+      createdAt: 0,
+      txnCount24: 0,
+    }));
 
     // Получаем адреса токенов из окончательных результатов
     const finalResultsAddresses = scoreFinalResults.map(
@@ -595,6 +781,7 @@ export class SolveScoreService {
         liquidity: true,
         createdAt: true,
         txnCount24: true,
+        volume24: true,
       },
     });
 
@@ -606,6 +793,9 @@ export class SolveScoreService {
       );
 
       result.liquidity = token?.liquidity ?? '0';
+      result.createdAt = token?.createdAt ?? null;
+      result.txnCount24 = token?.txnCount24 ?? null;
+      result.volume = token?.volume24 ?? null;
 
       if (token && token.txnCount24 < 10) {
         // Уменьшаем баллы для токенов с низкой ликвидностью

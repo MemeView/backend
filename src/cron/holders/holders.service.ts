@@ -9,6 +9,12 @@ import { UTCDate } from '@date-fns/utc';
 
 type holdersScore = {
   tokenAddress: string;
+  holders?: number;
+  holdersCountScore?: number;
+  holdersGrowthPercentage1h?: number;
+  scoreHoldersGrowthPercentage1h?: number;
+  holdersGrowthPercentage24h?: number;
+  scoreHoldersGrowthPercentage24h?: number;
   tokenScore: number;
 };
 
@@ -255,33 +261,45 @@ export class HoldersService {
         },
       });
 
-      const holdersScore: { tokenAddress: string; tokenScore: number }[] = [];
+      const holdersScore: holdersScore[] = [];
 
       await Promise.allSettled(
         holdersNowRaw.map(async (token) => {
           let tokenScore = 0;
+          const holders: number = token.holdersCount;
+          let holdersCountScore = 0;
+          let holdersGrowthPercentage1h: number = null;
+          let scoreHoldersGrowthPercentage1h: number = null;
+          let holdersGrowthPercentage24h: number = null;
+          let scoreHoldersGrowthPercentage24h: number = null;
 
           // баллы для токенов, у которых networkId не 1
           if (token.holdersCount === -1) {
             tokenScore += 10;
+            holdersCountScore += 10;
           }
 
           // баллы за количество холдеров
           if (token.holdersCount >= 50 && token.holdersCount <= 200) {
             tokenScore += (token.holdersCount - 50) * (12 / 150);
+            holdersCountScore += (token.holdersCount - 50) * (12 / 150);
           }
 
           if (token.holdersCount > 200 && token.holdersCount <= 3000) {
             tokenScore += 12;
+            holdersCountScore += 12;
           }
 
           if (token.holdersCount > 3000 && token.holdersCount <= 10000) {
             tokenScore +=
               (token.holdersCount - 3001) * ((1 - 12) / (10000 - 3001)) + 12;
+            holdersCountScore +=
+              (token.holdersCount - 3001) * ((1 - 12) / (10000 - 3001)) + 12;
           }
 
           if (token.holdersCount > 10000) {
             tokenScore += 1;
+            holdersCountScore += 1;
           }
 
           // находим количество холдеров для этого токена 1 час назад
@@ -308,24 +326,33 @@ export class HoldersService {
             // на сколько процентов увеличилось количество холдеров
             const holdersPercentage = holdersRatio * 100 - 100;
 
+            holdersGrowthPercentage1h = holdersPercentage;
+
             if (holdersPercentage >= 0 && holdersPercentage < 50) {
               tokenScore += holdersPercentage * (18 / 50);
+              scoreHoldersGrowthPercentage1h = holdersPercentage * (18 / 50);
             }
 
             if (holdersPercentage >= 50 && holdersPercentage < 100) {
               tokenScore += 18;
+              scoreHoldersGrowthPercentage1h = 18;
             }
 
             if (holdersPercentage >= 100 && holdersPercentage < 200) {
               tokenScore += 18 - (holdersPercentage - 100) * (18 / 100);
+              scoreHoldersGrowthPercentage1h =
+                18 - (holdersPercentage - 100) * (18 / 100);
             }
 
             if (holdersPercentage >= 200 && holdersPercentage < 300) {
               tokenScore += (holdersPercentage - 200) * (-18 / 100);
+              scoreHoldersGrowthPercentage1h =
+                (holdersPercentage - 200) * (-18 / 100);
             }
 
             if (holdersPercentage >= 300) {
               tokenScore += -18;
+              scoreHoldersGrowthPercentage1h = -18;
             }
           }
 
@@ -341,29 +368,44 @@ export class HoldersService {
 
             const holdersPercentage = holdersRatio * 100 - 100;
 
+            holdersGrowthPercentage24h = holdersPercentage;
+
             if (holdersPercentage >= 0 && holdersPercentage < 50) {
               tokenScore += holdersPercentage * (12 / 50);
+              scoreHoldersGrowthPercentage24h = holdersPercentage * (12 / 50);
             }
 
             if (holdersPercentage >= 50 && holdersPercentage < 100) {
               tokenScore += 12;
+              scoreHoldersGrowthPercentage24h = 12;
             }
 
             if (holdersPercentage >= 100 && holdersPercentage < 200) {
               tokenScore += 12 - (holdersPercentage - 100) * (12 / 100);
+              scoreHoldersGrowthPercentage24h =
+                12 - (holdersPercentage - 100) * (12 / 100);
             }
 
             if (holdersPercentage >= 200 && holdersPercentage < 300) {
               tokenScore += 0 - (holdersPercentage - 200) * (12 / 100);
+              scoreHoldersGrowthPercentage24h =
+                0 - (holdersPercentage - 200) * (12 / 100);
             }
 
             if (holdersPercentage >= 300) {
               tokenScore += -12;
+              scoreHoldersGrowthPercentage24h = -12;
             }
           }
 
           await holdersScore.push({
             tokenAddress: token.tokenAddress,
+            holders,
+            holdersCountScore,
+            holdersGrowthPercentage1h,
+            scoreHoldersGrowthPercentage1h,
+            holdersGrowthPercentage24h,
+            scoreHoldersGrowthPercentage24h,
             tokenScore,
           });
         }),
@@ -380,7 +422,29 @@ export class HoldersService {
         } else {
           mergedScores[item.tokenAddress] = {
             tokenScore: item.tokenScore,
+            holders: item.holders,
+            holdersCountScore: item.holdersCountScore,
+            holdersGrowthPercentage1h: item.holdersGrowthPercentage1h,
+            scoreHoldersGrowthPercentage1h: item.scoreHoldersGrowthPercentage1h,
+            holdersGrowthPercentage24h: item.holdersGrowthPercentage24h,
+            scoreHoldersGrowthPercentage24h:
+              item.scoreHoldersGrowthPercentage24h,
             liquidity: null, // Добавляем liquidity с начальным значением null
+            scoreFromVolume: null,
+            votesCount24: null,
+            scoreFromVotesFor24h: null,
+            scoreFromVotes: null,
+            votersPercentageFor24h: null,
+            scoreFromVotersPercentageFor24h: null,
+            votesPercentageFor24h: null,
+            scoreFromVotesPercentageFor24h: null,
+            scoreFromVotesPercentageFor7d: null,
+            votesPercentageFor7d: null,
+            change24: null,
+            scoreFromChange24: null,
+            volume: null,
+            volumeChangePercentage: null,
+            createdAt: null,
           };
         }
       });
@@ -390,10 +454,57 @@ export class HoldersService {
         if (mergedScores[item.tokenAddress]) {
           mergedScores[item.tokenAddress].tokenScore += item.tokenScore;
           mergedScores[item.tokenAddress].liquidity = item.liquidity;
+          mergedScores[item.tokenAddress].scoreFromVolume =
+            item.scoreFromVolume;
+          mergedScores[item.tokenAddress].votesCount24 = item.votesCount24;
+          mergedScores[item.tokenAddress].scoreFromVotesFor24h =
+            item.scoreFromVotesFor24h;
+          mergedScores[item.tokenAddress].scoreFromVotes = item.scoreFromVotes;
+          mergedScores[item.tokenAddress].votersPercentageFor24h =
+            item.votersPercentageFor24h;
+          mergedScores[item.tokenAddress].scoreFromVotersPercentageFor24h =
+            item.scoreFromVotersPercentageFor24h;
+          mergedScores[item.tokenAddress].votesPercentageFor24h =
+            item.votesPercentageFor24h;
+          mergedScores[item.tokenAddress].scoreFromVotesPercentageFor24h =
+            item.scoreFromVotesPercentageFor24h;
+          mergedScores[item.tokenAddress].scoreFromVotesPercentageFor7d =
+            item.scoreFromVotesPercentageFor7d;
+          mergedScores[item.tokenAddress].votesPercentageFor7d =
+            item.votesPercentageFor7d;
+          mergedScores[item.tokenAddress].change24 = item.change24;
+          mergedScores[item.tokenAddress].scoreFromChange24 =
+            item.scoreFromChange24;
+          mergedScores[item.tokenAddress].volume = item.volume;
+          mergedScores[item.tokenAddress].volumeChangePercentage =
+            item.volumeChangePercentage;
+          mergedScores[item.tokenAddress].createdAt = item.createdAt;
         } else {
           mergedScores[item.tokenAddress] = {
             tokenScore: item.tokenScore,
+            holders: null,
+            holdersCountScore: null,
+            holdersGrowthPercentage1h: null,
+            scoreHoldersGrowthPercentage1h: null,
+            holdersGrowthPercentage24h: null,
+            scoreHoldersGrowthPercentage24h: null,
             liquidity: item.liquidity,
+            scoreFromVolume: item.scoreFromVolume,
+            votesCount24: item.votesCount24,
+            scoreFromVotesFor24h: item.scoreFromVotesFor24h,
+            scoreFromVotes: item.scoreFromVotes,
+            votersPercentageFor24h: item.votersPercentageFor24h,
+            scoreFromVotersPercentageFor24h:
+              item.scoreFromVotersPercentageFor24h,
+            votesPercentageFor24h: item.votesPercentageFor24h,
+            scoreFromVotesPercentageFor24h: item.scoreFromVotesPercentageFor24h,
+            scoreFromVotesPercentageFor7d: item.scoreFromVotesPercentageFor7d,
+            votesPercentageFor7d: item.votesPercentageFor7d,
+            change24: item.change24,
+            scoreFromChange24: item.scoreFromChange24,
+            volume: item.volume,
+            volumeChangePercentage: item.volumeChangePercentage,
+            createdAt: item.createdAt,
           };
         }
       });
@@ -403,6 +514,38 @@ export class HoldersService {
         tokenAddress: key,
         tokenScore: mergedScores[key].tokenScore as number,
         liquidity: mergedScores[key].liquidity as string,
+
+        holders: mergedScores[key].holders as number,
+        holdersCountScore: mergedScores[key].holdersCountScore as number,
+        holdersGrowthPercentage1h: mergedScores[key]
+          .holdersGrowthPercentage1h as number,
+        scoreHoldersGrowthPercentage1h: mergedScores[key]
+          .scoreHoldersGrowthPercentage1h as number,
+        holdersGrowthPercentage24h: mergedScores[key]
+          .holdersGrowthPercentage24h as number,
+        scoreHoldersGrowthPercentage24h: mergedScores[key]
+          .scoreHoldersGrowthPercentage24h as number,
+        scoreFromVolume: mergedScores[key].scoreFromVolume as number,
+        votesCount24: mergedScores[key].votesCount24 as number,
+        scoreFromVotesFor24h: mergedScores[key].scoreFromVotesFor24h as number,
+        scoreFromVotes: mergedScores[key].scoreFromVotes as number,
+        votersPercentageFor24h: mergedScores[key]
+          .votersPercentageFor24h as number,
+        scoreFromVotersPercentageFor24h: mergedScores[key]
+          .scoreFromVotersPercentageFor24h as number,
+        votesPercentageFor24h: mergedScores[key]
+          .votesPercentageFor24h as number,
+        scoreFromVotesPercentageFor24h: mergedScores[key]
+          .scoreFromVotesPercentageFor24h as number,
+        scoreFromVotesPercentageFor7d: mergedScores[key]
+          .scoreFromVotesPercentageFor7d as number,
+        votesPercentageFor7d: mergedScores[key].votesPercentageFor7d as number,
+        change24: mergedScores[key].change24 as string,
+        scoreFromChange24: mergedScores[key].scoreFromChange24 as number,
+        volume: mergedScores[key].volume as string,
+        volumeChangePercentage: mergedScores[key]
+          .volumeChangePercentage as number,
+        createdAt: mergedScores[key].createdAt as number,
       }));
 
       mergedArray = mergedArray.filter((item) => item.tokenScore > 0);
