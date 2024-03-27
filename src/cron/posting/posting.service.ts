@@ -115,8 +115,8 @@ export class PostingService {
 
   async sendTwitterPhoto(message, imageUrl) {
     try {
-      const imageData = fs.readFileSync(imageUrl, { encoding: 'base64' });
-      // const imageData = imageUrl;
+      // const imageData = fs.readFileSync(imageUrl, { encoding: 'base64' });
+      const imageData = imageUrl;
 
       const mediaUpload = await twitterClient.post('media/upload', {
         media: imageData,

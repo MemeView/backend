@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RefreshMiddleware } from 'src/auth/refresh-jwt.middleware';
 import { SignalBotService } from '../signal-bot/signal-bot.service';
+import { SignalBotModule } from '../signal-bot/signal-bot.module';
 
 @Module({
   controllers: [SolveScoreController],
@@ -14,8 +15,9 @@ import { SignalBotService } from '../signal-bot/signal-bot.service';
     AuthService,
     JwtService,
     JwtAuthGuard,
-    SignalBotService,
+    // SignalBotService,
   ],
+  imports: [SignalBotModule],
 })
 export class SolveScoreModule {
   configure(consumer: MiddlewareConsumer) {
