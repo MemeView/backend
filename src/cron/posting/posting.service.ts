@@ -495,36 +495,36 @@ Start Signal Bot ⏩ https://t.me/TokenWatch_SignalBot
           );
           await this.sendTwitterPhoto(twitterMessage, 'modified_image.png');
 
-          // await this.sendTelegramPhoto(
-          //   telegramMessage,
-          //   'modified_image.png',
-          //   process.env.TELEGRAM_TOKENWATCH_AI_ID,
-          // );
-          // await this.sendTelegramPhoto(
-          //   telegramMessage,
-          //   'modified_image.png',
-          //   process.env.CHAT_RU_ID,
-          // );
-          // await this.sendTelegramPhoto(
-          //   telegramMessage,
-          //   'modified_image.png',
-          //   process.env.CHAT_AR_ID,
-          // );
-          // await this.sendTelegramPhoto(
-          //   telegramMessage,
-          //   'modified_image.png',
-          //   process.env.CHAT_ES_ID,
-          // );
-          // await this.sendTelegramPhoto(
-          //   telegramMessage,
-          //   'modified_image.png',
-          //   process.env.CHAT_PT_ID,
-          // );
-          // await this.sendTelegramPhoto(
-          //   telegramMessage,
-          //   'modified_image.png',
-          //   process.env.CHAT_ZH_ID,
-          // );
+          await this.sendTelegramPhoto(
+            telegramMessage,
+            'modified_image.png',
+            process.env.TELEGRAM_TOKENWATCH_AI_ID,
+          );
+          await this.sendTelegramPhoto(
+            telegramMessage,
+            'modified_image.png',
+            process.env.CHAT_RU_ID,
+          );
+          await this.sendTelegramPhoto(
+            telegramMessage,
+            'modified_image.png',
+            process.env.CHAT_AR_ID,
+          );
+          await this.sendTelegramPhoto(
+            telegramMessage,
+            'modified_image.png',
+            process.env.CHAT_ES_ID,
+          );
+          await this.sendTelegramPhoto(
+            telegramMessage,
+            'modified_image.png',
+            process.env.CHAT_PT_ID,
+          );
+          await this.sendTelegramPhoto(
+            telegramMessage,
+            'modified_image.png',
+            process.env.CHAT_ZH_ID,
+          );
         });
       }
 
