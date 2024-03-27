@@ -115,20 +115,12 @@ export class PostingService {
 
   async sendTwitterPhoto(message, imageUrl: string) {
     try {
-      const imageData = fs.readFileSync(imageUrl, { encoding: 'base64' });
-      // const imageData = imageUrl;
-
-      const mediaUpload = await twitterClient.v1.post('media/upload', {
-        media: imageData,
+      const mediaId = await twitterClient.v1.uploadMedia(imageUrl, {
+        mimeType: 'image/jpeg',
       });
-      console.log(mediaUpload);
 
-      const mediaId = mediaUpload.media_id_string;
-
-      await twitterClient.v2.post('statuses/update', {
-        status: message,
-        media_ids: mediaId,
-        media_type: 'image/png',
+      const tweet = await twitterClient.v2.tweet(message, {
+        media: { media_ids: [mediaId] },
       });
 
       console.log('Twitter message sent successfully!');
