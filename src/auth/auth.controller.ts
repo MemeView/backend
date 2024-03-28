@@ -457,9 +457,13 @@ export class AuthController {
         plan,
       );
 
+      if (result.status !== 200 || result.status !== 201) {
+        throw new HttpException(result.message, result.status);
+      }
+
       return result;
     } catch (error) {
-      throw new HttpException(error.message, 403);
+      throw new HttpException(error.message, error.status);
     }
   }
 
