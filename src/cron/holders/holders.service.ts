@@ -445,6 +445,7 @@ export class HoldersService {
             volume: null,
             volumeChangePercentage: null,
             createdAt: null,
+            txnCount24: null,
           };
         }
       });
@@ -479,6 +480,7 @@ export class HoldersService {
           mergedScores[item.tokenAddress].volumeChangePercentage =
             item.volumeChangePercentage;
           mergedScores[item.tokenAddress].createdAt = item.createdAt;
+          mergedScores[item.tokenAddress].txnCount24 = item.txnCount24;
         } else {
           mergedScores[item.tokenAddress] = {
             tokenScore: item.tokenScore,
@@ -505,6 +507,7 @@ export class HoldersService {
             volume: item.volume,
             volumeChangePercentage: item.volumeChangePercentage,
             createdAt: item.createdAt,
+            txnCount24: item.txnCount24,
           };
         }
       });
@@ -546,6 +549,7 @@ export class HoldersService {
         volumeChangePercentage: mergedScores[key]
           .volumeChangePercentage as number,
         createdAt: mergedScores[key].createdAt as number,
+        txnCount24: mergedScores[key].txnCount24 as number,
       }));
 
       mergedArray = mergedArray.filter((item) => item.tokenScore > 0);
