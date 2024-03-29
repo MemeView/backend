@@ -91,13 +91,13 @@ export class TtmsPortfolioService {
           const totalDailyPriceChange095By24h = JSON.stringify(
             oldPortfolio24.reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
-            }, 0) / oldPortfolio.length,
+            }, 0) / 30,
           );
 
           const totalDailyPriceChange095By48h = JSON.stringify(
             oldPortfolio48.reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
-            }, 0) / oldPortfolio.length,
+            }, 0) / 30,
           );
 
           await this.prisma.averageTtmsPortfolioResults.deleteMany({
@@ -272,13 +272,13 @@ export class TtmsPortfolioService {
           const totalDailyPriceChange095By24h = JSON.stringify(
             oldPortfolio24.reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
-            }, 0) / oldPortfolio.length,
+            }, 0) / 30,
           );
 
           const totalDailyPriceChange095By48h = JSON.stringify(
             oldPortfolio48.reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
-            }, 0) / oldPortfolio.length,
+            }, 0) / 30,
           );
 
           await this.prisma.averageTtmsPortfolioResults.deleteMany({

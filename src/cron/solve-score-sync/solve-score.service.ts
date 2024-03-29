@@ -766,6 +766,10 @@ export class SolveScoreService {
       liquidity: '',
       createdAt: 0,
       txnCount24: 0,
+      txnCount24Score: 0,
+      liquidityScore: 0,
+      tokenAgeScore: 0,
+      aiScore: 20,
     }));
 
     // Получаем адреса токенов из окончательных результатов
@@ -800,11 +804,13 @@ export class SolveScoreService {
       if (token && token.txnCount24 < 10) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
         result.tokenScore -= 50;
+        result.txnCount24Score = -50;
       }
 
       if (token && parseFloat(token.liquidity!) < 5000) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
         result.tokenScore -= 99;
+        result.liquidityScore = -99;
       }
 
       if (
@@ -813,6 +819,7 @@ export class SolveScoreService {
         parseFloat(token.liquidity!) < 10000
       ) {
         result.tokenScore += 1;
+        result.liquidityScore = 1;
       }
 
       if (
@@ -822,6 +829,7 @@ export class SolveScoreService {
       ) {
         // Увеличиваем баллы для токенов с ликвидностью от 10000 до 50000
         result.tokenScore += 10;
+        result.liquidityScore = 10;
       }
 
       if (
@@ -832,16 +840,20 @@ export class SolveScoreService {
         // Увеличиваем баллы для токенов с ликвидностью от 50000 до 500000, учитывая изменение по формуле
         result.tokenScore +=
           10 - ((parseFloat(token.liquidity!) - 50000) * 9) / 450000;
+        result.liquidityScore =
+          10 - ((parseFloat(token.liquidity!) - 50000) * 9) / 450000;
       }
 
       if (token && parseFloat(token.liquidity!) >= 500000) {
         // Увеличиваем баллы для токенов с высокой ликвидностью (больше или равно 500000)
         result.tokenScore += 1;
+        result.liquidityScore = 1;
       }
 
       // Уменьшаю баллы, если токену меньше 24 часов. Число 86400 это 24 часа в секундах
       if (token && currentTimestampInSeconds - token.createdAt < 86400) {
         result.tokenScore -= 40;
+        result.tokenAgeScore = -40;
       }
 
       // Уменьшаю баллы, если токен был создан в промежутке между 24 часов и 48 часов.
@@ -851,6 +863,7 @@ export class SolveScoreService {
         currentTimestampInSeconds - token.createdAt < 172800
       ) {
         result.tokenScore -= 20;
+        result.tokenAgeScore = -20;
       }
 
       // Уменьшаю баллы, если токен был создан в промежутке между 48 часов и 72 часов.
@@ -860,6 +873,7 @@ export class SolveScoreService {
         currentTimestampInSeconds - token.createdAt < 259200
       ) {
         result.tokenScore -= 10;
+        result.tokenAgeScore = -10;
       }
     });
 

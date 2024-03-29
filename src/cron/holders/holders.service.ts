@@ -481,6 +481,11 @@ export class HoldersService {
             item.volumeChangePercentage;
           mergedScores[item.tokenAddress].createdAt = item.createdAt;
           mergedScores[item.tokenAddress].txnCount24 = item.txnCount24;
+          mergedScores[item.tokenAddress].txnCount24Score =
+            item.txnCount24Score;
+          mergedScores[item.tokenAddress].liquidityScore = item.liquidityScore;
+          mergedScores[item.tokenAddress].tokenAgeScore = item.tokenAgeScore;
+          mergedScores[item.tokenAddress].aiScore = item.aiScore;
         } else {
           mergedScores[item.tokenAddress] = {
             tokenScore: item.tokenScore,
@@ -508,6 +513,10 @@ export class HoldersService {
             volumeChangePercentage: item.volumeChangePercentage,
             createdAt: item.createdAt,
             txnCount24: item.txnCount24,
+            txnCount24Score: item.txnCount24Score,
+            liquidityScore: item.liquidityScore,
+            tokenAgeScore: item.tokenAgeScore,
+            aiScore: item.aiScore,
           };
         }
       });
@@ -550,6 +559,10 @@ export class HoldersService {
           .volumeChangePercentage as number,
         createdAt: mergedScores[key].createdAt as number,
         txnCount24: mergedScores[key].txnCount24 as number,
+        txnCount24Score: mergedScores[key].txnCount24Score as number,
+        liquidityScore: mergedScores[key].liquidityScore as number,
+        tokenAgeScore: mergedScores[key].tokenAgeScore as number,
+        aiScore: mergedScores[key].aiScore as number,
       }));
 
       mergedArray = mergedArray.filter((item) => item.tokenScore > 0);
