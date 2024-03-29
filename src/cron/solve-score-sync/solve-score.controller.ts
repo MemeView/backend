@@ -345,7 +345,7 @@ export class SolveScoreController {
         (user && !userInWhiteList && !user.subscriptionLevel)
       ) {
         return response.status(403).json({
-          message: 'You have no active plan',
+          message: 'You have no active plan.',
         });
       }
 
@@ -356,7 +356,7 @@ export class SolveScoreController {
         !userInWhiteList
       ) {
         return response.status(403).json({
-          message: `Your trial period has already expired`,
+          message: `Your trial period has already expired.`,
         });
       }
 
@@ -367,7 +367,7 @@ export class SolveScoreController {
 
         if (subscribedReferralsCount < 3) {
           return response.status(403).json({
-            message: `You dont have permission to tokens score`,
+            message: `You dont have permission to tokens score.`,
           });
         }
       }
@@ -390,7 +390,7 @@ export class SolveScoreController {
 
         if (holdingTWAmount < plan.holdingTWAmount) {
           return response.status(403).json({
-            message: `You dont have permission to tokens score`,
+            message: `You dont have permission to tokens score.`,
           });
         }
       }
@@ -403,7 +403,7 @@ export class SolveScoreController {
         !userInWhiteList
       ) {
         return response.status(403).json({
-          message: `You dont have permission to tokens score`,
+          message: `You dont have permission to tokens score.`,
         });
       }
 
