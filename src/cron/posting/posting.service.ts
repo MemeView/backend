@@ -39,7 +39,7 @@ export class PostingService {
     const image = await loadImage(imagePath);
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-    ctx.font = 'bold 150px Arial';
+    ctx.font = 'bold 250px Arial';
     ctx.fillStyle = 'white';
     ctx.textAlign = 'center'; // Выравнивание текста по центру
     ctx.textBaseline = 'middle'; // Выравнивание текста по вертикали по центру
@@ -47,7 +47,7 @@ export class PostingService {
     // Рассчитываем координаты
     const textWidth = ctx.measureText(text).width;
     const xPosition = (canvas.width - textWidth) / 2;
-    const yPosition = canvas.height / 2 - 100;
+    const yPosition = canvas.height / 2 - 130;
 
     ctx.fillText(text, xPosition + textWidth / 2, yPosition);
 
@@ -444,7 +444,7 @@ export class PostingService {
       if (parseFloat(lastAveragePortfolio.average24Result) > 1) {
         const telegramMessage = `💹 24h portfolio growth: +${parseFloat(
           lastAveragePortfolio.average24Result,
-        ).toFixed(1)}% 🚀
+        ).toFixed(2)}% 🚀
 
 Details 👉 https://tokenwatch.ai/en/top30-portfolio-invetment-results/
 
@@ -454,7 +454,7 @@ Start Signal Bot ⏩ https://t.me/TokenWatch\\_SignalBot
 
         const twitterMessage = `💹 24h portfolio growth: +${parseFloat(
           lastAveragePortfolio.average24Result,
-        ).toFixed(1)}% 🚀
+        ).toFixed(2)}% 🚀
 
 Details 👉 https://tokenwatch.ai/en/investment-results
 
