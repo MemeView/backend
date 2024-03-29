@@ -350,19 +350,19 @@ export class AuthController {
             parseFloat(telegramId),
           );
 
-        const userHasVoted = await this.signalBotService.checkUserHasVoted(
-          walletAddress,
-        );
+        // const userHasVoted = await this.signalBotService.checkUserHasVoted(
+        //   walletAddress,
+        // );
 
-        const tokenBalance = await this.authService.getTokenBalance(
-          walletAddress,
-        );
+        // const tokenBalance = await this.authService.getTokenBalance(
+        //   walletAddress,
+        // );
 
-        let holdingTWAmount = false;
+        // let holdingTWAmount = false;
 
-        if (tokenBalance > 0) {
-          holdingTWAmount = true;
-        }
+        // if (tokenBalance > 0) {
+        //   holdingTWAmount = true;
+        // }
 
         const twitter = true;
 
@@ -386,8 +386,8 @@ export class AuthController {
           req: {
             twitter: twitter,
             telegram: isSubscribedOnChanel,
-            voted: userHasVoted,
-            holding: holdingTWAmount,
+            voted: true,
+            holding: true,
             expirationDate: add(user.trialCreatedAt, { days: 7 }),
           },
         });
