@@ -345,7 +345,7 @@ export class SolveScoreController {
         (user && !userInWhiteList && !user.subscriptionLevel)
       ) {
         return response.status(403).json({
-          message: 'There is no subscription',
+          message: 'You have no active plan',
         });
       }
 
