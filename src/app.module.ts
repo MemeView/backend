@@ -14,6 +14,7 @@ import { PostingModule } from './cron/posting/posting.module';
 import { AuthModule } from './auth/auth.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { EventTrackerModule } from './event-tracker/event-tracker.module';
+import { TtmsTransparencyModule } from './ttms-transparency/ttms-transparency.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { EventTrackerModule } from './event-tracker/event-tracker.module';
     AuthModule,
     TwitterModule,
     EventTrackerModule,
+    TtmsTransparencyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -51,4 +51,16 @@ export class HoldersController {
       return e;
     }
   }
+
+  @Post('/tw-holders')
+  async getTwHolders() {
+    try {
+      const result = await this.holdersService.handleTwHolders();
+
+      return result;
+    } catch (e) {
+      console.error('Error', e);
+      return e;
+    }
+  }
 }

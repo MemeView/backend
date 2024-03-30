@@ -108,6 +108,7 @@ export class CronService {
     });
 
     await this.definedTokensService.handleTokenWatch();
+    await this.holdersService.handleTwHolders();
 
     await this.handleRetry(async () => {
       if (currentHour === 0) {

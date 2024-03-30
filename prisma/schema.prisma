@@ -48,6 +48,8 @@ model Votes {
 model Score {
   tokenAddress                      String  @id @unique
   tokenScore                        Float
+  liquidityTokenSymbol              String?
+  networkId                         Int?
   liquidity                         String?
   liquidityScore                    Int?
   scoreFromVolume                   Float?
@@ -63,7 +65,10 @@ model Score {
   change24                          String?
   scoreFromChange24                 Float?
   volume                            String?
+  volumeTwoDaysAgo                  String?
+  scoreFromVolumeTwoDaysAgo         Int?
   volumeChangePercentage            Float?
+  scoreFromVolumePercentage         Int?
   createdAt                         Int?
   txnCount24                        Int?
   txnCount24Score                   Int?
@@ -239,6 +244,7 @@ model TokenWatch {
   name                  String?
   symbol                String?
   token                 Json?
+  holders               Int?
 }
 
 model SignalBotUsers {

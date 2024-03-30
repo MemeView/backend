@@ -32,6 +32,11 @@ interface Result {
   scoreFromChange24?: number;
   volume?: string;
   volumeChangePercentage?: number;
+  liquidityTokenSymbol?: string;
+  networkId?: number;
+  volumeTwoDaysAgo?: string;
+  scoreFromVolumePercentage?: number;
+  scoreFromVolumeTwoDaysAgo?: number;
 }
 
 interface Token {
@@ -56,6 +61,9 @@ interface Volume {
   scoreFromChange24?: number;
   volume?: string;
   volumeChangePercentage?: number;
+  volumeTwoDaysAgo?: string;
+  scoreFromVolumePercentage?: number;
+  scoreFromVolumeTwoDaysAgo?: number;
 }
 
 interface CombinedResult {
@@ -75,6 +83,9 @@ interface CombinedResult {
   scoreFromChange24: number | null;
   volume: string | null;
   volumeChangePercentage: number | null;
+  volumeTwoDaysAgo?: string;
+  scoreFromVolumePercentage?: number;
+  scoreFromVolumeTwoDaysAgo?: number;
 }
 
 type ColumnName =
@@ -228,7 +239,10 @@ export class SolveScoreService {
       if (tokenYesterday) {
         const change24Percentage = parseFloat(tokenYesterday.change24) * 100;
         let volumeScore = 0;
+        let scoreFromVolumePercentage = 0;
         let volumePercentage = 0;
+        const volumeTwoDaysAgo = tokenTwoDaysAgo.volume24;
+        let scoreFromVolumeTwoDaysAgo = 0;
 
         if (
           parseFloat(tokenYesterday.volume24) >
@@ -255,42 +269,53 @@ export class SolveScoreService {
         if (change24Percentage >= -50) {
           if (volumePercentage < -50) {
             volumeScore -= 10;
+            scoreFromVolumePercentage = -10;
           }
 
           if (volumePercentage >= -50 && volumePercentage < 0) {
             volumeScore += 3 - (0 - volumePercentage) * (3 / 50);
+            scoreFromVolumePercentage = 3 - (0 - volumePercentage) * (3 / 50);
           }
 
           if (volumePercentage >= 0 && volumePercentage < 100) {
             volumeScore += 3 + volumePercentage * (7 / 100);
+            scoreFromVolumePercentage = 3 + volumePercentage * (7 / 100);
           }
 
           if (volumePercentage >= 100 && volumePercentage < 200) {
             volumeScore += 10;
+            scoreFromVolumePercentage = 10;
           }
 
           if (volumePercentage >= 200 && volumePercentage < 300) {
             volumeScore += 10 - (volumePercentage - 200) * (10 / 100);
+            scoreFromVolumePercentage =
+              10 - (volumePercentage - 200) * (10 / 100);
           }
 
           if (volumePercentage > 900) {
             volumeScore -= 10;
+            scoreFromVolumePercentage = -10;
           }
         }
 
         if (change24Percentage < -50) {
           if (volumePercentage >= -50 && volumePercentage < 100) {
             volumeScore += 0 - (volumePercentage + 50) * (10 / 150);
+            scoreFromVolumePercentage =
+              0 - (volumePercentage + 50) * (10 / 150);
           }
 
           if (volumePercentage >= 100) {
             volumeScore -= 10;
+            scoreFromVolumePercentage = -10;
           }
         }
 
         // отнимаю баллы если два дня назад volume24 был меньше 500 долларов
         if (parseFloat(tokenTwoDaysAgo.volume24) < 500) {
           volumeScore -= 50;
+          scoreFromVolumeTwoDaysAgo = -50;
         }
 
         resultFromVolume.push({
@@ -298,6 +323,9 @@ export class SolveScoreService {
           scoreFromVolume: volumeScore,
           volume: tokenYesterday.volume24,
           volumeChangePercentage: volumePercentage,
+          volumeTwoDaysAgo,
+          scoreFromVolumePercentage,
+          scoreFromVolumeTwoDaysAgo,
         });
       }
 
@@ -694,6 +722,9 @@ export class SolveScoreService {
         scoreFromChange24: null,
         volume: null,
         volumeChangePercentage: null,
+        volumeTwoDaysAgo: null,
+        scoreFromVolumePercentage: null,
+        scoreFromVolumeTwoDaysAgo: null,
       };
 
       uniqueResultFromVolume.forEach((result) => {
@@ -702,6 +733,11 @@ export class SolveScoreService {
           combinedResult.volume = result.volume ?? null;
           combinedResult.volumeChangePercentage =
             result.volumeChangePercentage ?? null;
+          combinedResult.volumeTwoDaysAgo = result.volumeTwoDaysAgo ?? null;
+          combinedResult.scoreFromVolumePercentage =
+            result.scoreFromVolumePercentage ?? null;
+          combinedResult.scoreFromVolumeTwoDaysAgo =
+            result.scoreFromVolumeTwoDaysAgo ?? null;
         }
       });
 
@@ -770,6 +806,11 @@ export class SolveScoreService {
       liquidityScore: 0,
       tokenAgeScore: 0,
       aiScore: 20,
+      liquidityTokenSymbol: '',
+      networkId: null as number,
+      volumeTwoDaysAgo: result.volumeTwoDaysAgo,
+      scoreFromVolumePercentage: result.scoreFromVolumePercentage,
+      scoreFromVolumeTwoDaysAgo: result.scoreFromVolumePercentage,
     }));
 
     // Получаем адреса токенов из окончательных результатов
@@ -786,6 +827,8 @@ export class SolveScoreService {
         createdAt: true,
         txnCount24: true,
         volume24: true,
+        liquidityTokenSymbol: true,
+        networkId: true,
       },
     });
 
@@ -800,6 +843,8 @@ export class SolveScoreService {
       result.createdAt = token?.createdAt ?? null;
       result.txnCount24 = token?.txnCount24 ?? null;
       result.volume = token?.volume24 ?? null;
+      result.liquidityTokenSymbol = token?.liquidityTokenSymbol ?? null;
+      result.networkId = token?.networkId ?? null;
 
       if (token && token.txnCount24 < 10) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
