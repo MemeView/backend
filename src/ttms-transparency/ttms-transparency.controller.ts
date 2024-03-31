@@ -1,6 +1,8 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { TtmsTransparencyService } from './ttms-transparency.service';
 import { PrismaClient } from '@prisma/client';
+import { subHours } from 'date-fns';
+import { UTCDate } from '@date-fns/utc';
 
 @Controller('api')
 export class TtmsTransparencyController {
@@ -27,10 +29,6 @@ export class TtmsTransparencyController {
       blockchain = null;
     }
 
-    console.log(interval);
-    console.log(snapshot);
-    console.log(blockchain);
-
     const result = this.ttmsTransparencyService.handleTtmsTransparency(
       interval,
       snapshot,
@@ -38,5 +36,16 @@ export class TtmsTransparencyController {
     );
 
     return result;
+  }
+
+  @Get('/ttms-transparency-dates')
+  async ttmsTransparencyDates() {
+    try {
+      const result = await this.ttmsTransparencyService.ttmsTransparencyDates();
+
+      return result;
+    } catch (e) {
+      return e;
+    }
   }
 }

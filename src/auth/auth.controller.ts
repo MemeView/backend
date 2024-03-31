@@ -523,4 +523,34 @@ export class AuthController {
       });
     }
   }
+
+  @Get('/users-stats')
+  async usersStats() {
+    try {
+      const signalBotUsers = await this.prisma.signalBotUsers.findMany();
+
+      const allUsers = await this.prisma.users.findMany();
+
+      const trialUsers = allUsers.filter(
+        (user) => user.subscriptionLevel === 'trial',
+      );
+
+      const plan1Users = allUsers.filter(
+        (user) => user.subscriptionLevel === 'plan1',
+      );
+
+      const plan2Users = allUsers.filter(
+        (user) => user.subscriptionLevel === 'plan2',
+      );
+
+      return {
+        signalBotUsers: signalBotUsers.length,
+        trialUsers: trialUsers.length,
+        plan1Users: plan1Users.length,
+        plan2Users: plan2Users.length,
+      };
+    } catch (error) {
+      return error;
+    }
+  }
 }

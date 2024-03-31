@@ -51,7 +51,7 @@ model Score {
   liquidityTokenSymbol              String?
   networkId                         Int?
   liquidity                         String?
-  liquidityScore                    Int?
+  liquidityScore                    Float?
   scoreFromVolume                   Float?
   votesCount24                      Float?
   scoreFromVotesFor24h              Float?
@@ -66,20 +66,20 @@ model Score {
   scoreFromChange24                 Float?
   volume                            String?
   volumeTwoDaysAgo                  String?
-  scoreFromVolumeTwoDaysAgo         Int?
+  scoreFromVolumeTwoDaysAgo         Float?
   volumeChangePercentage            Float?
   scoreFromVolumePercentage         Int?
   createdAt                         Int?
   txnCount24                        Int?
-  txnCount24Score                   Int?
+  txnCount24Score                   Float?
   holders                           Int?
-  holdersCountScore                 Int?
+  holdersCountScore                 Float?
   holdersGrowthPercentage1h         Int?
-  scoreHoldersGrowthPercentage1h    Int?
+  scoreHoldersGrowthPercentage1h    Float?
   holdersGrowthPercentage24h        Int?
-  scoreHoldersGrowthPercentage24h   Int?
-  aiScore                           Int?
-  tokenAgeScore                     Int?
+  scoreHoldersGrowthPercentage24h   Float?
+  aiScore                           Float?
+  tokenAgeScore                     Float?
 }
 
 model ScoreByHours {
