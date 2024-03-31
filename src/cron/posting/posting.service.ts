@@ -277,7 +277,7 @@ export class PostingService {
           network = 'bsc';
         }
 
-        if (messagesCount < 2 && parseFloat(token.averageScoreToday) >= 50) {
+        if (messagesCount < 2 && parseFloat(token.averageScoreToday) >= 40) {
           // Создаем сообщение для отправки
           const growth = parseFloat(token.change24) * 100;
           let tokenTwitterUrl = null;
