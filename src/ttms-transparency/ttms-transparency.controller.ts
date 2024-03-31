@@ -17,25 +17,29 @@ export class TtmsTransparencyController {
     @Param('snapshot') snapshot: string,
     @Param('blockchain') blockchain: string,
   ) {
-    if (!interval) {
-      interval = null;
+    try {
+      if (!interval) {
+        interval = null;
+      }
+
+      if (!snapshot) {
+        snapshot = null;
+      }
+
+      if (!blockchain) {
+        blockchain = null;
+      }
+
+      const result = this.ttmsTransparencyService.handleTtmsTransparency(
+        interval,
+        snapshot,
+        blockchain,
+      );
+
+      return result;
+    } catch (error) {
+      return error;
     }
-
-    if (!snapshot) {
-      snapshot = null;
-    }
-
-    if (!blockchain) {
-      blockchain = null;
-    }
-
-    const result = this.ttmsTransparencyService.handleTtmsTransparency(
-      interval,
-      snapshot,
-      blockchain,
-    );
-
-    return result;
   }
 
   @Get('/ttms-transparency-dates')
