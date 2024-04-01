@@ -48,6 +48,8 @@ model Votes {
 model Score {
   tokenAddress                      String  @id @unique
   tokenScore                        Float
+  symbol                            String?
+  image                             String?
   liquidityTokenSymbol              String?
   networkId                         Int?
   liquidity                         String?

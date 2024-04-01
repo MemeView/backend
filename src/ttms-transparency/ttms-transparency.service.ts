@@ -36,6 +36,7 @@ export class TtmsTransparencyService {
     }
 
     let score = await this.prisma.score.findMany();
+    const tokens = await this.prisma.tokens.findMany();
 
     if (snapshotSymbol !== 'current') {
       const portfolioRaw =
@@ -75,47 +76,57 @@ export class TtmsTransparencyService {
       );
 
       let resultTokens: resultToken[] = portfolio.map((portfolio) => {
-        const token = score.find(
+        const tokenScore = score.find(
           (token) => token.tokenAddress === portfolio.tokenAddress,
         );
 
-        if (token) {
+        const tokenData = tokens.find(
+          (token) => token.address === portfolio.tokenAddress,
+        );
+
+        if (tokenScore && tokenData) {
           return {
             tokenAddress: portfolio.tokenAddress,
-            ttms: token.tokenScore,
+            symbol: tokenData.symbol,
+            ttms: tokenScore.tokenScore,
             startPrice: portfolio.priceUSD,
             exitPrice: portfolio.exitPrice,
             resultPercentage: portfolio.dailyPriceChange095,
-            priceGrowthPercentageFor24h: token.change24,
-            priceGrowthPercentageFor24hScore: token.scoreFromChange24,
-            votesFor24: token.votesCount24,
-            votesFor24Score: token.scoreFromVotesFor24h,
-            votersPercentageFor24: token.votersPercentageFor24h,
-            votersPercentageFor24Score: token.scoreFromVotersPercentageFor24h,
-            votesPercentageFor24: token.votesPercentageFor24h,
-            votesPercentageFor24Score: token.scoreFromVotesPercentageFor24h,
-            votesPercentageFor7days: token.votesPercentageFor7d,
-            votesPercentageFor7daysScore: token.scoreFromVotesPercentageFor7d,
-            holders: token.holders,
-            holdersCountScore: token.holdersCountScore,
-            holdersGrowthPercentageFor1h: token.holdersGrowthPercentage1h,
+            priceGrowthPercentageFor24h: tokenData.change24,
+            priceGrowthPercentageFor24hScore: tokenScore.scoreFromChange24,
+            votesFor24: tokenScore.votesCount24,
+            votesFor24Score: tokenScore.scoreFromVotesFor24h,
+            votersPercentageFor24: tokenScore.votersPercentageFor24h,
+            votersPercentageFor24Score:
+              tokenScore.scoreFromVotersPercentageFor24h,
+            votesPercentageFor24: tokenScore.votesPercentageFor24h,
+            votesPercentageFor24Score:
+              tokenScore.scoreFromVotesPercentageFor24h,
+            votesPercentageFor7days: tokenScore.votesPercentageFor7d,
+            votesPercentageFor7daysScore:
+              tokenScore.scoreFromVotesPercentageFor7d,
+            holders: tokenScore.holders,
+            holdersCountScore: tokenScore.holdersCountScore,
+            holdersGrowthPercentageFor1h: tokenScore.holdersGrowthPercentage1h,
             holdersGrowthPercentageFor1hScore:
-              token.scoreHoldersGrowthPercentage1h,
-            holdersGrowthPercentageFor24h: token.holdersGrowthPercentage24h,
+              tokenScore.scoreHoldersGrowthPercentage1h,
+            holdersGrowthPercentageFor24h:
+              tokenScore.holdersGrowthPercentage24h,
             holdersGrowthPercentageFor24hScore:
-              token.scoreHoldersGrowthPercentage24h,
-            volumeChangePercentage: token.volumeChangePercentage,
-            scoreFromVolumePercentage: token.scoreFromVolumePercentage,
-            liquidity: token.liquidity,
-            liquidityScore: token.liquidityScore,
-            tokenAge: token.createdAt,
-            tokenAgeScore: token.tokenAgeScore,
-            volumeTwoDaysAgo: token.volumeTwoDaysAgo,
-            scoreFromVolumeTwoDaysAgo: token.scoreFromVolumeTwoDaysAgo,
-            txnCount24: token.txnCount24,
-            txnCount24Score: token.txnCount24Score,
-            aiScore: token.aiScore,
-            chain: token.liquidityTokenSymbol,
+              tokenScore.scoreHoldersGrowthPercentage24h,
+            volumeChangePercentage: tokenScore.volumeChangePercentage,
+            scoreFromVolumePercentage: tokenScore.scoreFromVolumePercentage,
+            liquidity: tokenData.liquidity,
+            liquidityScore: tokenScore.liquidityScore,
+            tokenAge: tokenData.createdAt,
+            tokenAgeScore: tokenScore.tokenAgeScore,
+            volumeTwoDaysAgo: tokenScore.volumeTwoDaysAgo,
+            scoreFromVolumeTwoDaysAgo: tokenScore.scoreFromVolumeTwoDaysAgo,
+            txnCount24: tokenData.txnCount24,
+            txnCount24Score: tokenScore.txnCount24Score,
+            aiScore: tokenScore.aiScore,
+            image: tokenData.image,
+            liquidityTokenSymbol: tokenData.liquidityTokenSymbol,
             networkId: portfolio.networkId,
           };
         }
@@ -151,6 +162,7 @@ export class TtmsTransparencyService {
     return score.slice(0, 30).map((element) => {
       return {
         tokenAddress: element.tokenAddress,
+        symbol: element.symbol,
         ttms: element.tokenScore,
         startPrice: null,
         exitPrice: null,
@@ -184,7 +196,8 @@ export class TtmsTransparencyService {
         txnCount24: element.txnCount24,
         txnCount24Score: element.txnCount24Score,
         aiScore: element.aiScore,
-        chain: element.liquidityTokenSymbol,
+        image: element.image,
+        liquidityTokenSymbol: element.liquidityTokenSymbol,
         networkId: element.networkId,
       };
     });

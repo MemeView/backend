@@ -811,6 +811,8 @@ export class SolveScoreService {
       volumeTwoDaysAgo: result.volumeTwoDaysAgo,
       scoreFromVolumePercentage: result.scoreFromVolumePercentage,
       scoreFromVolumeTwoDaysAgo: result.scoreFromVolumePercentage,
+      symbol: null as string,
+      image: null as string,
     }));
 
     // Получаем адреса токенов из окончательных результатов
@@ -829,6 +831,8 @@ export class SolveScoreService {
         volume24: true,
         liquidityTokenSymbol: true,
         networkId: true,
+        symbol: true,
+        image: true,
       },
     });
 
@@ -845,6 +849,8 @@ export class SolveScoreService {
       result.volume = token?.volume24 ?? null;
       result.liquidityTokenSymbol = token?.liquidityTokenSymbol ?? null;
       result.networkId = token?.networkId ?? null;
+      result.symbol = token?.symbol ?? null;
+      result.image = token?.image ?? null;
 
       if (token && token.txnCount24 < 10) {
         // Уменьшаем баллы для токенов с низкой ликвидностью

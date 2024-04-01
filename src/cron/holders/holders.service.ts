@@ -482,6 +482,8 @@ export class HoldersService {
             scoreFromVolumePercentage: null as number,
             scoreFromVolumeTwoDaysAgo: null as number,
             aiScore: null as number,
+            symbol: null as string,
+            image: null as string,
           };
         }
       });
@@ -541,6 +543,8 @@ export class HoldersService {
             item.scoreFromVolumePercentage;
           mergedScores[item.tokenAddress].scoreFromVolumeTwoDaysAgo +=
             item.scoreFromVolumeTwoDaysAgo;
+          mergedScores[item.tokenAddress].symbol = item.symbol;
+          mergedScores[item.tokenAddress].image = item.image;
         } else {
           mergedScores[item.tokenAddress] = {
             tokenScore: item.tokenScore,
@@ -577,6 +581,8 @@ export class HoldersService {
             volumeTwoDaysAgo: item.volumeTwoDaysAgo,
             scoreFromVolumePercentage: item.scoreFromVolumePercentage,
             scoreFromVolumeTwoDaysAgo: item.scoreFromVolumeTwoDaysAgo,
+            symbol: item.symbol,
+            image: item.image,
           };
         }
       });
@@ -630,6 +636,8 @@ export class HoldersService {
           .scoreFromVolumePercentage as number,
         scoreFromVolumeTwoDaysAgo: mergedScores[key]
           .scoreFromVolumeTwoDaysAgo as number,
+        symbol: mergedScores[key].symbol as string,
+        image: mergedScores[key].image as string,
       }));
 
       mergedArray = mergedArray.filter((item) => item.tokenScore > 0);

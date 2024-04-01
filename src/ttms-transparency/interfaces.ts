@@ -53,7 +53,7 @@ export interface resultToken {
   txnCount24: number;
   txnCount24Score: number;
   aiScore: number;
-  chain: string;
+  liquidityTokenSymbol: string;
   networkId: number;
 }
 
