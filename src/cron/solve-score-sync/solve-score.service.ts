@@ -799,7 +799,7 @@ export class SolveScoreService {
       volume: result.volume,
       volumeChangePercentage: result.volumeChangePercentage,
       tokenScore: result.score + 20, // +20 за 2theMoon
-      liquidity: '',
+      liquidity: null as string,
       createdAt: 0,
       txnCount24: 0,
       txnCount24Score: 0,
@@ -843,7 +843,7 @@ export class SolveScoreService {
         (item) => item.address === result.tokenAddress,
       );
 
-      result.liquidity = token?.liquidity ?? '0';
+      result.liquidity = token?.liquidity ?? null;
       result.createdAt = token?.createdAt ?? null;
       result.txnCount24 = token?.txnCount24 ?? null;
       result.volume = token?.volume24 ?? null;
