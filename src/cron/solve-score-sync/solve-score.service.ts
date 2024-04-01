@@ -858,7 +858,10 @@ export class SolveScoreService {
         result.txnCount24Score = -50;
       }
 
-      if (token && parseFloat(token.liquidity!) < 5000) {
+      if (
+        (token && parseFloat(token.liquidity!) < 5000) ||
+        parseFloat(result.liquidity) < 5000
+      ) {
         // Уменьшаем баллы для токенов с низкой ликвидностью
         result.tokenScore -= 99;
         result.liquidityScore = -99;
