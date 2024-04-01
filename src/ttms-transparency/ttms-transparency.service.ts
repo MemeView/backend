@@ -142,6 +142,10 @@ export class TtmsTransparencyService {
         });
       }
 
+      resultTokens.sort((a, b) => {
+        return b.ttms - a.ttms;
+      });
+
       return resultTokens;
     }
 
