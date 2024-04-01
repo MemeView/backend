@@ -3,39 +3,48 @@ import { PrismaClient } from '@prisma/client';
 import { portfolio, resultToken } from './interfaces';
 import { UTCDate } from '@date-fns/utc';
 import { subHours } from 'date-fns';
+import { SnapshotEnum, ChainEnum } from './interfaces';
 
 @Injectable()
 export class TtmsTransparencyService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async handleTtmsTransparency(
-    interval: string,
-    snapshot: string,
-    blockchain: string,
-  ) {
+  async handleTtmsTransparency(snapshot: SnapshotEnum, blockchain: ChainEnum) {
     let blockchainNumber = 0;
+    let interval = '24';
+    let snapshotSymbol = '9am';
     if (blockchain) {
-      if (blockchain === 'eth') {
+      if (blockchain === ChainEnum.eth) {
         blockchainNumber = 1;
       }
-      if (blockchain === 'bsc') {
+      if (blockchain === ChainEnum.bsc) {
         blockchainNumber = 56;
       }
     }
-    if (!snapshot) {
-      snapshot = '0';
+    if (
+      snapshot !== SnapshotEnum.amCurrent &&
+      snapshot !== SnapshotEnum.pmCurrent
+    ) {
+      snapshotSymbol = '9' + snapshot.slice(0, 2);
+      interval = snapshot.slice(2);
     }
-    if (!interval) {
-      interval = '0';
+    if (
+      snapshot === SnapshotEnum.amCurrent ||
+      snapshot === SnapshotEnum.pmCurrent
+    ) {
+      snapshotSymbol = 'current';
     }
 
     let score = await this.prisma.score.findMany();
 
-    if (snapshot !== '0' && interval !== '0') {
+    if (snapshotSymbol !== 'current') {
       const portfolioRaw =
         await this.prisma.last24SolvedTtmsPortfolio.findFirst({
           where: {
-            AND: [{ startedAt: snapshot }, { interval: parseFloat(interval) }],
+            AND: [
+              { startedAt: snapshotSymbol },
+              { interval: parseFloat(interval) },
+            ],
           },
         });
 

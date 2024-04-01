@@ -1,8 +1,16 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  Param,
+  UsePipes,
+} from '@nestjs/common';
 import { TtmsTransparencyService } from './ttms-transparency.service';
 import { PrismaClient } from '@prisma/client';
 import { subHours } from 'date-fns';
 import { UTCDate } from '@date-fns/utc';
+import { SnapshotEnum, ChainEnum } from './interfaces';
+import { ValidationPipe } from '@nestjs/common';
 
 @Controller('api')
 export class TtmsTransparencyController {
@@ -11,27 +19,30 @@ export class TtmsTransparencyController {
     private readonly prisma: PrismaClient,
   ) {}
 
-  @Get('/handle-ttms-transparency/:interval?/:snapshot?/:blockchain?')
+  @Get('/handle-ttms-transparency/:snapshot?/:blockchain?')
+  @UsePipes(new ValidationPipe({ transform: true }))
   async handleTtmsTransparency(
-    @Param('interval') interval: string,
-    @Param('snapshot') snapshot: string,
-    @Param('blockchain') blockchain: string,
+    @Param('snapshot') snapshot: SnapshotEnum,
+    @Param('blockchain') blockchain: ChainEnum,
   ) {
     try {
-      if (!interval) {
-        interval = null;
-      }
-
       if (!snapshot) {
-        snapshot = null;
+        snapshot = SnapshotEnum.amCurrent;
       }
 
       if (!blockchain) {
-        blockchain = null;
+        blockchain = ChainEnum.all;
+      }
+
+      if (!(snapshot in SnapshotEnum)) {
+        throw new BadRequestException('Invalid snapshot value');
+      }
+
+      if (!(blockchain in ChainEnum)) {
+        throw new BadRequestException('Invalid blockchain value');
       }
 
       const result = this.ttmsTransparencyService.handleTtmsTransparency(
-        interval,
         snapshot,
         blockchain,
       );

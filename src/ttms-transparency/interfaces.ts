@@ -56,3 +56,18 @@ export interface resultToken {
   chain: string;
   networkId: number;
 }
+
+export enum SnapshotEnum {
+  amCurrent = 'amCurrent',
+  am24 = 'am24',
+  am48 = 'am48',
+  pmCurrent = 'pmCurrent',
+  pm24 = 'pm24',
+  pm48 = 'pm48',
+}
+
+export enum ChainEnum {
+  all = 'all',
+  bsc = 'bsc',
+  eth = 'eth',
+}
