@@ -1,16 +1,9 @@
-import {
-  BadRequestException,
-  Controller,
-  Get,
-  Param,
-  UsePipes,
-} from '@nestjs/common';
+import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
 import { TtmsTransparencyService } from './ttms-transparency.service';
 import { PrismaClient } from '@prisma/client';
 import { subHours } from 'date-fns';
 import { UTCDate } from '@date-fns/utc';
 import { SnapshotEnum, ChainEnum } from './interfaces';
-import { ValidationPipe } from '@nestjs/common';
 
 @Controller('api')
 export class TtmsTransparencyController {
@@ -20,7 +13,6 @@ export class TtmsTransparencyController {
   ) {}
 
   @Get('/handle-ttms-transparency/:snapshot?/:blockchain?')
-  @UsePipes(new ValidationPipe({ transform: true }))
   async handleTtmsTransparency(
     @Param('snapshot') snapshot: SnapshotEnum,
     @Param('blockchain') blockchain: ChainEnum,
