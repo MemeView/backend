@@ -446,7 +446,7 @@ export class PostingService {
           lastAveragePortfolio.average24Result,
         ).toFixed(2)}% 🚀
 
-Details 👉 https://tokenwatch.ai/en/top30-portfolio-invetment-results/
+Details 👉 https://tokenwatch.ai/en/investment-results
 
 Start Signal Bot ⏩ https://t.me/TokenWatch\\_SignalBot
 
