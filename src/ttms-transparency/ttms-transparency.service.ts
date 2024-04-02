@@ -250,8 +250,8 @@ export class TtmsTransparencyService {
       const endYear = portfolioCalculationEndedAtUtc.getUTCFullYear();
 
       if (portfolio.startedAt === '9am') {
-        const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]} ${startYear}, 9am PST`;
-        const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]} ${endYear}, 9am PST`;
+        const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]}, 9am PST`;
+        const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]}, 9am PST`;
 
         return {
           snapshotType: 'portfolio',
@@ -263,8 +263,8 @@ export class TtmsTransparencyService {
       }
 
       if (portfolio.startedAt === '9pm') {
-        const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]} ${startYear}, 9pm PST`;
-        const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]} ${endYear}, 9pm PST`;
+        const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]}, 9pm PST`;
+        const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]}, 9pm PST`;
 
         return {
           snapshotType: 'portfolio',
@@ -291,8 +291,8 @@ export class TtmsTransparencyService {
       snapshotType: 'current',
       portfolioInterval: null,
       portfolioSnapShot: null,
-      cycleStart: `${nowPstDay} ${months[nowPstMonth]} ${nowPstYear}, ${nowPstHourFormatted}${nowPstAmPm} PST`,
-      cycleEnd: `${nowPstDay} ${months[nowPstMonth]} ${nowPstYear}, ${nowPstHourFormatted}${nowPstAmPm} PST`,
+      cycleStart: `${nowPstDay} ${months[nowPstMonth]}, ${nowPstHourFormatted}${nowPstAmPm} PST`,
+      cycleEnd: `${nowPstDay} ${months[nowPstMonth]}, ${nowPstHourFormatted}${nowPstAmPm} PST`,
     });
 
     return result;
