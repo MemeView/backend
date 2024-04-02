@@ -458,7 +458,7 @@ export class HoldersService {
             holdersGrowthPercentage24h: item.holdersGrowthPercentage24h,
             scoreHoldersGrowthPercentage24h:
               item.scoreHoldersGrowthPercentage24h,
-            liquidity: null, // Добавляем liquidity с начальным значением null
+            liquidity: null as string, // Добавляем liquidity с начальным значением null
             liquidityScore: null as number,
             scoreFromVolume: null as number,
             votesCount24: null,
