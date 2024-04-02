@@ -92,7 +92,9 @@ export class TtmsTransparencyService {
             startPrice: portfolio.priceUSD,
             exitPrice: portfolio.exitPrice,
             resultPercentage: portfolio.dailyPriceChange095,
-            priceGrowthPercentageFor24h: tokenData.change24,
+            priceGrowthPercentageFor24h: JSON.stringify(
+              parseFloat(tokenData.change24) * 100,
+            ),
             priceGrowthPercentageFor24hScore: tokenScore.scoreFromChange24,
             votesFor24: tokenScore.votesCount24,
             votesFor24Score: tokenScore.scoreFromVotesFor24h,
@@ -171,7 +173,9 @@ export class TtmsTransparencyService {
         startPrice: null,
         exitPrice: null,
         resultPercentage: null,
-        priceGrowthPercentageFor24h: element.change24,
+        priceGrowthPercentageFor24h: JSON.stringify(
+          parseFloat(element.change24) * 100,
+        ),
         priceGrowthPercentageFor24hScore: element.scoreFromChange24,
         votesFor24: element.votesCount24,
         votesFor24Score: element.scoreFromVotesFor24h,
