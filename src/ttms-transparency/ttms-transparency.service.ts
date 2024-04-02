@@ -306,6 +306,10 @@ export class TtmsTransparencyService {
       },
     });
 
-    return result;
+    const resultObject = Object.fromEntries(
+      result.map((item) => [Object.keys(item)[0], item[Object.keys(item)[0]]]),
+    );
+
+    return resultObject;
   }
 }
