@@ -10,6 +10,10 @@ export class TtmsTransparencyService {
   constructor(private readonly prisma: PrismaClient) {}
 
   async handleTtmsTransparency(snapshot: SnapshotEnum, blockchain: ChainEnum) {
+    const utcDate = new UTCDate();
+    const currentTimestampInSeconds: number = Math.floor(
+      utcDate.getTime() / 1000,
+    );
     let blockchainNumber = 0;
     let interval = '24';
     let snapshotSymbol = '9am';
@@ -120,7 +124,7 @@ export class TtmsTransparencyService {
             scoreFromVolumePercentage: tokenScore.scoreFromVolumePercentage,
             liquidity: tokenData.liquidity,
             liquidityScore: tokenScore.liquidityScore,
-            tokenAge: tokenData.createdAt,
+            tokenAge: (currentTimestampInSeconds - tokenData.createdAt) / 3600,
             tokenAgeScore: tokenScore.tokenAgeScore,
             volumeTwoDaysAgo: tokenScore.volumeTwoDaysAgo,
             scoreFromVolumeTwoDaysAgo: tokenScore.scoreFromVolumeTwoDaysAgo,
@@ -197,7 +201,7 @@ export class TtmsTransparencyService {
         scoreFromVolumePercentage: element.scoreFromVolumePercentage,
         liquidity: element.liquidity,
         liquidityScore: element.liquidityScore,
-        tokenAge: element.createdAt,
+        tokenAge: (currentTimestampInSeconds - element.createdAt) / 3600,
         tokenAgeScore: element.tokenAgeScore,
         volumeTwoDaysAgo: element.volumeTwoDaysAgo,
         scoreFromVolumeTwoDaysAgo: element.scoreFromVolumeTwoDaysAgo,
