@@ -183,6 +183,7 @@ model TgWhiteList {
 model TtmsPortfolio {
   id                    Int @id @default(autoincrement())
   tokenAddress          String
+  score                 Float?
   symbol                String
   priceUSD              String
   startedAt             String

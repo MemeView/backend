@@ -165,6 +165,7 @@ export class TtmsPortfolioService {
         ).map(([key, value]) => ({
           tokenAddress: value.address,
           symbol: value.symbol,
+          score: value.absoluteScore,
           pairAddress: value.pairAddress,
           quoteToken: value.quoteToken,
           priceUSD: value.priceUSD,
@@ -184,6 +185,7 @@ export class TtmsPortfolioService {
         ).map(([key, value]) => ({
           tokenAddress: value.address,
           symbol: value.symbol,
+          score: value.absoluteScore,
           pairAddress: value.pairAddress,
           quoteToken: value.quoteToken,
           priceUSD: value.priceUSD,
@@ -346,6 +348,7 @@ export class TtmsPortfolioService {
         ).map(([key, value]) => ({
           tokenAddress: value.address,
           symbol: value.symbol,
+          score: value.absoluteScore,
           pairAddress: value.pairAddress,
           quoteToken: value.quoteToken,
           priceUSD: value.priceUSD,
@@ -365,6 +368,7 @@ export class TtmsPortfolioService {
         ).map(([key, value]) => ({
           tokenAddress: value.address,
           symbol: value.symbol,
+          score: value.absoluteScore,
           pairAddress: value.pairAddress,
           quoteToken: value.quoteToken,
           priceUSD: value.priceUSD,
