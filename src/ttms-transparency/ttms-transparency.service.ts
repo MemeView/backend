@@ -257,12 +257,15 @@ export class TtmsTransparencyService {
         const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]}, 9am PST`;
         const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]}, 9am PST`;
 
+        const key = `${portfolio.startedAt}${portfolio.interval}`;
+
         return {
-          snapshotType: 'portfolio',
-          portfolioInterval: portfolio.interval,
-          portfolioSnapShot: portfolio.startedAt,
-          cycleStart: cycleStart,
-          cycleEnd: cycleEnd,
+          [key]: {
+            portfolioInterval: portfolio.interval,
+            portfolioSnapShot: portfolio.startedAt,
+            cycleStart: cycleStart,
+            cycleEnd: cycleEnd,
+          },
         };
       }
 
@@ -270,12 +273,15 @@ export class TtmsTransparencyService {
         const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]}, 9pm PST`;
         const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]}, 9pm PST`;
 
+        const key = `${portfolio.startedAt}${portfolio.interval}`;
+
         return {
-          snapshotType: 'portfolio',
-          portfolioInterval: portfolio.interval,
-          portfolioSnapShot: portfolio.startedAt,
-          cycleStart: cycleStart,
-          cycleEnd: cycleEnd,
+          [key]: {
+            portfolioInterval: portfolio.interval,
+            portfolioSnapShot: portfolio.startedAt,
+            cycleStart: cycleStart,
+            cycleEnd: cycleEnd,
+          },
         };
       }
     });
@@ -292,11 +298,12 @@ export class TtmsTransparencyService {
     const nowPstHourFormatted = nowPstHour % 12 || 12;
 
     await result.push({
-      snapshotType: 'current',
-      portfolioInterval: null,
-      portfolioSnapShot: null,
-      cycleStart: `${nowPstDay} ${months[nowPstMonth]}, ${nowPstHourFormatted}${nowPstAmPm} PST`,
-      cycleEnd: `${nowPstDay} ${months[nowPstMonth]}, ${nowPstHourFormatted}${nowPstAmPm} PST`,
+      current: {
+        portfolioInterval: null,
+        portfolioSnapShot: null,
+        cycleStart: `${nowPstDay} ${months[nowPstMonth]}, ${nowPstHourFormatted}${nowPstAmPm} PST`,
+        cycleEnd: `${nowPstDay} ${months[nowPstMonth]}, ${nowPstHourFormatted}${nowPstAmPm} PST`,
+      },
     });
 
     return result;
