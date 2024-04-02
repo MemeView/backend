@@ -642,6 +642,10 @@ export class HoldersService {
 
       mergedArray = mergedArray.filter((item) => item.tokenScore > 0);
 
+      mergedArray = mergedArray.filter((item) =>
+        oldScore.some((oldItem) => oldItem.tokenAddress === item.tokenAddress),
+      );
+
       const { count: deletedCount } = await this.prisma.score.deleteMany();
       const { count: addedCount } = await this.prisma.score.createMany({
         data: mergedArray,

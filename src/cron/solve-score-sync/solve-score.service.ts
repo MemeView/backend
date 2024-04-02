@@ -810,7 +810,7 @@ export class SolveScoreService {
       networkId: null as number,
       volumeTwoDaysAgo: result.volumeTwoDaysAgo,
       scoreFromVolumePercentage: result.scoreFromVolumePercentage,
-      scoreFromVolumeTwoDaysAgo: result.scoreFromVolumePercentage,
+      scoreFromVolumeTwoDaysAgo: result.scoreFromVolumeTwoDaysAgo,
       symbol: null as string,
       image: null as string,
     }));
