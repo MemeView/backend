@@ -1,6 +1,7 @@
 export interface portfolio {
   id: number;
   tokenAddress: string;
+  score?: number;
   symbol: string;
   priceUSD: string;
   startedAt: string;
@@ -18,6 +19,36 @@ export interface portfolio {
   stopLoss?: string;
   interval?: number;
   intervalCheck?: number;
+  liquidity?: string;
+  liquidityScore?: number;
+  scoreFromVolume?: number;
+  votesCount24?: number;
+  scoreFromVotesFor24h?: number;
+  scoreFromVotes?: number;
+  votersPercentageFor24h?: number;
+  scoreFromVotersPercentageFor24h?: number;
+  votesPercentageFor24h?: number;
+  scoreFromVotesPercentageFor24h?: number;
+  scoreFromVotesPercentageFor7d?: number;
+  votesPercentageFor7d?: number;
+  change24?: string;
+  scoreFromChange24?: number;
+  volume?: string;
+  volumeTwoDaysAgo?: string;
+  scoreFromVolumeTwoDaysAgo?: number;
+  volumeChangePercentage?: number;
+  scoreFromVolumePercentage?: number;
+  createdAt?: number;
+  txnCount24?: number;
+  txnCount24Score?: number;
+  holders?: number;
+  holdersCountScore?: number;
+  holdersGrowthPercentage1h?: number;
+  scoreHoldersGrowthPercentage1h?: number;
+  holdersGrowthPercentage24h?: number;
+  scoreHoldersGrowthPercentage24h?: number;
+  aiScore?: number;
+  tokenAgeScore?: number;
 }
 
 export interface resultToken {

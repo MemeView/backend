@@ -40,7 +40,6 @@ export class TtmsTransparencyService {
     }
 
     let score = await this.prisma.score.findMany();
-    const tokens = await this.prisma.tokens.findMany();
 
     if (snapshotSymbol !== 'current') {
       const portfolioRaw =
@@ -59,6 +58,7 @@ export class TtmsTransparencyService {
             id: value.id,
             tokenAddress: value.tokenAddress,
             symbol: value.symbol,
+            score: value.score,
             priceUSD: value.priceUSD,
             startedAt: value.startedAt,
             ATH: value.ATH,
@@ -75,67 +75,88 @@ export class TtmsTransparencyService {
             stopLoss: value.stopLoss,
             interval: value.interval,
             intervalCheck: value.intervalCheck,
+
+            liquidity: value.liquidity,
+            liquidityScore: value.liquidityScore,
+            scoreFromVolume: value.scoreFromVolume,
+            votesCount24: value.votesCount24,
+            scoreFromVotesFor24h: value.scoreFromVotesFor24h,
+            scoreFromVotes: value.scoreFromVotes,
+            votersPercentageFor24h: value.votersPercentageFor24h,
+            scoreFromVotersPercentageFor24h:
+              value.scoreFromVotersPercentageFor24h,
+            votesPercentageFor24h: value.votesPercentageFor24h,
+            scoreFromVotesPercentageFor24h:
+              value.scoreFromVotesPercentageFor24h,
+            scoreFromVotesPercentageFor7d: value.scoreFromVotesPercentageFor7d,
+            votesPercentageFor7d: value.votesPercentageFor7d,
+            change24: value.change24,
+            scoreFromChange24: value.scoreFromChange24,
+            volume: value.volume,
+            volumeTwoDaysAgo: value.volumeTwoDaysAgo,
+            scoreFromVolumeTwoDaysAgo: value.scoreFromVolumeTwoDaysAgo,
+            volumeChangePercentage: value.volumeChangePercentage,
+            scoreFromVolumePercentage: value.scoreFromVolumePercentage,
+            createdAt: value.createdAt,
+            txnCount24: value.txnCount24,
+            txnCount24Score: value.txnCount24Score,
+            holders: value.holders,
+            holdersCountScore: value.holdersCountScore,
+            holdersGrowthPercentage1h: value.holdersGrowthPercentage1h,
+            scoreHoldersGrowthPercentage1h:
+              value.scoreHoldersGrowthPercentage1h,
+            holdersGrowthPercentage24h: value.holdersGrowthPercentage24h,
+            scoreHoldersGrowthPercentage24h:
+              value.scoreHoldersGrowthPercentage24h,
+            aiScore: value.aiScore,
+            tokenAgeScore: value.tokenAgeScore,
           };
         },
       );
 
       let resultTokens: resultToken[] = portfolio.map((portfolio) => {
-        const tokenScore = score.find(
-          (token) => token.tokenAddress === portfolio.tokenAddress,
-        );
-
-        const tokenData = tokens.find(
-          (token) => token.address === portfolio.tokenAddress,
-        );
-
-        if (tokenScore && tokenData) {
-          return {
-            tokenAddress: portfolio.tokenAddress,
-            symbol: tokenData.symbol,
-            ttms: tokenScore.tokenScore,
-            startPrice: portfolio.priceUSD,
-            exitPrice: portfolio.exitPrice,
-            resultPercentage: portfolio.dailyPriceChange095,
-            priceGrowthPercentageFor24h: JSON.stringify(
-              parseFloat(tokenData.change24) * 100,
-            ),
-            priceGrowthPercentageFor24hScore: tokenScore.scoreFromChange24,
-            votesFor24: tokenScore.votesCount24,
-            votesFor24Score: tokenScore.scoreFromVotesFor24h,
-            votersPercentageFor24: tokenScore.votersPercentageFor24h,
-            votersPercentageFor24Score:
-              tokenScore.scoreFromVotersPercentageFor24h,
-            votesPercentageFor24: tokenScore.votesPercentageFor24h,
-            votesPercentageFor24Score:
-              tokenScore.scoreFromVotesPercentageFor24h,
-            votesPercentageFor7days: tokenScore.votesPercentageFor7d,
-            votesPercentageFor7daysScore:
-              tokenScore.scoreFromVotesPercentageFor7d,
-            holders: tokenScore.holders,
-            holdersCountScore: tokenScore.holdersCountScore,
-            holdersGrowthPercentageFor1h: tokenScore.holdersGrowthPercentage1h,
-            holdersGrowthPercentageFor1hScore:
-              tokenScore.scoreHoldersGrowthPercentage1h,
-            holdersGrowthPercentageFor24h:
-              tokenScore.holdersGrowthPercentage24h,
-            holdersGrowthPercentageFor24hScore:
-              tokenScore.scoreHoldersGrowthPercentage24h,
-            volumeChangePercentage: tokenScore.volumeChangePercentage,
-            scoreFromVolumePercentage: tokenScore.scoreFromVolumePercentage,
-            liquidity: tokenData.liquidity,
-            liquidityScore: tokenScore.liquidityScore,
-            tokenAge: (currentTimestampInSeconds - tokenData.createdAt) / 3600,
-            tokenAgeScore: tokenScore.tokenAgeScore,
-            volumeTwoDaysAgo: tokenScore.volumeTwoDaysAgo,
-            scoreFromVolumeTwoDaysAgo: tokenScore.scoreFromVolumeTwoDaysAgo,
-            txnCount24: tokenData.txnCount24,
-            txnCount24Score: tokenScore.txnCount24Score,
-            aiScore: tokenScore.aiScore,
-            image: tokenData.image,
-            liquidityTokenSymbol: tokenData.liquidityTokenSymbol,
-            networkId: portfolio.networkId,
-          };
-        }
+        return {
+          tokenAddress: portfolio.tokenAddress,
+          symbol: portfolio.symbol,
+          ttms: portfolio.score,
+          startPrice: portfolio.priceUSD,
+          exitPrice: portfolio.exitPrice,
+          resultPercentage: portfolio.dailyPriceChange095,
+          priceGrowthPercentageFor24h: JSON.stringify(
+            parseFloat(portfolio.change24) * 100,
+          ),
+          priceGrowthPercentageFor24hScore: portfolio.scoreFromChange24,
+          votesFor24: portfolio.votesCount24,
+          votesFor24Score: portfolio.scoreFromVotesFor24h,
+          votersPercentageFor24: portfolio.votersPercentageFor24h,
+          votersPercentageFor24Score: portfolio.scoreFromVotersPercentageFor24h,
+          votesPercentageFor24: portfolio.votesPercentageFor24h,
+          votesPercentageFor24Score: portfolio.scoreFromVotesPercentageFor24h,
+          votesPercentageFor7days: portfolio.votesPercentageFor7d,
+          votesPercentageFor7daysScore: portfolio.scoreFromVotesPercentageFor7d,
+          holders: portfolio.holders,
+          holdersCountScore: portfolio.holdersCountScore,
+          holdersGrowthPercentageFor1h: portfolio.holdersGrowthPercentage1h,
+          holdersGrowthPercentageFor1hScore:
+            portfolio.scoreHoldersGrowthPercentage1h,
+          holdersGrowthPercentageFor24h: portfolio.holdersGrowthPercentage24h,
+          holdersGrowthPercentageFor24hScore:
+            portfolio.scoreHoldersGrowthPercentage24h,
+          volumeChangePercentage: portfolio.volumeChangePercentage,
+          scoreFromVolumePercentage: portfolio.scoreFromVolumePercentage,
+          liquidity: portfolio.liquidity,
+          liquidityScore: portfolio.liquidityScore,
+          tokenAge: (currentTimestampInSeconds - portfolio.createdAt) / 3600,
+          tokenAgeScore: portfolio.tokenAgeScore,
+          volumeTwoDaysAgo: portfolio.volumeTwoDaysAgo,
+          scoreFromVolumeTwoDaysAgo: portfolio.scoreFromVolumeTwoDaysAgo,
+          txnCount24: portfolio.txnCount24,
+          txnCount24Score: portfolio.txnCount24Score,
+          aiScore: portfolio.aiScore,
+          image: portfolio.image,
+          liquidityTokenSymbol: portfolio.liquidityTokenSymbol,
+          networkId: portfolio.networkId,
+        };
       });
 
       resultTokens = resultTokens.filter((element) => {
