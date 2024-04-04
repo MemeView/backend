@@ -1181,6 +1181,23 @@ export class SolveScoreService {
       return b.absoluteScore - a.absoluteScore;
     });
 
+    const networkId1Array = result
+      .filter((item) => item.networkId === 1)
+      .slice(0, 30);
+
+    const networkId56Array = result
+      .filter((item) => item.networkId === 56)
+      .slice(0, 30);
+
+    const combinedArray = [...networkId1Array, ...networkId56Array];
+
+    combinedArray.sort((a, b) => {
+      if (b.score === a.score) {
+        return parseFloat(b.liquidity) - parseFloat(a.liquidity); // Сортировка по liquidity при равных score
+      }
+      return b.score - a.score; // Сортировка по score
+    });
+
     const scoreByCurrentHour = `score${hour}`;
 
     const utcDate = new UTCDate();
@@ -1193,7 +1210,7 @@ export class SolveScoreService {
 
     const ttmsNow = await this.prisma.ttmsByHours.create({
       data: {
-        [scoreByCurrentHour]: result.slice(0, 30),
+        [scoreByCurrentHour]: combinedArray,
       },
     });
 

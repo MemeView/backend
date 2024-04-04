@@ -17,6 +17,7 @@ import {
   subDays,
   subHours,
 } from 'date-fns';
+import { portfolio } from 'src/ttms-transparency/interfaces';
 
 type IntervalType = '24' | '48';
 
@@ -107,8 +108,10 @@ export class TtmsPortfolioController {
         const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]} ${startYear}, 9am PST`;
         const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]} ${endYear}, 9am PST`;
 
+        const portfolio = Object.values(result.portfolio).slice(0, 30);
+
         return {
-          portfolio: result.portfolio,
+          portfolio: portfolio,
           cycleStart: cycleStart,
           cycleEnd: cycleEnd,
         };
@@ -118,8 +121,10 @@ export class TtmsPortfolioController {
         const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]} ${startYear}, 9pm PST`;
         const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]} ${endYear}, 9pm PST`;
 
+        const portfolio = Object.values(result.portfolio).slice(0, 30);
+
         return {
-          portfolio: result.portfolio,
+          portfolio: portfolio,
           cycleStart: cycleStart,
           cycleEnd: cycleEnd,
         };

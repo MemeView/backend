@@ -17,6 +17,7 @@ import {
   getMonth,
   getYear,
   startOfDay,
+  startOfHour,
   subDays,
   subHours,
 } from 'date-fns';
@@ -447,7 +448,7 @@ export class SolveScoreController {
         scoreQuery = `score9pm`;
       }
 
-      const result = await this.prisma.ttmsByHours.findFirst({
+      const result: any = await this.prisma.ttmsByHours.findFirst({
         where: {
           [scoreQuery]: { not: null },
         },
@@ -487,7 +488,7 @@ export class SolveScoreController {
 
       return {
         calculatedOn: calculatedOn,
-        data: result[scoreQuery],
+        data: result[scoreQuery].slice(0, 30),
       };
     } catch (e) {
       return e;

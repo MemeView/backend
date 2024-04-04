@@ -89,13 +89,13 @@ export class TtmsPortfolioService {
           });
 
           const totalDailyPriceChange095By24h = JSON.stringify(
-            oldPortfolio24.reduce((acc, portfolio) => {
+            oldPortfolio24.slice(0, 30).reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
             }, 0) / 30,
           );
 
           const totalDailyPriceChange095By48h = JSON.stringify(
-            oldPortfolio48.reduce((acc, portfolio) => {
+            oldPortfolio48.slice(0, 30).reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
             }, 0) / 30,
           );
@@ -336,13 +336,13 @@ export class TtmsPortfolioService {
           });
 
           const totalDailyPriceChange095By24h = JSON.stringify(
-            oldPortfolio24.reduce((acc, portfolio) => {
+            oldPortfolio24.slice(0, 30).reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
             }, 0) / 30,
           );
 
           const totalDailyPriceChange095By48h = JSON.stringify(
-            oldPortfolio48.reduce((acc, portfolio) => {
+            oldPortfolio48.slice(0, 30).reduce((acc, portfolio) => {
               return acc + parseFloat(portfolio.dailyPriceChange095);
             }, 0) / 30,
           );

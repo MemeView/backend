@@ -175,7 +175,7 @@ export class TtmsTransparencyService {
         return b.ttms - a.ttms;
       });
 
-      return resultTokens;
+      return resultTokens.slice(0, 30);
     }
 
     score.sort((a, b) => {

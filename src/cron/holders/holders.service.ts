@@ -278,8 +278,8 @@ export class HoldersService {
       const holdersOneDayAgoRaw = await this.prisma.holders.findMany({
         where: {
           AND: [
-            { createdAt: { gte: startOfHourOneDayAgoPlusOneHour } },
-            { createdAt: { lt: startOfHourOneDayAgo } },
+            { createdAt: { gte: startOfHourOneDayAgo } },
+            { createdAt: { lt: startOfHourOneDayAgoPlusOneHour } },
           ],
         },
       });
