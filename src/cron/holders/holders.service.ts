@@ -529,11 +529,11 @@ export class HoldersService {
           mergedScores[item.tokenAddress].networkId = item.networkId;
           mergedScores[item.tokenAddress].holdersCountScore +=
             item.holdersCountScore;
-          mergedScores[item.tokenAddress].holdersGrowthPercentage1h =
+          mergedScores[item.tokenAddress].holdersGrowthPercentage1h +=
             item.holdersGrowthPercentage1h;
           mergedScores[item.tokenAddress].scoreHoldersGrowthPercentage1h +=
             item.scoreHoldersGrowthPercentage1h;
-          mergedScores[item.tokenAddress].holdersGrowthPercentage24h =
+          mergedScores[item.tokenAddress].holdersGrowthPercentage24h +=
             item.holdersGrowthPercentage24h;
           mergedScores[item.tokenAddress].scoreHoldersGrowthPercentage24h +=
             item.scoreHoldersGrowthPercentage24h;
