@@ -70,15 +70,15 @@ model Score {
   volumeTwoDaysAgo                  String?
   scoreFromVolumeTwoDaysAgo         Float?
   volumeChangePercentage            Float?
-  scoreFromVolumePercentage         Int?
+  scoreFromVolumePercentage         Float?
   createdAt                         Int?
   txnCount24                        Int?
   txnCount24Score                   Float?
   holders                           Int?
   holdersCountScore                 Float?
-  holdersGrowthPercentage1h         Int?
+  holdersGrowthPercentage1h         Float?
   scoreHoldersGrowthPercentage1h    Float?
-  holdersGrowthPercentage24h        Int?
+  holdersGrowthPercentage24h        Float?
   scoreHoldersGrowthPercentage24h   Float?
   aiScore                           Float?
   tokenAgeScore                     Float?
@@ -220,7 +220,7 @@ model TtmsPortfolio {
   volumeTwoDaysAgo                  String?
   scoreFromVolumeTwoDaysAgo         Float?
   volumeChangePercentage            Float?
-  scoreFromVolumePercentage         Int?
+  scoreFromVolumePercentage         Float?
   createdAt                         Int?
   txnCount24                        Int?
   txnCount24Score                   Float?
