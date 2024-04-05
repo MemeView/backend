@@ -226,9 +226,9 @@ model TtmsPortfolio {
   txnCount24Score                   Float?
   holders                           Int?
   holdersCountScore                 Float?
-  holdersGrowthPercentage1h         Int?
+  holdersGrowthPercentage1h         Float?
   scoreHoldersGrowthPercentage1h    Float?
-  holdersGrowthPercentage24h        Int?
+  holdersGrowthPercentage24h        Float?
   scoreHoldersGrowthPercentage24h   Float?
   aiScore                           Float?
   tokenAgeScore                     Float?
