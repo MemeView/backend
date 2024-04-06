@@ -31,7 +31,7 @@ export class PartnersService {
       score = score.filter((e) => e.networkId === parseFloat(chainId));
     }
 
-    const ttms = await Promise.all(
+    let ttms = await Promise.all(
       score.map(async (score) => {
         const token = await tokens.find(
           (token) => token.address === score.tokenAddress,
@@ -48,6 +48,12 @@ export class PartnersService {
         }
       }),
     );
+
+    ttms = ttms.filter((e) => e);
+
+    if (chainId === '56') {
+      chainId = '2';
+    }
 
     const tokensResult = await ttms
       .sort((a, b) => {
