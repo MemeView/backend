@@ -15,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
 import { TwitterModule } from './twitter/twitter.module';
 import { EventTrackerModule } from './event-tracker/event-tracker.module';
 import { TtmsTransparencyModule } from './ttms-transparency/ttms-transparency.module';
+import { PartnersModule } from './partners/partners.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TtmsTransparencyModule } from './ttms-transparency/ttms-transparency.mo
     TwitterModule,
     EventTrackerModule,
     TtmsTransparencyModule,
+    PartnersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
