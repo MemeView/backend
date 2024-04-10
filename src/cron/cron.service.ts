@@ -59,175 +59,175 @@ export class CronService {
     }
   }
 
-  @Cron('0 * * * *', { disabled: process.env.NODE_ENV === 'development' }) // начало каждого часа
-  async tokensCron() {
-    const utcDate = new UTCDate();
-    const pstDate = subHours(utcDate, 7);
-    const currentHour = utcDate.getUTCHours();
-    const currentPstHour = pstDate.getUTCHours();
+  // @Cron('0 * * * *', { disabled: process.env.NODE_ENV === 'development' }) // начало каждого часа
+  // async tokensCron() {
+  //   const utcDate = new UTCDate();
+  //   const pstDate = subHours(utcDate, 7);
+  //   const currentHour = utcDate.getUTCHours();
+  //   const currentPstHour = pstDate.getUTCHours();
 
-    await this.handleRetry(async () => {
-      let totalDeletedCount = 0;
-      let totalAddedCount = 0;
+  //   await this.handleRetry(async () => {
+  //     let totalDeletedCount = 0;
+  //     let totalAddedCount = 0;
 
-      // ищем токены на networkId = 1
-      for (let i = 1; i <= 6; i++) {
-        try {
-          const networkId = 1;
-          const { deletedCount, addedCount } =
-            await this.definedTokensService.handleTokens(i, networkId);
+  //     // ищем токены на networkId = 1
+  //     for (let i = 1; i <= 6; i++) {
+  //       try {
+  //         const networkId = 1;
+  //         const { deletedCount, addedCount } =
+  //           await this.definedTokensService.handleTokens(i, networkId);
 
-          totalDeletedCount += deletedCount;
-          totalAddedCount += addedCount;
+  //         totalDeletedCount += deletedCount;
+  //         totalAddedCount += addedCount;
 
-          console.log(
-            `Cron job completed: ${totalDeletedCount} tokens deleted, ${totalAddedCount} tokens added on network ${networkId}`,
-          );
-        } catch (e) {
-          break;
-        }
-      }
+  //         console.log(
+  //           `Cron job completed: ${totalDeletedCount} tokens deleted, ${totalAddedCount} tokens added on network ${networkId}`,
+  //         );
+  //       } catch (e) {
+  //         break;
+  //       }
+  //     }
 
-      // ищем токены на networkId = 56
-      for (let i = 1; i <= 6; i++) {
-        try {
-          const networkId = 56;
-          const { deletedCount, addedCount } =
-            await this.definedTokensService.handleTokens(i, networkId);
+  //     // ищем токены на networkId = 56
+  //     for (let i = 1; i <= 6; i++) {
+  //       try {
+  //         const networkId = 56;
+  //         const { deletedCount, addedCount } =
+  //           await this.definedTokensService.handleTokens(i, networkId);
 
-          totalDeletedCount += deletedCount;
-          totalAddedCount += addedCount;
+  //         totalDeletedCount += deletedCount;
+  //         totalAddedCount += addedCount;
 
-          console.log(
-            `Cron job completed: ${totalAddedCount} tokens added on both networks`,
-          );
-        } catch (e) {
-          break;
-        }
-      }
-    });
+  //         console.log(
+  //           `Cron job completed: ${totalAddedCount} tokens added on both networks`,
+  //         );
+  //       } catch (e) {
+  //         break;
+  //       }
+  //     }
+  //   });
 
-    await this.definedTokensService.handleTokenWatch();
-    await this.holdersService.handleTwHolders();
+  //   await this.definedTokensService.handleTokenWatch();
+  //   await this.holdersService.handleTwHolders();
 
-    await this.handleRetry(async () => {
-      if (currentHour === 0) {
-        await this.holdersService.handleHolders(0);
-      }
-      if (currentHour !== 0) {
-        await this.holdersService.handleHolders(currentHour);
-      }
+  //   await this.handleRetry(async () => {
+  //     if (currentHour === 0) {
+  //       await this.holdersService.handleHolders(0);
+  //     }
+  //     if (currentHour !== 0) {
+  //       await this.holdersService.handleHolders(currentHour);
+  //     }
 
-      console.log(`handleHolders job completed'`);
-    });
+  //     console.log(`handleHolders job completed'`);
+  //   });
 
-    await this.handleRetry(async () => {
-      await this.volumeService.handleVolumeData();
-      console.log(`Cron 'volume-sync' job completed`);
-    });
+  //   await this.handleRetry(async () => {
+  //     await this.volumeService.handleVolumeData();
+  //     console.log(`Cron 'volume-sync' job completed`);
+  //   });
 
-    if (currentHour === 0) {
-      await this.prisma.scoreByHours.deleteMany();
-    }
+  //   if (currentHour === 0) {
+  //     await this.prisma.scoreByHours.deleteMany();
+  //   }
 
-    await this.handleRetry(async () => {
-      await this.solveScoreService.solveScores();
+  //   await this.handleRetry(async () => {
+  //     await this.solveScoreService.solveScores();
 
-      console.log(`solveScoreService job completed'`);
-    });
+  //     console.log(`solveScoreService job completed'`);
+  //   });
 
-    await this.handleRetry(async () => {
-      const { deletedCount, addedCount } =
-        await this.holdersService.handleHoldersScore();
+  //   await this.handleRetry(async () => {
+  //     const { deletedCount, addedCount } =
+  //       await this.holdersService.handleHoldersScore();
 
-      console.log('deletedCount', deletedCount);
-      console.log('addedCount', addedCount);
+  //     console.log('deletedCount', deletedCount);
+  //     console.log('addedCount', addedCount);
 
-      console.log(`handleHoldersScore job completed'`);
-    });
+  //     console.log(`handleHoldersScore job completed'`);
+  //   });
 
-    if (currentHour === 23) {
-      await this.handleRetry(async () => {
-        await this.solveScoreService.updateDailyScores();
-        console.log(`Cron 'average-score' job completed`);
-      });
-    }
+  //   if (currentHour === 23) {
+  //     await this.handleRetry(async () => {
+  //       await this.solveScoreService.updateDailyScores();
+  //       console.log(`Cron 'average-score' job completed`);
+  //     });
+  //   }
 
-    await this.handleRetry(async () => {
-      await this.postingService.handleCombinedPosting();
-      console.log(`Cron 'posting' job completed`);
-    });
+  //   await this.handleRetry(async () => {
+  //     await this.postingService.handleCombinedPosting();
+  //     console.log(`Cron 'posting' job completed`);
+  //   });
 
-    if (currentPstHour === 3) {
-      await this.solveScoreService.solveTtmsByHours('3am');
-      console.log(`Current ttms has beet copied to the column 3am`);
-      const sendedMessagesCount =
-        await this.signalBotService.sendMessageToAllUsers();
-      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
-    }
+  //   if (currentPstHour === 3) {
+  //     await this.solveScoreService.solveTtmsByHours('3am');
+  //     console.log(`Current ttms has beet copied to the column 3am`);
+  //     const sendedMessagesCount =
+  //       await this.signalBotService.sendMessageToAllUsers();
+  //     console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
+  //   }
 
-    if (currentPstHour === 9) {
-      await this.solveScoreService.solveTtmsByHours('9am');
-      console.log(`Current ttms has beet copied to the column 9am`);
-      const sendedMessagesCount =
-        await this.signalBotService.sendMessageToAllUsers();
-      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
-    }
+  //   if (currentPstHour === 9) {
+  //     await this.solveScoreService.solveTtmsByHours('9am');
+  //     console.log(`Current ttms has beet copied to the column 9am`);
+  //     const sendedMessagesCount =
+  //       await this.signalBotService.sendMessageToAllUsers();
+  //     console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
+  //   }
 
-    if (currentPstHour === 15) {
-      await this.solveScoreService.solveTtmsByHours('3pm');
-      console.log(`Current ttms has beet copied to the column 3pm`);
-      const sendedMessagesCount =
-        await this.signalBotService.sendMessageToAllUsers();
-      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
-    }
+  //   if (currentPstHour === 15) {
+  //     await this.solveScoreService.solveTtmsByHours('3pm');
+  //     console.log(`Current ttms has beet copied to the column 3pm`);
+  //     const sendedMessagesCount =
+  //       await this.signalBotService.sendMessageToAllUsers();
+  //     console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
+  //   }
 
-    if (currentPstHour === 21) {
-      await this.solveScoreService.solveTtmsByHours('9pm');
-      console.log(`Current ttms has beet copied to the column 9pm`);
-      const sendedMessagesCount =
-        await this.signalBotService.sendMessageToAllUsers();
-      console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
-    }
-    await this.ttmsPortfolioService.handleTtmsPortfolio(currentPstHour);
-    console.log('ttms portfolio cron job completed');
+  //   if (currentPstHour === 21) {
+  //     await this.solveScoreService.solveTtmsByHours('9pm');
+  //     console.log(`Current ttms has beet copied to the column 9pm`);
+  //     const sendedMessagesCount =
+  //       await this.signalBotService.sendMessageToAllUsers();
+  //     console.log(`sendedMessagesCount = ${sendedMessagesCount}`);
+  //   }
+  //   await this.ttmsPortfolioService.handleTtmsPortfolio(currentPstHour);
+  //   console.log('ttms portfolio cron job completed');
 
-    if (currentPstHour === 9 || currentPstHour === 21) {
-      await this.postingService.portfolioAutoPosting();
-      console.log('portfolio-auto-posting cron job completed');
-    }
+  //   if (currentPstHour === 9 || currentPstHour === 21) {
+  //     await this.postingService.portfolioAutoPosting();
+  //     console.log('portfolio-auto-posting cron job completed');
+  //   }
 
-    await this.airdropsService.checkAirdropRequirementsCron('airdrop1');
-    await this.airdropsService.checkAirdropRequirementsCron('airdrop2');
-  }
+  //   await this.airdropsService.checkAirdropRequirementsCron('airdrop1');
+  //   await this.airdropsService.checkAirdropRequirementsCron('airdrop2');
+  // }
 
-  async volumeCron() {
-    await this.handleRetry(async () => {
-      await this.volumeService.handleVolumeData();
-      console.log(`Cron 'volume-sync' job completed`);
-    });
-  }
+  // async volumeCron() {
+  //   await this.handleRetry(async () => {
+  //     await this.volumeService.handleVolumeData();
+  //     console.log(`Cron 'volume-sync' job completed`);
+  //   });
+  // }
 
-  @Cron('35 * * * *', { disabled: process.env.NODE_ENV === 'development' })
-  async solveScoresCron() {
-    await this.handleRetry(async () => {
-      const result = await this.votesService.handleAutoVoting();
-      console.log(`autoVotingCron job completed with result: ${result}`);
-    });
+  // @Cron('35 * * * *', { disabled: process.env.NODE_ENV === 'development' })
+  // async solveScoresCron() {
+  //   await this.handleRetry(async () => {
+  //     const result = await this.votesService.handleAutoVoting();
+  //     console.log(`autoVotingCron job completed with result: ${result}`);
+  //   });
 
-    await this.handleRetry(async () => {
-      await this.solveScoreService.solveScores();
-      console.log(`solveScoresCron job completed`);
-    });
+  //   await this.handleRetry(async () => {
+  //     await this.solveScoreService.solveScores();
+  //     console.log(`solveScoresCron job completed`);
+  //   });
 
-    await this.handleRetry(async () => {
-      const { deletedCount, addedCount } =
-        await this.holdersService.handleHoldersScore();
+  //   await this.handleRetry(async () => {
+  //     const { deletedCount, addedCount } =
+  //       await this.holdersService.handleHoldersScore();
 
-      console.log('deletedCount', deletedCount);
-      console.log('addedCount', addedCount);
+  //     console.log('deletedCount', deletedCount);
+  //     console.log('addedCount', addedCount);
 
-      console.log(`handleHoldersScore job completed'`);
-    });
-  }
+  //     console.log(`handleHoldersScore job completed'`);
+  //   });
+  // }
 }
