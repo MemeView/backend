@@ -28,10 +28,28 @@ export class PartnersController {
     @Res() response: Response,
   ) {
     try {
-      const utcDate = new UTCDate();
+      // const utcDate = new UTCDate();
+
+      if (!user) {
+        return response.status(400).json({
+          error: 'user is not provided',
+          status: 400,
+        });
+      }
+
+      if (!chainId) {
+        return response.status(400).json({
+          error: 'chainId is not provided',
+          status: 400,
+        });
+      }
+
+      const result = await this.pertnersService.ttmsForPartners(user, chainId);
+
+      const utcDate = new Date(result.date);
       const pstDate = subHours(utcDate, 7);
       const currentPstHour = pstDate.getUTCHours();
-      const currentPstDay = pstDate.getUTCDay();
+      const currentPstDay = pstDate.getUTCDate();
       const currentPstMonth = pstDate.getUTCMonth();
 
       const months = [
@@ -53,25 +71,9 @@ export class PartnersController {
 
       const timeStamp = `${currentPstHour}${currentPstHourFormat} ${currentPstDay} ${months[currentPstMonth]} by PST`;
 
-      if (!user) {
-        return response.status(400).json({
-          error: 'user is not provided',
-          status: 400,
-        });
-      }
-
-      if (!chainId) {
-        return response.status(400).json({
-          error: 'chainId is not provided',
-          status: 400,
-        });
-      }
-
-      const result = await this.pertnersService.ttmsForPartners(user, chainId);
-
       return response.status(200).json({
         timeStamp,
-        token: result,
+        token: result.tokens,
       });
     } catch (e) {
       if (e instanceof HttpException) {

@@ -117,6 +117,11 @@ export class TtmsTransparencyService {
       );
 
       let resultTokens: resultToken[] = portfolio.map((portfolio) => {
+        let liquidityToHoldersPercentage =
+          parseFloat(portfolio.liquidity) / portfolio.holders;
+        if (liquidityToHoldersPercentage < 0) {
+          liquidityToHoldersPercentage = 0;
+        }
         return {
           tokenAddress: portfolio.tokenAddress,
           symbol: portfolio.symbol,
@@ -158,6 +163,7 @@ export class TtmsTransparencyService {
           image: portfolio.image,
           liquidityTokenSymbol: portfolio.liquidityTokenSymbol,
           networkId: portfolio.networkId,
+          liquidityToHoldersPercentage,
         };
       });
 
@@ -193,6 +199,11 @@ export class TtmsTransparencyService {
     }
 
     return score.slice(0, 30).map((element) => {
+      let liquidityToHoldersPercentage =
+        parseFloat(element.liquidity) / element.holders;
+      if (liquidityToHoldersPercentage < 0) {
+        liquidityToHoldersPercentage = 0;
+      }
       return {
         tokenAddress: element.tokenAddress,
         symbol: element.symbol,
@@ -234,6 +245,7 @@ export class TtmsTransparencyService {
         image: element.image,
         liquidityTokenSymbol: element.liquidityTokenSymbol,
         networkId: element.networkId,
+        liquidityToHoldersPercentage,
       };
     });
   }
