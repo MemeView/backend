@@ -145,7 +145,7 @@ export class PartnersService {
         };
       });
 
-    let date = pstDate;
+    let date = utcDate;
     if (partner.partnerAccess !== 'all') {
       date = score.createdAt;
     }
