@@ -30,6 +30,13 @@ export class PartnersController {
     try {
       // const utcDate = new UTCDate();
 
+      // await this.prisma.partners.update({
+      //   where: {
+      //     partnerLogin: '1146b370-3410-4964-b21b-f685c863e1a1',
+      //   },
+      //   data: { partnerAccess: 'all' },
+      // });
+
       if (!user) {
         return response.status(400).json({
           error: 'user is not provided',
@@ -48,7 +55,7 @@ export class PartnersController {
 
       const utcDate = new Date(result.date);
       const pstDate = subHours(utcDate, 7);
-      const currentPstHour = pstDate.getUTCHours();
+      let currentPstHour = pstDate.getUTCHours();
       const currentPstDay = pstDate.getUTCDate();
       const currentPstMonth = pstDate.getUTCMonth();
 
@@ -68,6 +75,10 @@ export class PartnersController {
       ];
 
       const currentPstHourFormat = currentPstHour > 12 ? 'pm' : 'am';
+
+      if (currentPstHour >= 21) {
+        currentPstHour = 9;
+      }
 
       const timeStamp = `${currentPstHour}${currentPstHourFormat} ${currentPstDay} ${months[currentPstMonth]} by PST`;
 

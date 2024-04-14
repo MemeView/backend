@@ -296,4 +296,5 @@ enum Status {
 
 model Partners {
   partnerLogin      String @id @unique
+  partnerAccess     String @default("plan1")
 }

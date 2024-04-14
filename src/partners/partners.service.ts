@@ -16,7 +16,7 @@ export class PartnersService {
 
     let pstInterval = 'score9am';
 
-    if ((currentHour >= 0 && currentHour < 9) || currentHour >= 21) {
+    if ((currentPstHour >= 0 && currentPstHour < 9) || currentPstHour >= 21) {
       pstInterval = 'score9pm';
     }
 
@@ -38,32 +38,58 @@ export class PartnersService {
       throw new HttpException('partner does not exist', 400);
     }
 
-    // let score = await this.prisma.score.findMany();
-    const score = await this.prisma.ttmsByHours.findFirst({
-      where: {
-        [pstInterval]: { not: null },
-      },
-      select: {
-        [pstInterval]: true,
-        createdAt: true,
-      },
-    });
+    let scoreResult: {
+      tokenAddress: string;
+      networkId: number;
+      pairAddress: string;
+      tokenScore: number;
+    }[];
 
-    let scoreResult = Object.values(score[pstInterval]).map(
-      (value: {
-        address: string;
-        networkId: number;
-        pairAddress: string;
-        absoluteScore: number;
-      }) => {
+    let score: any;
+    if (
+      partner.partnerAccess === 'plan1' ||
+      partner.partnerAccess === 'plan2'
+    ) {
+      // let score = await this.prisma.score.findMany();
+      score = await this.prisma.ttmsByHours.findFirst({
+        where: {
+          [pstInterval]: { not: null },
+        },
+        select: {
+          [pstInterval]: true,
+          createdAt: true,
+        },
+      });
+
+      scoreResult = Object.values(score[pstInterval]).map(
+        (value: {
+          address: string;
+          networkId: number;
+          pairAddress: string;
+          absoluteScore: number;
+        }) => {
+          return {
+            tokenAddress: value.address,
+            networkId: value.networkId,
+            pairAddress: value.pairAddress,
+            tokenScore: value.absoluteScore,
+          };
+        },
+      );
+    }
+
+    if (partner.partnerAccess === 'all') {
+      score = await this.prisma.score.findMany();
+
+      scoreResult = await score.map((token) => {
         return {
-          tokenAddress: value.address,
-          networkId: value.networkId,
-          pairAddress: value.pairAddress,
-          tokenScore: value.absoluteScore,
+          tokenAddress: token.tokenAddress,
+          networkId: token.networkId,
+          pairAddress: token.pairAddress,
+          tokenScore: token.tokenScore,
         };
-      },
-    );
+      });
+    }
 
     const tokens = await this.prisma.tokens.findMany();
 
@@ -119,9 +145,14 @@ export class PartnersService {
         };
       });
 
+    let date = pstDate;
+    if (partner.partnerAccess !== 'all') {
+      date = score.createdAt;
+    }
+
     return {
       tokens: tokensResult.slice(0, 30),
-      date: score.createdAt,
+      date,
     };
   }
 }

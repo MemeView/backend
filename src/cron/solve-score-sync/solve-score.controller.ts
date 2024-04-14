@@ -461,11 +461,14 @@ export class SolveScoreController {
         },
       });
 
-      const dateString = result.createdAt;
+      let dateString = result.createdAt;
 
-      const year = getYear(dateString);
-      const month = getMonth(dateString); // (начинает с 0 для января)
-      const day = getDate(dateString);
+      dateString = new Date(dateString);
+      dateString = subHours(dateString, 7);
+
+      const year = dateString.getUTCFullYear();
+      const month = dateString.getUTCMonth(); // (начинает с 0 для января)
+      const day = dateString.getUTCDate();
 
       const months = [
         'January',
