@@ -121,7 +121,15 @@ export class TtmsPortfolioController {
         const cycleStart = `${portfolioCalculationStartedDay} ${months[startMonth]} ${startYear}, 9pm PST`;
         const cycleEnd = `${portfolioCalculationEndedDay} ${months[endMonth]} ${endYear}, 9pm PST`;
 
-        const portfolio = Object.values(result.portfolio).slice(0, 30);
+        const portfolio = Object.values(result.portfolio)
+          .sort((a, b) => {
+            if (a.score === b.score) {
+              return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+            } else {
+              return b.score - a.score;
+            }
+          })
+          .slice(0, 30);
 
         return {
           portfolio: portfolio,
