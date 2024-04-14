@@ -34,12 +34,20 @@ export class TtmsTransparencyController {
         throw new BadRequestException('Invalid blockchain value');
       }
 
-      const result = this.ttmsTransparencyService.handleTtmsTransparency(
+      const result = await this.ttmsTransparencyService.handleTtmsTransparency(
         snapshot,
         blockchain,
       );
 
-      return result;
+      const averagePortfolioResult = result.reduce(
+        (acc, curr) => acc + parseFloat(curr.resultPercentage),
+        0,
+      );
+
+      return {
+        result,
+        averagePortfolioResult: averagePortfolioResult / 30,
+      };
     } catch (error) {
       return error;
     }

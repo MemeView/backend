@@ -58,13 +58,29 @@ export class TtmsPortfolioService {
             }
           });
 
-          const oldPortfolio24 = oldPortfolio.filter(
+          let oldPortfolio24 = oldPortfolio.filter(
             (item) => item.interval === 24,
           );
 
-          const oldPortfolio48 = oldPortfolio.filter(
+          oldPortfolio24 = oldPortfolio24.sort((a, b) => {
+            if (a.score === b.score) {
+              return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+            } else {
+              return b.score - a.score;
+            }
+          });
+
+          let oldPortfolio48 = oldPortfolio.filter(
             (item) => item.interval === 48 && item.intervalCheck === 1,
           );
+
+          oldPortfolio48 = oldPortfolio48.sort((a, b) => {
+            if (a.score === b.score) {
+              return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+            } else {
+              return b.score - a.score;
+            }
+          });
 
           await this.prisma.last24SolvedTtmsPortfolio.deleteMany({
             where: {
@@ -305,13 +321,29 @@ export class TtmsPortfolioService {
             }
           });
 
-          const oldPortfolio24 = oldPortfolio.filter(
+          let oldPortfolio24 = oldPortfolio.filter(
             (item) => item.interval === 24,
           );
 
-          const oldPortfolio48 = oldPortfolio.filter(
+          oldPortfolio24 = oldPortfolio24.sort((a, b) => {
+            if (a.score === b.score) {
+              return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+            } else {
+              return b.score - a.score;
+            }
+          });
+
+          let oldPortfolio48 = oldPortfolio.filter(
             (item) => item.interval === 48 && item.intervalCheck === 1,
           );
+
+          oldPortfolio48 = oldPortfolio48.sort((a, b) => {
+            if (a.score === b.score) {
+              return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+            } else {
+              return b.score - a.score;
+            }
+          });
 
           await this.prisma.last24SolvedTtmsPortfolio.deleteMany({
             where: {
