@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { HoldersService } from './holders.service';
 import { PrismaClient } from '@prisma/client';
+import { Response, Request } from 'express';
 
 @Controller('api')
 export class HoldersController {
@@ -34,8 +35,20 @@ export class HoldersController {
   }
 
   @Get('/take-holders')
-  async getHoldersUnique(@Query('tokenAddress') tokenAddress: string) {
+  async getHoldersUnique(
+    @Query('tokenAddress') tokenAddress: string,
+    @Res() response: Response,
+  ) {
     try {
+      if (tokenAddress === '0xc3b36424c70e0e6aee3b91d1894c2e336447dbd3') {
+        const result = await this.prisma.tokenWatch.findFirst();
+
+        return response.status(200).json({
+          success: true,
+          data: result,
+        });
+      }
+
       const result = await this.prisma.holders.findFirst({
         where: {
           tokenAddress: tokenAddress,
@@ -45,10 +58,16 @@ export class HoldersController {
         },
       });
 
-      return result;
+      return response.status(200).json({
+        success: true,
+        data: result,
+      });
     } catch (e) {
       console.error('Error', e);
-      return e;
+      return response.status(400).json({
+        success: true,
+        error: e.message,
+      });
     }
   }
 
