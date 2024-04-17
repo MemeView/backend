@@ -588,17 +588,7 @@ export class TtmsPortfolioService {
         });
       }
 
-      let ttmsPortfolio = await this.prisma.ttmsPortfolio.findMany();
-
-      if (hour === 9 || hour === 21) {
-        ttmsPortfolio = ttmsPortfolio.filter(
-          (e) => e.interval === 48 && e.intervalCheck === null,
-        );
-      }
-
-      if (ttmsPortfolio.length === 0) {
-        return { deletedCount: 0, addedCount: 0 };
-      }
+      const ttmsPortfolio = await this.prisma.ttmsPortfolio.findMany();
 
       // получаю адреса токенов, без повторений
       const tokenAddresses = [
@@ -651,7 +641,10 @@ export class TtmsPortfolioService {
                 // мы вышли
               }
             }
-          } else {
+          }
+          if (
+            parseFloat(freshToken.priceUSD) < parseFloat(portfolio.priceUSD)
+          ) {
             // если с момента A0 цена начала падать, то фиксируем stopLoss на -3% на будущее
             if (portfolio.stopLoss === null) {
               portfolio.stopLoss = '-3';
