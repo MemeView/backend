@@ -178,7 +178,11 @@ export class TtmsTransparencyService {
       }
 
       resultTokens.sort((a, b) => {
-        return b.ttms - a.ttms;
+        if (a.ttms === b.ttms) {
+          return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+        } else {
+          return b.ttms - a.ttms;
+        }
       });
 
       return resultTokens.slice(0, 30);

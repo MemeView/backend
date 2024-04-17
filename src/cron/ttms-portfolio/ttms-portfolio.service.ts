@@ -105,15 +105,33 @@ export class TtmsPortfolioService {
           });
 
           const totalDailyPriceChange095By24h = JSON.stringify(
-            oldPortfolio24.slice(0, 30).reduce((acc, portfolio) => {
-              return acc + parseFloat(portfolio.dailyPriceChange095);
-            }, 0) / 30,
+            oldPortfolio24
+              .slice(0, 30)
+              .sort((a, b) => {
+                if (a.score === b.score) {
+                  return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+                } else {
+                  return b.score - a.score;
+                }
+              })
+              .reduce((acc, portfolio) => {
+                return acc + parseFloat(portfolio.dailyPriceChange095);
+              }, 0) / 30,
           );
 
           const totalDailyPriceChange095By48h = JSON.stringify(
-            oldPortfolio48.slice(0, 30).reduce((acc, portfolio) => {
-              return acc + parseFloat(portfolio.dailyPriceChange095);
-            }, 0) / 30,
+            oldPortfolio48
+              .sort((a, b) => {
+                if (a.score === b.score) {
+                  return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+                } else {
+                  return b.score - a.score;
+                }
+              })
+              .slice(0, 30)
+              .reduce((acc, portfolio) => {
+                return acc + parseFloat(portfolio.dailyPriceChange095);
+              }, 0) / 30,
           );
 
           await this.prisma.averageTtmsPortfolioResults.deleteMany({
@@ -368,15 +386,33 @@ export class TtmsPortfolioService {
           });
 
           const totalDailyPriceChange095By24h = JSON.stringify(
-            oldPortfolio24.slice(0, 30).reduce((acc, portfolio) => {
-              return acc + parseFloat(portfolio.dailyPriceChange095);
-            }, 0) / 30,
+            oldPortfolio24
+              .sort((a, b) => {
+                if (a.score === b.score) {
+                  return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+                } else {
+                  return b.score - a.score;
+                }
+              })
+              .slice(0, 30)
+              .reduce((acc, portfolio) => {
+                return acc + parseFloat(portfolio.dailyPriceChange095);
+              }, 0) / 30,
           );
 
           const totalDailyPriceChange095By48h = JSON.stringify(
-            oldPortfolio48.slice(0, 30).reduce((acc, portfolio) => {
-              return acc + parseFloat(portfolio.dailyPriceChange095);
-            }, 0) / 30,
+            oldPortfolio48
+              .sort((a, b) => {
+                if (a.score === b.score) {
+                  return parseFloat(b.liquidity) - parseFloat(a.liquidity);
+                } else {
+                  return b.score - a.score;
+                }
+              })
+              .slice(0, 30)
+              .reduce((acc, portfolio) => {
+                return acc + parseFloat(portfolio.dailyPriceChange095);
+              }, 0) / 30,
           );
 
           await this.prisma.averageTtmsPortfolioResults.deleteMany({
@@ -552,7 +588,17 @@ export class TtmsPortfolioService {
         });
       }
 
-      const ttmsPortfolio = await this.prisma.ttmsPortfolio.findMany();
+      let ttmsPortfolio = await this.prisma.ttmsPortfolio.findMany();
+
+      if (hour === 9 || hour === 21) {
+        ttmsPortfolio = ttmsPortfolio.filter(
+          (e) => e.interval === 48 && e.intervalCheck === null,
+        );
+      }
+
+      if (ttmsPortfolio.length === 0) {
+        return { deletedCount: 0, addedCount: 0 };
+      }
 
       // получаю адреса токенов, без повторений
       const tokenAddresses = [
