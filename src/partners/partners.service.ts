@@ -20,12 +20,8 @@ export class PartnersService {
       pstInterval = 'score9pm';
     }
 
-    if (chainId !== '0' && chainId !== '1' && chainId !== '2') {
+    if (chainId !== '0' && chainId !== '1' && chainId !== '56') {
       throw new HttpException('incorrect chain', 400);
-    }
-
-    if (chainId === '2') {
-      chainId = '56';
     }
 
     const partner = await this.prisma.partners.findUnique({
@@ -110,7 +106,7 @@ export class PartnersService {
             chainId = '1';
           }
           if (token.networkId === 56) {
-            chainId = '2';
+            chainId = '56';
           }
           return {
             address: token.address,
@@ -124,10 +120,6 @@ export class PartnersService {
     );
 
     ttms = ttms.filter((e) => e);
-
-    if (chainId === '56') {
-      chainId = '2';
-    }
 
     const tokensResult = await ttms
       .sort((a, b) => {
