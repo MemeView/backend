@@ -615,10 +615,6 @@ export class TtmsPortfolioService {
           if (
             parseFloat(freshToken.priceUSD) > parseFloat(portfolio.priceUSD)
           ) {
-            // если с момента A0 цена начала расти, то фиксируем stopLoss на -5% на будущее
-            if (portfolio.stopLoss === null) {
-              portfolio.stopLoss = '-5';
-            }
             // Новая цена Больше ATH ?
             if (parseFloat(freshToken.priceUSD) > parseFloat(portfolio.ATH)) {
               portfolio.ATH = freshToken.priceUSD;
@@ -645,11 +641,6 @@ export class TtmsPortfolioService {
           if (
             parseFloat(freshToken.priceUSD) < parseFloat(portfolio.priceUSD)
           ) {
-            // если с момента A0 цена начала падать, то фиксируем stopLoss на -3% на будущее
-            if (portfolio.stopLoss === null) {
-              portfolio.stopLoss = '-3';
-            }
-
             const stopLoss = (100 + parseFloat(portfolio.stopLoss)) / 100;
 
             // Новая цена <= Цены на старте 24 часового цикла * stopLoss ?

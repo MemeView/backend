@@ -198,7 +198,7 @@ model TtmsPortfolio {
   image                             String?
   liquidityTokenSymbol              String?
   liquidityTokenAddress             String?
-  stopLoss                          String? 
+  stopLoss                          String @default("-3")
   interval                          Int?
   intervalCheck                     Int?
 
