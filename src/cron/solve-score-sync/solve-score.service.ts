@@ -278,19 +278,19 @@ export class SolveScoreService {
           }
 
           if (volumePercentage >= 0 && volumePercentage < 100) {
-            volumeScore += 3 + volumePercentage * (7 / 100);
-            scoreFromVolumePercentage = 3 + volumePercentage * (7 / 100);
+            volumeScore += 3 + volumePercentage * (5 / 100);
+            scoreFromVolumePercentage = 3 + volumePercentage * (5 / 100);
           }
 
           if (volumePercentage >= 100 && volumePercentage < 200) {
-            volumeScore += 10;
-            scoreFromVolumePercentage = 10;
+            volumeScore += 8;
+            scoreFromVolumePercentage = 8;
           }
 
           if (volumePercentage >= 200 && volumePercentage < 300) {
-            volumeScore += 10 - (volumePercentage - 200) * (10 / 100);
+            volumeScore += 8 - (volumePercentage - 200) * (8 / 100);
             scoreFromVolumePercentage =
-              10 - (volumePercentage - 200) * (10 / 100);
+              10 - (volumePercentage - 200) * (8 / 100);
           }
 
           if (volumePercentage > 900) {
@@ -805,7 +805,7 @@ export class SolveScoreService {
       txnCount24Score: 0,
       liquidityScore: 0,
       tokenAgeScore: 0,
-      aiScore: 20,
+      aiScore: 18,
       liquidityTokenSymbol: '',
       networkId: null as number,
       volumeTwoDaysAgo: result.volumeTwoDaysAgo,
@@ -856,6 +856,12 @@ export class SolveScoreService {
         // Уменьшаем баллы для токенов с низкой ликвидностью
         result.tokenScore -= 50;
         result.txnCount24Score = -50;
+      }
+
+      if (token && token.txnCount24 >= 10 && token.txnCount24 < 20) {
+        // Уменьшаем баллы для токенов с низкой ликвидностью
+        result.tokenScore -= 5;
+        result.txnCount24Score = -5;
       }
 
       if (
@@ -1189,7 +1195,15 @@ export class SolveScoreService {
       .filter((item) => item.networkId === 56)
       .slice(0, 30);
 
-    const combinedArray = [...networkId1Array, ...networkId56Array];
+    const networkId8453Array = result
+      .filter((item) => item.networkId === 8453)
+      .slice(0, 30);
+
+    const combinedArray = [
+      ...networkId1Array,
+      ...networkId56Array,
+      ...networkId8453Array,
+    ];
 
     combinedArray.sort((a, b) => {
       if (b.score === a.score) {

@@ -277,13 +277,17 @@ export class PostingService {
           network = 'bsc';
         }
 
+        if (token.networkId === 8453) {
+          network = 'base';
+        }
+
         if (messagesCount < 2 && parseFloat(token.averageScoreToday) >= 50) {
           // Создаем сообщение для отправки
           const growth = parseFloat(token.change24) * 100;
-          let tokenTwitterUrl = null;
-          if (token.twitterUrl) {
-            tokenTwitterUrl = token.twitterUrl.split('https://twitter.com/');
-          }
+          // let tokenTwitterUrl = null;
+          // if (token.twitterUrl) {
+          //   tokenTwitterUrl = token.twitterUrl.split('https://twitter.com/');
+          // }
           const message =
             `[$${token.symbol.toUpperCase()}](https://tokenwatch.ai/en/tokens/${network}/${
               token.pairAddress
@@ -313,7 +317,7 @@ export class PostingService {
             `#Signals\n\n` +
             `by @TokenWatch\\_ai`;
 
-          let twitterTestMessage =
+          const twitterTestMessage =
             `$${token.symbol.toUpperCase()}\n\n` +
             `💹 24h growth: +${this.getAbsoluteScore(growth)}%\n\n` +
             `🚀 Yesterday ToTheMoonScore: ${this.getAbsoluteScore(
@@ -330,10 +334,10 @@ export class PostingService {
             `#Signals\n\n` +
             `by @TokenWatch_ai`;
 
-          if (tokenTwitterUrl) {
-            twitterTestMessage =
-              `@${tokenTwitterUrl[1]}\n` + twitterTestMessage;
-          }
+          // if (tokenTwitterUrl) {
+          //   twitterTestMessage =
+          //     `@${tokenTwitterUrl[1]}\n` + twitterTestMessage;
+          // }
 
           const twitterMessage =
             `$${token.symbol.toUpperCase()}\n\n` +

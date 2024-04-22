@@ -20,7 +20,12 @@ export class PartnersService {
       pstInterval = 'score9pm';
     }
 
-    if (chainId !== '0' && chainId !== '1' && chainId !== '56') {
+    if (
+      chainId !== '0' &&
+      chainId !== '1' &&
+      chainId !== '56' &&
+      chainId !== '8453'
+    ) {
       throw new HttpException('incorrect chain', 400);
     }
 
@@ -107,6 +112,9 @@ export class PartnersService {
           }
           if (token.networkId === 56) {
             chainId = '56';
+          }
+          if (token.networkId === 8453) {
+            chainId = '8453';
           }
           return {
             address: token.address,

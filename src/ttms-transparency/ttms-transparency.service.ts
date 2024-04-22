@@ -24,6 +24,9 @@ export class TtmsTransparencyService {
       if (blockchain === ChainEnum.bsc) {
         blockchainNumber = 56;
       }
+      if (blockchain === ChainEnum.base) {
+        blockchainNumber = 8453;
+      }
     }
     if (
       snapshot !== SnapshotEnum.amCurrent &&
