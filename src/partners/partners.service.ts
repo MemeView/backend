@@ -24,7 +24,9 @@ export class PartnersService {
       chainId !== '0' &&
       chainId !== '1' &&
       chainId !== '56' &&
-      chainId !== '8453'
+      chainId !== '8453' &&
+      chainId !== '10' &&
+      chainId !== '42161'
     ) {
       throw new HttpException('incorrect chain', 400);
     }
@@ -116,6 +118,13 @@ export class PartnersService {
           if (token.networkId === 8453) {
             chainId = '8453';
           }
+          if (token.networkId === 10) {
+            chainId = '10';
+          }
+          if (token.networkId === 42161) {
+            chainId = '42161';
+          }
+
           return {
             address: token.address,
             pair: token.pairAddress,

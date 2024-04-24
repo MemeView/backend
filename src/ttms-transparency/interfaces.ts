@@ -102,4 +102,6 @@ export enum ChainEnum {
   bsc = 'bsc',
   eth = 'eth',
   base = 'base',
+  op = 'op',
+  arb = 'arb',
 }
