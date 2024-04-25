@@ -281,6 +281,22 @@ export class PostingService {
           network = 'base';
         }
 
+        if (token.networkId === 10) {
+          network = 'op';
+        }
+        if (token.networkId === 42161) {
+          network = 'arb';
+        }
+        if (token.networkId === 43114) {
+          network = 'avax';
+        }
+        if (token.networkId === 137) {
+          network = 'matic';
+        }
+        if (token.networkId === 1399811149) {
+          network = 'sol';
+        }
+
         if (messagesCount < 2 && parseFloat(token.averageScoreToday) >= 50) {
           // Создаем сообщение для отправки
           const growth = parseFloat(token.change24) * 100;
