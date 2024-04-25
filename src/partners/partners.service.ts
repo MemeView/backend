@@ -26,7 +26,10 @@ export class PartnersService {
       chainId !== '56' &&
       chainId !== '8453' &&
       chainId !== '10' &&
-      chainId !== '42161'
+      chainId !== '42161' &&
+      chainId !== '43114' &&
+      chainId !== '137' &&
+      chainId !== '1399811149'
     ) {
       throw new HttpException('incorrect chain', 400);
     }
@@ -123,6 +126,15 @@ export class PartnersService {
           }
           if (token.networkId === 42161) {
             chainId = '42161';
+          }
+          if (token.networkId === 43114) {
+            chainId = '43114';
+          }
+          if (token.networkId === 137) {
+            chainId = '137';
+          }
+          if (token.networkId === 1399811149) {
+            chainId = '1399811149';
           }
 
           return {

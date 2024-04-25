@@ -33,6 +33,15 @@ export class TtmsTransparencyService {
       if (blockchain === ChainEnum.arb) {
         blockchainNumber = 42161;
       }
+      if (blockchain === ChainEnum.avax) {
+        blockchainNumber = 43114;
+      }
+      if (blockchain === ChainEnum.matic) {
+        blockchainNumber = 137;
+      }
+      if (blockchain === ChainEnum.sol) {
+        blockchainNumber = 1399811149;
+      }
     }
     if (
       snapshot !== SnapshotEnum.amCurrent &&

@@ -104,4 +104,7 @@ export enum ChainEnum {
   base = 'base',
   op = 'op',
   arb = 'arb',
+  avax = 'avax',
+  matic = 'matic',
+  sol = 'sol',
 }
