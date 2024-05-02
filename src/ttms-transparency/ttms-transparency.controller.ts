@@ -12,10 +12,11 @@ export class TtmsTransparencyController {
     private readonly prisma: PrismaClient,
   ) {}
 
-  @Get('/handle-ttms-transparency/:snapshot?/:blockchain?')
+  @Get('/handle-ttms-transparency/:snapshot?/:blockchain?/:tokenCount?')
   async handleTtmsTransparency(
     @Param('snapshot') snapshot: SnapshotEnum,
     @Param('blockchain') blockchain: ChainEnum,
+    @Param('tokenCount') tokenCount: '30' | '100',
   ) {
     try {
       if (!snapshot) {
@@ -26,6 +27,10 @@ export class TtmsTransparencyController {
         blockchain = ChainEnum.all;
       }
 
+      if (!tokenCount) {
+        tokenCount = '30';
+      }
+
       if (!(snapshot in SnapshotEnum)) {
         throw new BadRequestException('Invalid snapshot value');
       }
@@ -34,10 +39,28 @@ export class TtmsTransparencyController {
         throw new BadRequestException('Invalid blockchain value');
       }
 
+      if (tokenCount && tokenCount !== '30' && tokenCount !== '100') {
+        throw new BadRequestException(
+          'Invalid tokenCount value. Available values 30 or 100',
+        );
+      }
+
       const result = await this.ttmsTransparencyService.handleTtmsTransparency(
         snapshot,
         blockchain,
+        tokenCount,
       );
+
+      result.sort((a, b) => {
+        if (b.ttms === a.ttms) {
+          return parseFloat(b.liquidity) - parseFloat(a.liquidity); // Сортировка по liquidity при равных score
+        }
+        return b.ttms - a.ttms; // Сортировка по score
+      });
+
+      result.forEach((token, index) => {
+        token['placeInTop'] = index + 1; // индекс начинается с 0, поэтому добавляем 1
+      });
 
       const averagePortfolioResult = result.reduce(
         (acc, curr) => acc + parseFloat(curr.resultPercentage),

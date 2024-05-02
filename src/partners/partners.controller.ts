@@ -77,7 +77,7 @@ export class PartnersController {
       const timeStamp = `${currentPstHour}${currentPstHourFormat} ${currentPstDay} ${months[currentPstMonth]} by PST`;
 
       return response.status(200).json({
-        timeStamp,
+        timeStamp: pstDate,
         token: result.tokens,
       });
     } catch (e) {

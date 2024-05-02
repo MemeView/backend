@@ -9,7 +9,11 @@ import { SnapshotEnum, ChainEnum } from './interfaces';
 export class TtmsTransparencyService {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async handleTtmsTransparency(snapshot: SnapshotEnum, blockchain: ChainEnum) {
+  async handleTtmsTransparency(
+    snapshot: SnapshotEnum,
+    blockchain: ChainEnum,
+    tokenCount: '30' | '100',
+  ) {
     const utcDate = new UTCDate();
     const currentTimestampInSeconds: number = Math.floor(
       utcDate.getTime() / 1000,
@@ -203,7 +207,7 @@ export class TtmsTransparencyService {
         }
       });
 
-      return resultTokens.slice(0, 30);
+      return resultTokens.slice(0, parseFloat(tokenCount));
     }
 
     score.sort((a, b) => {
@@ -220,7 +224,7 @@ export class TtmsTransparencyService {
       });
     }
 
-    return score.slice(0, 30).map((element) => {
+    return score.slice(0, parseFloat(tokenCount)).map((element) => {
       let liquidityToHoldersPercentage =
         parseFloat(element.liquidity) / element.holders;
       if (liquidityToHoldersPercentage < 0) {

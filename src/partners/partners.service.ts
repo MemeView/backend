@@ -65,6 +65,9 @@ export class PartnersService {
           [pstInterval]: true,
           createdAt: true,
         },
+        orderBy: {
+          createdAt: 'desc',
+        },
       });
 
       scoreResult = Object.values(score[pstInterval]).map(
