@@ -49,6 +49,7 @@ export class PartnersService {
       networkId: number;
       pairAddress: string;
       tokenScore: number;
+      liquidity: string;
     }[];
 
     let score: any;
@@ -70,18 +71,20 @@ export class PartnersService {
         },
       });
 
-      scoreResult = Object.values(score[pstInterval]).map(
+      scoreResult = await Object.values(score[pstInterval]).map(
         (value: {
           address: string;
           networkId: number;
           pairAddress: string;
           absoluteScore: number;
+          liquidity: string;
         }) => {
           return {
             tokenAddress: value.address,
             networkId: value.networkId,
             pairAddress: value.pairAddress,
             tokenScore: value.absoluteScore,
+            liquidity: value.liquidity,
           };
         },
       );
@@ -96,11 +99,12 @@ export class PartnersService {
           networkId: token.networkId,
           pairAddress: token.pairAddress,
           tokenScore: token.tokenScore,
+          liquidity: token.liquidity,
         };
       });
     }
 
-    const tokens = await this.prisma.tokens.findMany();
+    // const tokens = await this.prisma.tokens.findMany();
 
     if (chainId !== '0') {
       scoreResult = scoreResult.filter(
@@ -110,44 +114,42 @@ export class PartnersService {
 
     let ttms = await Promise.all(
       scoreResult.map(async (score) => {
-        const token = await tokens.find(
-          (token) => token.address === score.tokenAddress,
-        );
+        // const token = await tokens.find(
+        //   (token) => token.address === score.tokenAddress,
+        // );
 
-        if (token) {
-          if (token.networkId === 1) {
-            chainId = '1';
-          }
-          if (token.networkId === 56) {
-            chainId = '56';
-          }
-          if (token.networkId === 8453) {
-            chainId = '8453';
-          }
-          if (token.networkId === 10) {
-            chainId = '10';
-          }
-          if (token.networkId === 42161) {
-            chainId = '42161';
-          }
-          if (token.networkId === 43114) {
-            chainId = '43114';
-          }
-          if (token.networkId === 137) {
-            chainId = '137';
-          }
-          if (token.networkId === 1399811149) {
-            chainId = '1399811149';
-          }
-
-          return {
-            address: token.address,
-            pair: token.pairAddress,
-            chainId: chainId,
-            score: score.tokenScore,
-            liquidity: token.liquidity,
-          };
+        if (score.networkId === 1) {
+          chainId = '1';
         }
+        if (score.networkId === 56) {
+          chainId = '56';
+        }
+        if (score.networkId === 8453) {
+          chainId = '8453';
+        }
+        if (score.networkId === 10) {
+          chainId = '10';
+        }
+        if (score.networkId === 42161) {
+          chainId = '42161';
+        }
+        if (score.networkId === 43114) {
+          chainId = '43114';
+        }
+        if (score.networkId === 137) {
+          chainId = '137';
+        }
+        if (score.networkId === 1399811149) {
+          chainId = '1399811149';
+        }
+
+        return {
+          address: score.tokenAddress,
+          pair: score.pairAddress,
+          chainId: chainId,
+          score: score.tokenScore,
+          liquidity: score.liquidity,
+        };
       }),
     );
 
