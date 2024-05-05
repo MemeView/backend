@@ -21,6 +21,12 @@ import { portfolio } from 'src/ttms-transparency/interfaces';
 
 type IntervalType = '24' | '48';
 
+interface portfolioScheduleResult {
+  percentage: string;
+  interval: string;
+  createdAt: Date;
+}
+
 @Controller('/api')
 export class TtmsPortfolioController {
   constructor(
@@ -200,6 +206,49 @@ export class TtmsPortfolioController {
           return acc + parseFloat(result[intervalRow]);
         }, 0),
       };
+    } catch (e) {
+      return e;
+    }
+  }
+
+  @Get('/average-ttms-portfolio-results-schedule')
+  async averageTtmsPortfolioResultsSchedule() {
+    try {
+      const utcDate = new UTCDate();
+      const todayStartOfDay = startOfDay(utcDate);
+      const oneWeekAgo = subDays(todayStartOfDay, 7);
+      const monthAgo = subDays(todayStartOfDay, 30);
+
+      const portfolioResults =
+        await this.prisma.averageTtmsPortfolioResults.findMany({
+          where: {
+            createdAt: {
+              gte: monthAgo,
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+          take: 60,
+        });
+
+      const result24 = portfolioResults.map((result) => {
+        return {
+          percentage: result.average24Result,
+          interval: result.startedAt,
+          createdAt: result.createdAt,
+        };
+      });
+
+      const result48 = portfolioResults.map((result) => {
+        return {
+          percentage: result.average48Result,
+          interval: result.startedAt,
+          createdAt: result.createdAt,
+        };
+      });
+
+      return { result24, result48 };
     } catch (e) {
       return e;
     }
