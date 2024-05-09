@@ -243,11 +243,27 @@ model Last24SolvedTtmsPortfolio {
 }
 
 model AverageTtmsPortfolioResults {
-  id                  Int @id @default(autoincrement())
-  average24Result     String  @default("0")
-  average48Result     String  @default("0")
-  startedAt           String
-  createdAt           DateTime @default(now())
+  id                                    Int @id @default(autoincrement())
+  average24Result                       String  @default("0")
+  average48Result                       String  @default("0")
+  startedAt                             String
+  createdAt                             DateTime @default(now())
+  average24ResultOn1Network             String @default("0")
+  average48ResultOn1Network             String @default("0")
+  average24ResultOn56Network            String @default("0")
+  average48ResultOn56Network            String @default("0")
+  average24ResultOn8453Network          String @default("0")
+  average48ResultOn8453Network          String @default("0")
+  average24ResultOn10Network            String @default("0")
+  average48ResultOn10Network            String @default("0")
+  average24ResultOn42161Network         String @default("0")
+  average48ResultOn42161Network         String @default("0")
+  average24ResultOn43114Network         String @default("0")
+  average48ResultOn43114Network         String @default("0")
+  average24ResultOn137Network           String @default("0")
+  average48ResultOn137Network           String @default("0")
+  average24ResultOn1399811149Network    String @default("0")
+  average48ResultOn1399811149Network    String @default("0")
 }
 
 model Airdrops {

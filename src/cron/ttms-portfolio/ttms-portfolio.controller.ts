@@ -21,6 +21,17 @@ import { portfolio } from 'src/ttms-transparency/interfaces';
 
 type IntervalType = '24' | '48';
 
+type networkIdType =
+  | '1'
+  | '56'
+  | '8453'
+  | '10'
+  | '42161'
+  | '43114'
+  | '137'
+  | '1399811149'
+  | 'all';
+
 interface portfolioScheduleResult {
   percentage: string;
   interval: string;
@@ -211,9 +222,30 @@ export class TtmsPortfolioController {
     }
   }
 
-  @Get('/average-ttms-portfolio-results-schedule')
-  async averageTtmsPortfolioResultsSchedule() {
+  @Get('/average-ttms-portfolio-results-schedule/:networkId?')
+  async averageTtmsPortfolioResultsSchedule(
+    @Param('networkId') networkId: networkIdType,
+  ) {
     try {
+      if (!networkId) {
+        networkId = 'all';
+      }
+      if (
+        networkId &&
+        ![
+          '1',
+          '56',
+          '8453',
+          '10',
+          '42161',
+          '43114',
+          '137',
+          '1399811149',
+          'all',
+        ].includes(networkId)
+      ) {
+        throw new HttpException('incorrect networkId', 400);
+      }
       const utcDate = new UTCDate();
       const todayStartOfDay = startOfDay(utcDate);
       const oneWeekAgo = subDays(todayStartOfDay, 7);
@@ -232,9 +264,17 @@ export class TtmsPortfolioController {
           take: 60,
         });
 
+      let average24resultQuery = 'average24Result';
+      let average48resultQuery = 'average48Result';
+
+      if (networkId !== 'all') {
+        average24resultQuery = `average24ResultOn${networkId}Network`;
+        average48resultQuery = `average48ResultOn${networkId}Network`;
+      }
+
       const result24 = portfolioResults.map((result) => {
         return {
-          percentage: result.average24Result,
+          percentage: result[average24resultQuery],
           interval: result.startedAt,
           createdAt: result.createdAt,
         };
@@ -242,7 +282,7 @@ export class TtmsPortfolioController {
 
       const result48 = portfolioResults.map((result) => {
         return {
-          percentage: result.average48Result,
+          percentage: result[average48resultQuery],
           interval: result.startedAt,
           createdAt: result.createdAt,
         };
@@ -250,7 +290,7 @@ export class TtmsPortfolioController {
 
       return { result24, result48 };
     } catch (e) {
-      return e;
+      throw new HttpException(e.message, e.status);
     }
   }
 }
