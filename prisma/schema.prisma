@@ -16,6 +16,7 @@ model Tokens {
   address               String? @unique
   pairAddress           String?
   priceUSD              String?
+  uniqueBuys24          Int?
   quoteToken            String?
   createdAt             Int?
   name                  String?
@@ -82,6 +83,8 @@ model Score {
   scoreHoldersGrowthPercentage24h   Float?
   aiScore                           Float?
   tokenAgeScore                     Float?
+  uniqueBuys24                      Int?
+  uniqueBuys24Score                 Float?
 }
 
 model ScoreByHours {
@@ -232,6 +235,8 @@ model TtmsPortfolio {
   scoreHoldersGrowthPercentage24h   Float?
   aiScore                           Float?
   tokenAgeScore                     Float?
+  uniqueBuys24                      Int?
+  uniqueBuys24Score                 Float?
 }
 
 model Last24SolvedTtmsPortfolio {

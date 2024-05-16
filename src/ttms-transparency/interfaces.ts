@@ -49,6 +49,8 @@ export interface portfolio {
   scoreHoldersGrowthPercentage24h?: number;
   aiScore?: number;
   tokenAgeScore?: number;
+  uniqueBuys24?: number;
+  uniqueBuys24Score?: number;
 }
 
 export interface resultToken {
@@ -86,6 +88,8 @@ export interface resultToken {
   aiScore: number;
   liquidityTokenSymbol: string;
   networkId: number;
+  uniqueBuys24: number;
+  uniqueBuys24Score: number;
 }
 
 export enum SnapshotEnum {

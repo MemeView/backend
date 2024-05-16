@@ -134,6 +134,8 @@ export class TtmsTransparencyService {
               value.scoreHoldersGrowthPercentage24h ?? null,
             aiScore: value.aiScore ?? null,
             tokenAgeScore: value.tokenAgeScore ?? null,
+            uniqueBuys24: value.uniqueBuys24 ?? null,
+            uniqueBuys24Score: value.uniqueBuys24Score ?? null,
           };
         },
       );
@@ -186,6 +188,8 @@ export class TtmsTransparencyService {
           liquidityTokenSymbol: portfolio.liquidityTokenSymbol,
           networkId: portfolio.networkId,
           liquidityToHoldersPercentage,
+          uniqueBuys24: portfolio.uniqueBuys24,
+          uniqueBuys24Score: portfolio.uniqueBuys24Score,
         };
       });
 
@@ -272,6 +276,8 @@ export class TtmsTransparencyService {
         liquidityTokenSymbol: element.liquidityTokenSymbol,
         networkId: element.networkId,
         liquidityToHoldersPercentage,
+        uniqueBuys24: element.uniqueBuys24,
+        uniqueBuys24Score: element.uniqueBuys24Score,
       };
     });
   }
