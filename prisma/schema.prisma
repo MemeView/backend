@@ -318,4 +318,5 @@ enum Status {
 model Partners {
   partnerLogin      String @id @unique
   partnerAccess     String @default("plan1")
+  tokensCount       Int @default(30)
 }

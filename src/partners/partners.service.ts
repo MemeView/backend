@@ -177,7 +177,7 @@ export class PartnersService {
     }
 
     return {
-      tokens: tokensResult.slice(0, 30),
+      tokens: tokensResult.slice(0, partner.tokensCount),
       date,
     };
   }
