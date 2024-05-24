@@ -48,6 +48,7 @@ model Votes {
 
 model Score {
   tokenAddress                      String  @id @unique
+  pairAddress                       String?
   tokenScore                        Float
   symbol                            String?
   image                             String?
@@ -85,6 +86,12 @@ model Score {
   tokenAgeScore                     Float?
   uniqueBuys24                      Int?
   uniqueBuys24Score                 Float?
+  buyTax                            Float?
+  buyTaxScore                       Float @default(0)
+  sellTax                           Float?
+  sellTaxScore                      Float @default(0)
+  riskLevel                         Float?
+  riskLevelScore                    Float @default(0)
 }
 
 model ScoreByHours {
