@@ -16,6 +16,7 @@ import { TwitterModule } from './twitter/twitter.module';
 import { EventTrackerModule } from './event-tracker/event-tracker.module';
 import { TtmsTransparencyModule } from './ttms-transparency/ttms-transparency.module';
 import { PartnersModule } from './partners/partners.module';
+import { TradeBotModule } from './trade-bot/trade-bot.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PartnersModule } from './partners/partners.module';
     EventTrackerModule,
     TtmsTransparencyModule,
     PartnersModule,
+    TradeBotModule,
   ],
   controllers: [AppController],
   providers: [AppService],

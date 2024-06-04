@@ -17,7 +17,7 @@ export class SignalBotService {
   ) {
     if (!SignalBotService.bot) {
       SignalBotService.bot = new TelegramBot(process.env.TG_SIGNAL_BOT_TOKEN, {
-        polling: true,
+        polling: false,
       });
     }
     const telegramBot = SignalBotService.bot;

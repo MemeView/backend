@@ -131,21 +131,27 @@ model DailyScore {
 }
 
 model Users {
-  walletAddress         String   @id @unique
-  telegramId            String?
-  votes                 Int      @default(5)
-  updatedAt             DateTime @default(now())
-  refreshToken          String?
-  refreshTokenCreatedAt DateTime? @default(now())
-  freeTrialWasTaken     Boolean  @default(false)
-  id                    Int      @unique @default(autoincrement())
-  ownRefId              String?  @unique
-  registrationRefId     String?
-  holdingTWAmount       String?
-  holdingTWAmountUSDT   String?
-  subscriptionLevel     String?
-  trialCreatedAt        DateTime?
-  planWasTakenAt        DateTime?
+  walletAddress                     String   @id @unique
+  telegramId                        String?
+  votes                             Int      @default(5)
+  updatedAt                         DateTime @default(now())
+  refreshToken                      String?
+  refreshTokenCreatedAt             DateTime? @default(now())
+  freeTrialWasTaken                 Boolean  @default(false)
+  id                                Int      @unique @default(autoincrement())
+  ownRefId                          String?  @unique
+  registrationRefId                 String?
+  holdingTWAmount                   String?
+  holdingTWAmountUSDT               String?
+  subscriptionLevel                 String?
+  trialCreatedAt                    DateTime?
+  planWasTakenAt                    DateTime?
+}
+
+model TradingBotUsers {
+  telegramId                        String @id @unique
+  tradingBotSubscription            Boolean @default(false)
+  tradingBotSubscriptionExpiresAt   DateTime?
 }
 
 model Volume {
