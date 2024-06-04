@@ -580,14 +580,15 @@ Please be patient and expect the answer during 72 hours.`;
               score: value.absoluteScore,
               symbol: value.symbol,
               networkId: value.networkId,
+              tradeUrl: value.tradeUrl,
             };
           })
           .sort((a, b) => b.score - a.score)
           .slice(0, 30);
 
         const ttmsTop30 = allTtms.map(
-          (item, index) => `${index + 1}. $${item.symbol}`,
-        ); // нумерую и извлекаю symbol токенов
+          (item, index) => `${index + 1}. [${item.symbol}](${item.tradeUrl})`,
+        ); // добавляю ссылку в символ токена
 
         const message = `*🚀 Overall Top-30*\n\n${ttmsTop30.join('\n')}`; // соединяю все в одно сообщение
 
@@ -627,6 +628,7 @@ Please be patient and expect the answer during 72 hours.`;
               score: value.absoluteScore,
               symbol: value.symbol,
               networkId: value.networkId,
+              tradeUrl: value.tradeUrl,
             };
           })
           .sort((a, b) => b.score - a.score)
@@ -634,8 +636,8 @@ Please be patient and expect the answer during 72 hours.`;
           .slice(0, 30);
 
         const ttmsTop30 = allTtms.map(
-          (item, index) => `${index + 1}. $${item.symbol}`,
-        ); // нумерую и извлекаю symbol токенов
+          (item, index) => `${index + 1}. [${item.symbol}](${item.tradeUrl})`,
+        ); // добавляю ссылку в символ токена
 
         const message = `*🚀 ETH Top-30*\n\n${ttmsTop30.join('\n')}`; // соединяю все в одно сообщение
 
@@ -675,6 +677,7 @@ Please be patient and expect the answer during 72 hours.`;
               score: value.absoluteScore,
               symbol: value.symbol,
               networkId: value.networkId,
+              tradeUrl: value.tradeUrl,
             };
           })
           .sort((a, b) => b.score - a.score)
@@ -682,8 +685,8 @@ Please be patient and expect the answer during 72 hours.`;
           .slice(0, 30);
 
         const ttmsTop30 = allTtms.map(
-          (item, index) => `${index + 1}. $${item.symbol}`,
-        ); // нумерую и извлекаю symbol токенов
+          (item, index) => `${index + 1}. [${item.symbol}](${item.tradeUrl})`,
+        ); // добавляю ссылку в символ токена
 
         const message = `*🚀 BSC Top-30*\n\n${ttmsTop30.join('\n')}`; // соединяю все в одно сообщение
 
@@ -723,6 +726,7 @@ Please be patient and expect the answer during 72 hours.`;
               score: value.absoluteScore,
               symbol: value.symbol,
               networkId: value.networkId,
+              tradeUrl: value.tradeUrl,
             };
           })
           .sort((a, b) => b.score - a.score)
@@ -730,8 +734,8 @@ Please be patient and expect the answer during 72 hours.`;
           .slice(0, 30);
 
         const ttmsTop30 = allTtms.map(
-          (item, index) => `${index + 1}. $${item.symbol}`,
-        ); // нумерую и извлекаю symbol токенов
+          (item, index) => `${index + 1}. [${item.symbol}](${item.tradeUrl})`,
+        ); // добавляю ссылку в символ токена
 
         const message = `*🚀 BASE Top-30*\n\n${ttmsTop30.join('\n')}`; // соединяю все в одно сообщение
 
@@ -771,6 +775,7 @@ Please be patient and expect the answer during 72 hours.`;
               score: value.absoluteScore,
               symbol: value.symbol,
               networkId: value.networkId,
+              tradeUrl: value.tradeUrl,
             };
           })
           .sort((a, b) => b.score - a.score)
@@ -778,8 +783,8 @@ Please be patient and expect the answer during 72 hours.`;
           .slice(0, 30);
 
         const ttmsTop30 = allTtms.map(
-          (item, index) => `${index + 1}. $${item.symbol}`,
-        ); // нумерую и извлекаю symbol токенов
+          (item, index) => `${index + 1}. [${item.symbol}](${item.tradeUrl})`,
+        ); // добавляю ссылку в символ токена
 
         const message = `*🚀 OP Top-30*\n\n${ttmsTop30.join('\n')}`; // соединяю все в одно сообщение
 
@@ -819,6 +824,7 @@ Please be patient and expect the answer during 72 hours.`;
               score: value.absoluteScore,
               symbol: value.symbol,
               networkId: value.networkId,
+              tradeUrl: value.tradeUrl,
             };
           })
           .sort((a, b) => b.score - a.score)
@@ -826,8 +832,8 @@ Please be patient and expect the answer during 72 hours.`;
           .slice(0, 30);
 
         const ttmsTop30 = allTtms.map(
-          (item, index) => `${index + 1}. $${item.symbol}`,
-        ); // нумерую и извлекаю symbol токенов
+          (item, index) => `${index + 1}. [${item.symbol}](${item.tradeUrl})`,
+        ); // добавляю ссылку в символ токена
 
         const message = `*🚀 SOL Top-30*\n\n${ttmsTop30.join('\n')}`; // соединяю все в одно сообщение
 

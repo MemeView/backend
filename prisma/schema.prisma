@@ -32,6 +32,8 @@ model Tokens {
   liquidityTokenAddress String?
   txnCount24            Int?
   twitterUrl            String?
+  exchanges             Json?
+  tradeUrl              String?
 }
 
 model Blacklist {
@@ -92,6 +94,7 @@ model Score {
   sellTaxScore                      Float @default(0)
   riskLevel                         Float?
   riskLevelScore                    Float @default(0)
+  tradeUrl                          String?
 }
 
 model ScoreByHours {
@@ -250,6 +253,7 @@ model TtmsPortfolio {
   tokenAgeScore                     Float?
   uniqueBuys24                      Int?
   uniqueBuys24Score                 Float?
+  tradeUrl                          String?
 }
 
 model Last24SolvedTtmsPortfolio {
