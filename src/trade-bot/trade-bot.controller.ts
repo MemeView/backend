@@ -53,4 +53,53 @@ export class TradeBotController {
 
     return newSubscriptions;
   }
+
+  @Post('/remove-subscription')
+  async removeSubscription(@Body('telegramIds') telegramIds: string[]) {
+    const existingUsers = await this.prisma.tradingBotUsers.findMany({
+      where: {
+        telegramId: {
+          in: telegramIds,
+        },
+      },
+      select: {
+        telegramId: true,
+        tradingBotSubscription: true,
+      },
+    });
+
+    const existingTelegramIds = existingUsers.map((user) => user.telegramId);
+
+    const nonExistingTelegramIds = telegramIds.filter(
+      (id) => !existingTelegramIds.includes(id),
+    );
+
+    const usersWithoutSubscription = existingUsers
+      .filter((user) => !user.tradingBotSubscription)
+      .map((user) => user.telegramId);
+
+    const usersWithSubscription = existingUsers
+      .filter((user) => user.tradingBotSubscription)
+      .map((user) => user.telegramId);
+
+    if (usersWithSubscription.length > 0) {
+      await this.prisma.tradingBotUsers.updateMany({
+        where: {
+          telegramId: {
+            in: usersWithSubscription,
+          },
+        },
+        data: {
+          tradingBotSubscription: false,
+          tradingBotSubscriptionExpiresAt: null,
+        },
+      });
+    }
+
+    return {
+      updatedUsers: usersWithSubscription,
+      nonExistingTelegramIds,
+      usersWithoutSubscription,
+    };
+  }
 }
