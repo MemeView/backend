@@ -794,7 +794,7 @@ Please be patient and expect the answer during 72 hours.`;
         telegramBot.sendMessage(chatId, message, options);
       }
 
-      if (data === 'goBackButton') {
+      if (data === 'goBackButton' || data === 'top30') {
         const utcDate = new UTCDate();
 
         const user = await this.prisma.tradingBotUsers.findUnique({
@@ -1130,7 +1130,26 @@ Please be patient and expect the answer during 72 hours.`;
           });
         }
 
-        await telegramBot.sendMessage(chatId, 'Thank you for your purchase!');
+        const formattedExpiryDate = format(newExpiryDate, 'MMMM d, yyyy');
+        const messageText = `*Purchase complete*
+
+Your plan has been activated till ${formattedExpiryDate}.
+
+Go get the latest signals.`;
+
+        await telegramBot.sendMessage(chatId, messageText, {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '🚀 Get Top-30 Tokens',
+                  callback_data: 'top30',
+                },
+              ],
+            ],
+          },
+        });
       }
     });
 
@@ -1194,7 +1213,26 @@ Please be patient and expect the answer during 72 hours.`;
           });
         }
 
-        await telegramBot.sendMessage(chatId, 'Thank you for your purchase!');
+        const formattedExpiryDate = format(newExpiryDate, 'MMMM d, yyyy');
+        const messageText = `*Purchase complete*
+
+Your plan has been activated till ${formattedExpiryDate}.
+
+Go get the latest signals.`;
+
+        await telegramBot.sendMessage(chatId, messageText, {
+          parse_mode: 'Markdown',
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: '🚀 Get Top-30 Tokens',
+                  callback_data: 'top30',
+                },
+              ],
+            ],
+          },
+        });
       }
     }
   }
