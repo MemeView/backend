@@ -7,6 +7,9 @@ import {
   format,
   differenceInMinutes,
   startOfDay,
+  addDays,
+  addMonths,
+  addYears,
 } from 'date-fns';
 import * as TelegramBot from 'node-telegram-bot-api';
 import * as initData from '@tma.js/init-data-node';
@@ -255,19 +258,19 @@ Features: copytrade based on a address that follows TokenWatch predictions, manu
           [
             {
               text: 'Buy 1 week for 5 USDT',
-              url: `https://t.me/${botUsername}?start=pay_1_week`,
+              callback_data: `pay_1_week`,
             },
           ],
           [
             {
               text: 'Buy 1 month for 12 USDT',
-              url: `https://t.me/${botUsername}?start=pay_1_month`,
+              callback_data: `pay_1_month`,
             },
           ],
           [
             {
               text: 'Buy 1 year for 69 USDT',
-              url: `https://t.me/${botUsername}?start=pay_1_year`,
+              callback_data: `pay_1_year`,
             },
           ],
         ];
@@ -282,64 +285,6 @@ Features: copytrade based on a address that follows TokenWatch predictions, manu
           },
         });
       }
-    });
-
-    telegramBot.onText(/\/start pay_(.+)/, async (msg, match) => {
-      const chatId = msg.chat.id;
-      const plan = match[1];
-
-      let prices;
-      if (plan === '1_week') {
-        prices = [{ label: '1 week plan', amount: 500 }];
-      } else if (plan === '1_month') {
-        prices = [{ label: '1 month plan', amount: 1200 }];
-      } else if (plan === '1_year') {
-        prices = [{ label: '1 year plan', amount: 6900 }];
-      }
-
-      telegramBot.sendInvoice(
-        chatId,
-        `Subscription Plan: ${plan.replace('_', ' ')}`,
-        `Get access to TokenWatch AI for ${plan.replace('_', ' ')}`,
-        `invoice_payload_${plan}`,
-        paymentToken,
-        'USDT',
-        prices,
-      );
-    });
-
-    telegramBot.on('pre_checkout_query', (query) => {
-      telegramBot.answerPreCheckoutQuery(query.id, true);
-    });
-
-    telegramBot.on('successful_payment', async (msg) => {
-      const chatId = msg.chat.id;
-      const payload = msg.successful_payment.invoice_payload;
-      let expiresAt;
-
-      if (payload === 'invoice_payload_1_week') {
-        expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
-      } else if (payload === 'invoice_payload_1_month') {
-        expiresAt = new Date();
-        expiresAt.setMonth(expiresAt.getMonth() + 1);
-      } else if (payload === 'invoice_payload_1_year') {
-        expiresAt = new Date();
-        expiresAt.setFullYear(expiresAt.getFullYear() + 1);
-      }
-
-      await prisma.tradingBotUsers.update({
-        where: { telegramId: JSON.stringify(chatId) },
-        data: {
-          tradingBotSubscription: true,
-          tradingBotSubscriptionExpiresAt: expiresAt,
-        },
-      });
-
-      telegramBot.sendMessage(
-        chatId,
-        `Thank you for your purchase! Your subscription is now active until ${expiresAt}`,
-      );
     });
 
     telegramBot.onText(/🚀 Get Top-30 Tokens/, async (msg) => {
@@ -883,7 +828,7 @@ Please be patient and expect the answer during 72 hours.`;
             // Сборка строки с временем
             const formattedTime = `${formattedHours}${amPm}`;
 
-            // Собираем финальную строку
+            // Собираю финальную строку
             const ttmsSolvedAt = `${formattedDate} at ${formattedTime} (PST)`;
 
             const minutesDifference = differenceInMinutes(
@@ -1032,19 +977,19 @@ Please be patient and expect the answer during 72 hours.`;
             [
               {
                 text: 'Buy 1 week for 5 USDT',
-                url: 'https://tokenwatch.ai/en',
+                callback_data: `pay_1_week`,
               },
             ],
             [
               {
                 text: 'Buy 1 month for 12 USDT',
-                url: 'https://tokenwatch.ai/en',
+                callback_data: `pay_1_month`,
               },
             ],
             [
               {
                 text: 'Buy 1 year for 69 USDT',
-                url: 'https://tokenwatch.ai/en',
+                callback_data: `pay_1_year`,
               },
             ],
           ];
@@ -1060,6 +1005,197 @@ Please be patient and expect the answer during 72 hours.`;
           });
         }
       }
+
+      if (data === 'pay_1_week') {
+        const title = '1 Week Subscription';
+        const description = '1 week subscription to TokenWatch AI';
+        const payload = '1_week_subscription';
+        const prices = [{ label: '1 Week Subscription', amount: 250 }];
+
+        // симулирую процесс оплаты
+        // const fakeMessage = {
+        //   chat: { id: 1161414429 },
+        //   successful_payment: { invoice_payload: '1_week_subscription' },
+        // };
+
+        // await simulateSuccessfulPayment(fakeMessage);
+
+        await telegramBot.sendInvoice(
+          chatId,
+          title,
+          description,
+          payload,
+          '',
+          'XTR',
+          prices,
+        );
+      }
+
+      if (data === 'pay_1_month') {
+        const title = '1 Month Subscription';
+        const description = '1 month subscription to TokenWatch AI';
+        const payload = '1_month_subscription';
+        const prices = [{ label: '1 Month Subscription', amount: 600 }];
+
+        await telegramBot.sendInvoice(
+          chatId,
+          title,
+          description,
+          payload,
+          '',
+          'XTR',
+          prices,
+        );
+      }
+
+      if (data === 'pay_1_year') {
+        const title = '1 Year Subscription';
+        const description = '1 year subscription to TokenWatch AI';
+        const payload = '1_year_subscription';
+        const prices = [{ label: '1 Year Subscription', amount: 3450 }];
+
+        await telegramBot.sendInvoice(
+          chatId,
+          title,
+          description,
+          payload,
+          '',
+          'XTR',
+          prices,
+        );
+      }
     });
+
+    telegramBot.on('pre_checkout_query', async (query) => {
+      const preCheckoutQueryId = query.id;
+      await telegramBot.answerPreCheckoutQuery(preCheckoutQueryId, true);
+    });
+
+    telegramBot.on('message', async (msg) => {
+      if (msg.successful_payment) {
+        const chatId = msg.chat.id;
+        const payload = msg.successful_payment.invoice_payload;
+
+        const utcNow = new Date();
+
+        let newExpiryDate;
+        if (payload === '1_week_subscription') {
+          newExpiryDate = addDays(utcNow, 7);
+        } else if (payload === '1_month_subscription') {
+          newExpiryDate = addMonths(utcNow, 1);
+        } else if (payload === '1_year_subscription') {
+          newExpiryDate = addYears(utcNow, 1);
+        }
+
+        let user = await prisma.tradingBotUsers.findUnique({
+          where: { telegramId: JSON.stringify(chatId) },
+        });
+
+        if (user) {
+          // Если подписка пользователя еще активна, добавляю время к текущей дате окончания подписки
+          if (
+            user.tradingBotSubscriptionExpiresAt &&
+            user.tradingBotSubscriptionExpiresAt > utcNow
+          ) {
+            const currentExpiryDate = new Date(
+              user.tradingBotSubscriptionExpiresAt,
+            );
+            if (payload === '1_week_subscription') {
+              newExpiryDate = addDays(currentExpiryDate, 7);
+            } else if (payload === '1_month_subscription') {
+              newExpiryDate = addMonths(currentExpiryDate, 1);
+            } else if (payload === '1_year_subscription') {
+              newExpiryDate = addYears(currentExpiryDate, 1);
+            }
+          }
+          user = await prisma.tradingBotUsers.update({
+            where: { telegramId: JSON.stringify(chatId) },
+            data: {
+              tradingBotSubscription: true,
+              tradingBotSubscriptionExpiresAt: newExpiryDate,
+            },
+          });
+        } else {
+          user = await prisma.tradingBotUsers.upsert({
+            where: { telegramId: JSON.stringify(chatId) },
+            update: {
+              tradingBotSubscription: true,
+              tradingBotSubscriptionExpiresAt: newExpiryDate,
+            },
+            create: {
+              telegramId: JSON.stringify(chatId),
+              tradingBotSubscription: true,
+              tradingBotSubscriptionExpiresAt: newExpiryDate,
+            },
+          });
+        }
+
+        await telegramBot.sendMessage(chatId, 'Thank you for your purchase!');
+      }
+    });
+
+    // Функция для симуляции успешной оплаты
+    async function simulateSuccessfulPayment(msg) {
+      if (msg.successful_payment) {
+        const chatId = msg.chat.id;
+        const payload = msg.successful_payment.invoice_payload;
+
+        const utcNow = new Date();
+
+        let newExpiryDate;
+        if (payload === '1_week_subscription') {
+          newExpiryDate = addDays(utcNow, 7);
+        } else if (payload === '1_month_subscription') {
+          newExpiryDate = addMonths(utcNow, 1);
+        } else if (payload === '1_year_subscription') {
+          newExpiryDate = addYears(utcNow, 1);
+        }
+
+        let user = await prisma.tradingBotUsers.findUnique({
+          where: { telegramId: JSON.stringify(chatId) },
+        });
+
+        if (user) {
+          // Если подписка пользователя еще активна, добавляю время к текущей дате окончания подписки
+          if (
+            user.tradingBotSubscriptionExpiresAt &&
+            user.tradingBotSubscriptionExpiresAt > utcNow
+          ) {
+            const currentExpiryDate = new Date(
+              user.tradingBotSubscriptionExpiresAt,
+            );
+            if (payload === '1_week_subscription') {
+              newExpiryDate = addDays(currentExpiryDate, 7);
+            } else if (payload === '1_month_subscription') {
+              newExpiryDate = addMonths(currentExpiryDate, 1);
+            } else if (payload === '1_year_subscription') {
+              newExpiryDate = addYears(currentExpiryDate, 1);
+            }
+          }
+          user = await prisma.tradingBotUsers.update({
+            where: { telegramId: JSON.stringify(chatId) },
+            data: {
+              tradingBotSubscription: true,
+              tradingBotSubscriptionExpiresAt: newExpiryDate,
+            },
+          });
+        } else {
+          user = await prisma.tradingBotUsers.upsert({
+            where: { telegramId: JSON.stringify(chatId) },
+            update: {
+              tradingBotSubscription: true,
+              tradingBotSubscriptionExpiresAt: newExpiryDate,
+            },
+            create: {
+              telegramId: JSON.stringify(chatId),
+              tradingBotSubscription: true,
+              tradingBotSubscriptionExpiresAt: newExpiryDate,
+            },
+          });
+        }
+
+        await telegramBot.sendMessage(chatId, 'Thank you for your purchase!');
+      }
+    }
   }
 }
