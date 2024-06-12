@@ -13,6 +13,8 @@ import {
 } from 'date-fns';
 import * as TelegramBot from 'node-telegram-bot-api';
 import * as initData from '@tma.js/init-data-node';
+import axios from 'axios';
+import * as crypto from 'crypto';
 // import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
@@ -258,19 +260,19 @@ Features: copytrade based on a address that follows TokenWatch predictions, manu
           [
             {
               text: 'Buy 1 week for 5 USDT',
-              callback_data: `pay_1_week`,
+              callback_data: 'select_payment_method_1_week',
             },
           ],
           [
             {
               text: 'Buy 1 month for 12 USDT',
-              callback_data: `pay_1_month`,
+              callback_data: 'select_payment_method_1_month',
             },
           ],
           [
             {
               text: 'Buy 1 year for 69 USDT',
-              callback_data: `pay_1_year`,
+              callback_data: 'select_payment_method_1_year',
             },
           ],
         ];
@@ -977,19 +979,19 @@ Please be patient and expect the answer during 72 hours.`;
             [
               {
                 text: 'Buy 1 week for 5 USDT',
-                callback_data: `pay_1_week`,
+                callback_data: 'select_payment_method_1_week',
               },
             ],
             [
               {
                 text: 'Buy 1 month for 12 USDT',
-                callback_data: `pay_1_month`,
+                callback_data: 'select_payment_method_1_month',
               },
             ],
             [
               {
                 text: 'Buy 1 year for 69 USDT',
-                callback_data: `pay_1_year`,
+                callback_data: 'select_payment_method_1_year',
               },
             ],
           ];
@@ -1006,65 +1008,232 @@ Please be patient and expect the answer during 72 hours.`;
         }
       }
 
-      if (data === 'pay_1_week') {
-        const title = '1 Week Subscription';
-        const description = '1 week subscription to TokenWatch AI';
-        const payload = '1_week_subscription';
-        const prices = [{ label: '1 Week Subscription', amount: 250 }];
+      if (data.startsWith('select_payment_method')) {
+        const period = data.split('_').slice(-2).join('_');
 
-        // симулирую процесс оплаты
-        // const fakeMessage = {
-        //   chat: { id: 1161414429 },
-        //   successful_payment: { invoice_payload: '1_week_subscription' },
-        // };
+        const paymentMethods = [
+          [
+            {
+              text: 'Telegram Stars',
+              callback_data: `pay_${period}_telegram_stars`,
+            },
+          ],
+          [
+            {
+              text: 'Cryptomus',
+              callback_data: `pay_${period}_cryptomus`,
+            },
+          ],
+        ];
 
-        // await simulateSuccessfulPayment(fakeMessage);
-
-        await telegramBot.sendInvoice(
-          chatId,
-          title,
-          description,
-          payload,
-          '',
-          'XTR',
-          prices,
-        );
+        await telegramBot.sendMessage(chatId, 'Choose a payment method:', {
+          reply_markup: {
+            inline_keyboard: paymentMethods,
+          },
+        });
       }
 
-      if (data === 'pay_1_month') {
-        const title = '1 Month Subscription';
-        const description = '1 month subscription to TokenWatch AI';
-        const payload = '1_month_subscription';
-        const prices = [{ label: '1 Month Subscription', amount: 600 }];
-
-        await telegramBot.sendInvoice(
-          chatId,
-          title,
-          description,
-          payload,
-          '',
-          'XTR',
-          prices,
+      if (data.startsWith('pay_')) {
+        const match = data.match(
+          /^pay_(\d+_week|\d+_month|\d+_year)_(telegram_stars|cryptomus)$/,
         );
+        if (!match) {
+          console.error('Invalid payment data:', data);
+          return;
+        }
+        const period = match[1];
+        const paymentMethod = match[2];
+
+        let title, description, payload, prices;
+        if (period === '1_week') {
+          title = '1 Week';
+          description = '1 week subscription to TokenWatch AI';
+          payload = '1_week_subscription';
+          prices = [{ label: '1 Week Subscription', amount: 250 }];
+        } else if (period === '1_month') {
+          title = '1 Month';
+          description = '1 month subscription to TokenWatch AI';
+          payload = '1_month_subscription';
+          prices = [{ label: '1 Month Subscription', amount: 600 }];
+        } else if (period === '1_year') {
+          title = '1 Year';
+          description = '1 year subscription to TokenWatch AI';
+          payload = '1_year_subscription';
+          prices = [{ label: '1 Year Subscription', amount: 3450 }];
+        }
+
+        if (paymentMethod === 'telegram_stars') {
+          await telegramBot.sendInvoice(
+            chatId,
+            title,
+            description,
+            payload,
+            '',
+            'XTR',
+            prices,
+          );
+        } else if (paymentMethod === 'cryptomus') {
+          if (period === '1_week') {
+            prices = [{ label: '1 Week Subscription', amount: 5 }];
+          }
+          if (period === '1_month') {
+            prices = [{ label: '1 Month Subscription', amount: 12 }];
+          }
+          if (period === '1_year') {
+            prices = [{ label: '1 Year Subscription', amount: 69 }];
+          }
+          await processCryptomusPayment(
+            this.prisma,
+            chatId,
+            title,
+            description,
+            prices,
+          );
+        }
       }
 
-      if (data === 'pay_1_year') {
-        const title = '1 Year Subscription';
-        const description = '1 year subscription to TokenWatch AI';
-        const payload = '1_year_subscription';
-        const prices = [{ label: '1 Year Subscription', amount: 3450 }];
+      // if (data === 'pay_1_week') {
+      //   const title = '1 Week Subscription';
+      //   const description = '1 week subscription to TokenWatch AI';
+      //   const payload = '1_week_subscription';
+      //   const prices = [{ label: '1 Week Subscription', amount: 250 }];
 
-        await telegramBot.sendInvoice(
-          chatId,
-          title,
-          description,
-          payload,
-          '',
-          'XTR',
-          prices,
-        );
-      }
+      //   // симулирую процесс оплаты
+      //   // const fakeMessage = {
+      //   //   chat: { id: 1161414429 },
+      //   //   successful_payment: { invoice_payload: '1_week_subscription' },
+      //   // };
+
+      //   // await simulateSuccessfulPayment(fakeMessage);
+
+      //   await telegramBot.sendInvoice(
+      //     chatId,
+      //     title,
+      //     description,
+      //     payload,
+      //     '',
+      //     'XTR',
+      //     prices,
+      //   );
+      // }
+
+      // if (data === 'pay_1_month') {
+      //   const title = '1 Month Subscription';
+      //   const description = '1 month subscription to TokenWatch AI';
+      //   const payload = '1_month_subscription';
+      //   const prices = [{ label: '1 Month Subscription', amount: 600 }];
+
+      //   await telegramBot.sendInvoice(
+      //     chatId,
+      //     title,
+      //     description,
+      //     payload,
+      //     '',
+      //     'XTR',
+      //     prices,
+      //   );
+      // }
+
+      // if (data === 'pay_1_year') {
+      //   const title = '1 Year Subscription';
+      //   const description = '1 year subscription to TokenWatch AI';
+      //   const payload = '1_year_subscription';
+      //   const prices = [{ label: '1 Year Subscription', amount: 3450 }];
+
+      //   await telegramBot.sendInvoice(
+      //     chatId,
+      //     title,
+      //     description,
+      //     payload,
+      //     '',
+      //     'XTR',
+      //     prices,
+      //   );
+      // }
     });
+
+    async function processCryptomusPayment(
+      prisma,
+      chatId,
+      title,
+      description,
+      prices,
+    ) {
+      const cryptomusApiUrl = 'https://api.cryptomus.com/v1/payment';
+      const merchant = process.env.CRYPTOMUS_MERCHANT;
+      const apiKey = process.env.CRYPTOMUS_API_KEY;
+
+      // const amount = 0.1;
+      const amount = prices[0].amount;
+      const orderId = `${chatId}_${title.replace(/\s+/g, '_')}_${Date.now()}`;
+      const callbackUrl =
+        'https://ca72-185-222-239-176.ngrok-free.app/api/cryptomus-webhook';
+
+      const requestData = {
+        amount: amount.toString(),
+        currency: 'USD',
+        order_id: orderId,
+        url_callback: callbackUrl,
+      };
+
+      const dataString = JSON.stringify(requestData);
+
+      const base64Data = Buffer.from(dataString).toString('base64');
+
+      // Генерация подписи
+      const sign = crypto
+        .createHash('md5')
+        .update(base64Data + apiKey)
+        .digest('hex');
+
+      try {
+        const response = await axios.post(cryptomusApiUrl, requestData, {
+          headers: {
+            merchant: merchant,
+            sign: sign,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const paymentUrl = response.data.result.url;
+        const paymentData = response.data.result;
+        const uuid = paymentData.uuid;
+
+        const message = 'Please complete your payment using the button below:';
+        const options = {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: 'Pay Now',
+                  url: paymentUrl,
+                },
+              ],
+            ],
+          },
+        };
+
+        await prisma.cryptomusTransactions.create({
+          data: {
+            uuid: uuid,
+            orderId: paymentData.order_id,
+            amount: paymentData.amount,
+            currency: paymentData.currency,
+            url: paymentData.url,
+            isFinal: paymentData.isFinal,
+            userTelegramId: JSON.stringify(chatId),
+          },
+        });
+
+        await telegramBot.sendMessage(chatId, message, options);
+      } catch (error) {
+        console.error('Error processing Cryptomus payment:', error);
+        await telegramBot.sendMessage(
+          chatId,
+          'There was an error processing your payment. Please try again later.',
+        );
+      }
+    }
 
     telegramBot.on('pre_checkout_query', async (query) => {
       const preCheckoutQueryId = query.id;
@@ -1235,5 +1404,11 @@ Go get the latest signals.`;
         });
       }
     }
+  }
+  public static getBotInstance(): TelegramBot {
+    if (!this.bot) {
+      throw new Error('Bot is not initialized.');
+    }
+    return this.bot;
   }
 }

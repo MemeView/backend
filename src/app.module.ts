@@ -17,6 +17,7 @@ import { EventTrackerModule } from './event-tracker/event-tracker.module';
 import { TtmsTransparencyModule } from './ttms-transparency/ttms-transparency.module';
 import { PartnersModule } from './partners/partners.module';
 import { TradeBotModule } from './trade-bot/trade-bot.module';
+import { CryptomusModule } from './cryptomus/cryptomus.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { TradeBotModule } from './trade-bot/trade-bot.module';
     TtmsTransparencyModule,
     PartnersModule,
     TradeBotModule,
+    CryptomusModule,
   ],
   controllers: [AppController],
   providers: [AppService],

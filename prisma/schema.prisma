@@ -337,3 +337,14 @@ model Partners {
   partnerAccess     String @default("plan1")
   tokensCount       Int @default(30)
 }
+
+model CryptomusTransactions {
+  id              Int @id @default(autoincrement())
+  uuid            String @unique
+  orderId         String @unique
+  amount          String?
+  currency        String?
+  url             String?
+  isFinal         Boolean @default(false)
+  userTelegramId  String?
+}

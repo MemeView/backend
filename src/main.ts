@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import 'graphql-import-node';
 import * as cookieParser from 'cookie-parser';
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
@@ -15,7 +14,7 @@ async function bootstrap() {
       'https://localhost:8004',
       'https://twa.tokenwatch.ai',
       'https://tw-telegram-mini-app.ngrok.app',
-      'https://tokenwatch.ai'
+      'https://tokenwatch.ai',
     ],
     credentials: true,
     preflightContinue: false,
